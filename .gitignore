@@ -1,1 +1,44 @@
-.vs/ 
+# Zależności i pakiety (NuGet)
+*.nupkg
+*.nuget.props
+*.nuget.targets
+packages/
+
+# Pliki i foldery generowane przez Visual Studio
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Pliki generowane przez kompilację
+bin/
+obj/
+
+# Pliki tymczasowe
+*.tmp
+*.temp
+*.tfignore
+
+# Pliki specyficzne dla użytkownika
+*.vs/
+.vs/
+project.lock.json
+project.fragment.lock.json
+*.csproj.user
+
+# Ustawienia publikowania
+*.pubxml
+*.publish.xml
+
+# Pliki cache i logi
+*.log
+*.DS_Store
+
+# Pliki generowane przez narzędzia
+*.generated.cs
+*.g.cs
+*.g.i.cs
+
+# Pliki systemowe
+Thumbs.db
+Desktop.ini
