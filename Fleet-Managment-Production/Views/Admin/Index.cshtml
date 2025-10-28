@@ -1,0 +1,29 @@
+﻿@model IEnumerable<Fleet_Managment_Production.Models.Users>
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+<h2>@ViewData["Title"]</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nazwa użytkownika</th>
+            <th>Email</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>
+                    <a class="btn btn-primary" asp-action="ManageRoles" asp-route-userId="@user.Id">
+                        Zarządzaj rolami
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
