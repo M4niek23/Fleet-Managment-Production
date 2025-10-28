@@ -1,0 +1,38 @@
+# Pliki systemowe i edytorów
+################################
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Pliki generowane przez Visual Studio i .NET
+#############################################
+# Folder z cache i ustawieniami użytkownika Visual Studio
+.vs/
+
+# Foldery kompilacji
+[Bb]in/
+[Oo]bj/
+
+# Pliki użytkownika specyficzne dla projektu/solucji
+*.suo
+*.user
+*.csproj.user
+*.sln.docstates
+
+# Ustawienia lokalne, które mogą zawierać sekrety
+Properties/launchSettings.json
+appsettings.Development.json
+
+# Pliki logów i baz danych
+*.log
+*.mdf
+*.ldf
+
+# Pakiety NuGet
+packages/
+*.nupkg
+
+# Pliki tymczasowe
+*.tmp
