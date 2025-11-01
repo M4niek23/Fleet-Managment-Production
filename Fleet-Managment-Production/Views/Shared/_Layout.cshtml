@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@*
+  Lewy sidebar: rozwijany/zwijany na desktopie (przycisk „☰”).
+  Mobile: offcanvas.
+  Prawa strona topbaru: tylko _LoginPartial.
+*@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -11,49 +16,93 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <!-- Topbar -->
+        <nav class="navbar navbar-light bg-white border-bottom">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Fleet-Managment</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li>
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Vehicles" asp-action="Index">Vehicles</a>
-                        </li>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Hamburger: mobile (offcanvas) -->
+                    <button class="navbar-toggler d-md-none" type="button"
+                            data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas"
+                            aria-controls="sidebarOffcanvas" aria-label="Open menu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
 
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-danger" asp-area="" asp-controller="Admin" asp-action="Index">
-                                    Zarządzanie (Admin)
-                                </a>
-                            </li>
-                        }
-                        @if (User.IsInRole("User"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="User">Users</a>
-                            </li>
-                        }
-                        <partial name="_LoginPartial" />
-                    </ul>
+                    <!-- Toggler: desktop (zwija/rozwija sidebar) -->
+                    <button id="sidebarToggle" class="btn btn-outline-secondary d-none d-md-inline-flex"
+                            type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
+                        ☰
+                    </button>
+
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                        Fleet-Managment
+                    </a>
+                </div>
+
+                <!-- Prawa strona: tylko logowanie/rejestracja -->
+                <div class="ms-auto d-flex align-items-center">
+                    <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+    <!-- Główna struktura: FLEX (desktop) -->
+    <div class="app-wrap d-none d-md-flex">
+        <!-- Sidebar desktop -->
+        <aside class="sidebar bg-light border-end">
+            <nav class="nav flex-column py-3">
+                <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" title="Home">
+                    <span class="link-text">Home</span>
+                </a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Privacy" title="Privacy">
+                    <span class="link-text">Privacy</span>
+                </a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" title="Vehicles">
+                    <span class="link-text">Vehicles</span>
+                </a>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index" title="Manage Roles">
+                        <span class="link-text">Manage Roles</span>
+                    </a>
+                }
+                @if (User.IsInRole("User"))
+                {
+                    <a class="nav-link px-3" asp-controller="Home" asp-action="User" title="Users">
+                        <span class="link-text">Users</span>
+                    </a>
+                }
+            </nav>
+        </aside>
+
+        <!-- Treść -->
+        <main class="content flex-grow-1 px-3 py-3">
             @RenderBody()
         </main>
+    </div>
+
+    <!-- Mobile: offcanvas -->
+    <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="sidebarOffcanvasLabel">Menu</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <nav class="nav flex-column py-2">
+                <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" data-bs-dismiss="offcanvas">Home</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Privacy" data-bs-dismiss="offcanvas">Privacy</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" data-bs-dismiss="offcanvas">Vehicles</a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index" data-bs-dismiss="offcanvas">Manage Roles</a>
+                }
+                @if (User.IsInRole("User"))
+                {
+                    <a class="nav-link px-3" asp-controller="Home" asp-action="User" data-bs-dismiss="offcanvas">Users</a>
+                }
+            </nav>
+        </div>
     </div>
 
     <footer class="border-top footer text-muted">
@@ -61,9 +110,28 @@
             <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // Sidebar collapse (desktop) + zapamiętanie stanu
+        (function () {
+            const key = 'sidebar-collapsed';
+            const body = document.body;
+            const btn = document.getElementById('sidebarToggle');
+
+            // Przywróć stan
+            if (localStorage.getItem(key) === '1') body.classList.add('sidebar-collapsed');
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    body.classList.toggle('sidebar-collapsed');
+                    localStorage.setItem(key, body.classList.contains('sidebar-collapsed') ? '1' : '0');
+                });
+            }
+        })();
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

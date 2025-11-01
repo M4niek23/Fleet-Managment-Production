@@ -29,3 +29,65 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+.sidebar {
+    min-height: calc(100vh - 56px); 
+    position: sticky;
+    top: 56px;
+    overflow-y: auto;
+}
+
+@media (min-width: 768px) {
+    main {
+        min-height: calc(100vh - 56px);
+    }
+}
+
+.sidebar .nav-link.active,
+.offcanvas .nav-link.active {
+    font-weight: 600;
+}
+
+.app-wrap {
+    min-height: calc(100vh - 56px); 
+}
+
+
+.sidebar {
+    width: 240px;
+    min-height: calc(100vh - 56px);
+    position: sticky;
+    top: 56px;
+    overflow-y: auto;
+    transition: width .2s ease;
+}
+
+
+.content {
+    min-height: calc(100vh - 56px);
+}
+body.sidebar-collapsed .sidebar {
+    width: 64px;
+}
+    body.sidebar-collapsed .sidebar .link-text {
+        display: none;
+    }
+
+ 
+    body.sidebar-collapsed .sidebar .nav-link {
+        text-align: center;
+        padding-left: .75rem;
+        padding-right: .75rem;
+    }
+
+
+.sidebar .nav-link {
+    white-space: nowrap;
+}
+
+
+@media (max-width: 767.98px) {
+    .app-wrap {
+        display: none;
+    }
+
+}
