@@ -54,9 +54,6 @@
                 <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" title="Home">
                     <span class="link-text">Home</span>
                 </a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Privacy" title="Privacy">
-                    <span class="link-text">Privacy</span>
-                </a>
                 <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" title="Vehicles">
                     <span class="link-text">Vehicles</span>
                 </a>
@@ -67,12 +64,7 @@
                         <span class="link-text">Manage Roles</span>
                     </a>
                 }
-                @if (User.IsInRole("User"))
-                {
-                    <a class="nav-link px-3" asp-controller="Home" asp-action="User" title="Users">
-                        <span class="link-text">Users</span>
-                    </a>
-                }
+                
             </nav>
         </aside>
 
@@ -91,16 +83,12 @@
         <div class="offcanvas-body p-0">
             <nav class="nav flex-column py-2">
                 <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" data-bs-dismiss="offcanvas">Home</a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Privacy" data-bs-dismiss="offcanvas">Privacy</a>
                 <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" data-bs-dismiss="offcanvas">Vehicles</a>
                 @if (User.IsInRole("Admin"))
                 {
                     <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index" data-bs-dismiss="offcanvas">Manage Roles</a>
                 }
-                @if (User.IsInRole("User"))
-                {
-                    <a class="nav-link px-3" asp-controller="Home" asp-action="User" data-bs-dismiss="offcanvas">Users</a>
-                }
+
             </nav>
         </div>
     </div>

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore; // dla [Index]
+using Microsoft.EntityFrameworkCore; 
 using Fleet_Managment_Production.Models;
 
 
