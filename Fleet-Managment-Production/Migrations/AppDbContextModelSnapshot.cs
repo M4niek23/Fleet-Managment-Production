@@ -69,7 +69,7 @@ namespace Fleet_Managment_Production.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Insurance");
+                    b.ToTable("Insurances", (string)null);
                 });
 
             modelBuilder.Entity("Fleet_Managment_Production.Models.Users", b =>
@@ -195,7 +195,7 @@ namespace Fleet_Managment_Production.Migrations
                         .IsUnique()
                         .HasFilter("[VIN] IS NOT NULL");
 
-                    b.ToTable("Vehicle");
+                    b.ToTable("Vehicles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -333,13 +333,13 @@ namespace Fleet_Managment_Production.Migrations
 
             modelBuilder.Entity("Fleet_Managment_Production.Models.Insurance", b =>
                 {
-                    b.HasOne("Fleet_Managment_Production.Models.VehicleTable.Vehicle", "Vehicles")
+                    b.HasOne("Fleet_Managment_Production.Models.VehicleTable.Vehicle", "Vehicle")
                         .WithMany("Insurances")
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Vehicles");
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("Fleet_Managment_Production.Models.VehicleTable.Vehicle", b =>

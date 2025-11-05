@@ -11,19 +11,22 @@ namespace Fleet_Managment_Production.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<Vehicle> Vehicles;
-        public DbSet<Insurance> Insurances;
+        public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<Insurance> Insurances { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder b)
+        protected override void OnModelCreating(ModelBuilder ModelBulider)
         {
-            base.OnModelCreating(b);
+            base.OnModelCreating(ModelBulider);
 
             // Konfiguracja Users do Vehicles
-            b.Entity<Users>()
+            ModelBulider.Entity<Users>()
             .HasMany(u => u.Vehicles)
             .WithOne(v => v.User)
             .HasForeignKey(v => v.UserId)
             .OnDelete(DeleteBehavior.SetNull);
+            ModelBulider.Entity<Vehicle>().ToTable("Vehicles");
+            ModelBulider.Entity<Insurance>().ToTable("Insurances");
+
 
         }
        

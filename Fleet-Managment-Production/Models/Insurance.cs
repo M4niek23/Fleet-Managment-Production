@@ -60,6 +60,6 @@ namespace Fleet_Managment_Production.Models
         
         [Display(Name="Pojazd")]
         public int VehicleId { get; set; }
-        public Vehicle Vehicles { get; set; }
+        public Vehicle Vehicle { get; set; }
     }
 }

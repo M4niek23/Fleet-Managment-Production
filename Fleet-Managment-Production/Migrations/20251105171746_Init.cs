@@ -158,7 +158,7 @@ namespace Fleet_Managment_Production.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Vehicle",
+                name: "Vehicles",
                 columns: table => new
                 {
                     VehicleId = table.Column<int>(type: "int", nullable: false)
@@ -175,9 +175,9 @@ namespace Fleet_Managment_Production.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Vehicle", x => x.VehicleId);
+                    table.PrimaryKey("PK_Vehicles", x => x.VehicleId);
                     table.ForeignKey(
-                        name: "FK_Vehicle_AspNetUsers_UserId",
+                        name: "FK_Vehicles_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -185,7 +185,7 @@ namespace Fleet_Managment_Production.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Insurance",
+                name: "Insurances",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -204,11 +204,11 @@ namespace Fleet_Managment_Production.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Insurance", x => x.Id);
+                    table.PrimaryKey("PK_Insurances", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Insurance_Vehicle_VehicleId",
+                        name: "FK_Insurances_Vehicles_VehicleId",
                         column: x => x.VehicleId,
-                        principalTable: "Vehicle",
+                        principalTable: "Vehicles",
                         principalColumn: "VehicleId",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -253,25 +253,25 @@ namespace Fleet_Managment_Production.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Insurance_VehicleId",
-                table: "Insurance",
+                name: "IX_Insurances_VehicleId",
+                table: "Insurances",
                 column: "VehicleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Vehicle_LicensePlate",
-                table: "Vehicle",
+                name: "IX_Vehicles_LicensePlate",
+                table: "Vehicles",
                 column: "LicensePlate",
                 unique: true,
                 filter: "[LicensePlate] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Vehicle_UserId",
-                table: "Vehicle",
+                name: "IX_Vehicles_UserId",
+                table: "Vehicles",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Vehicle_VIN",
-                table: "Vehicle",
+                name: "IX_Vehicles_VIN",
+                table: "Vehicles",
                 column: "VIN",
                 unique: true,
                 filter: "[VIN] IS NOT NULL");
@@ -296,13 +296,13 @@ namespace Fleet_Managment_Production.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Insurance");
+                name: "Insurances");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Vehicle");
+                name: "Vehicles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
