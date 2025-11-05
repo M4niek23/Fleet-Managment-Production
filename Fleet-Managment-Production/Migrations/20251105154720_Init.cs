@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fleet_Managment_Production.Migrations
 {
     /// <inheritdoc />
-    public partial class Users : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -157,6 +157,62 @@ namespace Fleet_Managment_Production.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Vehicle",
+                columns: table => new
+                {
+                    VehicleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Make = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Model = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    FuelType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    ProductionYear = table.Column<int>(type: "int", nullable: false),
+                    LicensePlate = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    VIN = table.Column<string>(type: "nvarchar(17)", maxLength: 17, nullable: true),
+                    CurrentKm = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Vehicle", x => x.VehicleId);
+                    table.ForeignKey(
+                        name: "FK_Vehicle_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Insurance",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PolicyNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    InsurareName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Cost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    HasOc = table.Column<bool>(type: "bit", nullable: false),
+                    AcScope = table.Column<int>(type: "int", nullable: false),
+                    HasAssistance = table.Column<bool>(type: "bit", nullable: false),
+                    HasNNW = table.Column<bool>(type: "bit", nullable: false),
+                    IsCurrent = table.Column<bool>(type: "bit", nullable: false),
+                    VehicleId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Insurance", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Insurance_Vehicle_VehicleId",
+                        column: x => x.VehicleId,
+                        principalTable: "Vehicle",
+                        principalColumn: "VehicleId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -195,6 +251,30 @@ namespace Fleet_Managment_Production.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Insurance_VehicleId",
+                table: "Insurance",
+                column: "VehicleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Vehicle_LicensePlate",
+                table: "Vehicle",
+                column: "LicensePlate",
+                unique: true,
+                filter: "[LicensePlate] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Vehicle_UserId",
+                table: "Vehicle",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Vehicle_VIN",
+                table: "Vehicle",
+                column: "VIN",
+                unique: true,
+                filter: "[VIN] IS NOT NULL");
         }
 
         /// <inheritdoc />
@@ -216,7 +296,13 @@ namespace Fleet_Managment_Production.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Insurance");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Vehicle");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

@@ -2,9 +2,9 @@
 {
     public enum VehicleStatus
     {
-        Available = 0,
-        InUse = 1,
-        InMaintenance = 2,
-        Decommissioned = 3 
+        Available,
+        InUse,
+        InMaintenance,
+        Decommissioned,
     }
 }

@@ -1,29 +1,37 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Fleet_Managment_Production.Data;
+// Poprawne usingi dla Twoich modeli
+using Fleet_Managment_Production.Models;
 using Fleet_Managment_Production.Models.VehicleTable;
+// Using dla autoryzacji i UserManager
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace Fleet_Managment_Production.Controllers
 {
+    [Authorize] // Zabezpieczamy kontroler
     public class VehiclesController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<Users> _userManager;
 
-        public VehiclesController(AppDbContext context)
+        public VehiclesController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Vehicles
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Vehicles.Include(v => v.User);
-            return View(await appDbContext.ToListAsync());
+            
+            var vehicles = _context.Vehicles.Include(v => v.User);
+            return View(await vehicles.ToListAsync());
         }
 
         // GET: Vehicles/Details/5
@@ -34,9 +42,13 @@ namespace Fleet_Managment_Production.Controllers
                 return NotFound();
             }
 
+            // Znajdź pojazd używając klucza VehicleId
+            // Dołączamy Ubezpieczenia (Insurances), aby widok mógł znaleźć to aktywne (IsCurrent = true)
             var vehicle = await _context.Vehicles
                 .Include(v => v.User)
-                .FirstOrDefaultAsync(m => m.VehicleId == id);
+                .Include(v => v.Insurances) // KLUCZOWE: Ładujemy ubezpieczenia
+                .FirstOrDefaultAsync(m => m.VehicleId == id); // Używamy VehicleId
+
             if (vehicle == null)
             {
                 return NotFound();
@@ -48,13 +60,12 @@ namespace Fleet_Managment_Production.Controllers
         // GET: Vehicles/Create
         public IActionResult Create()
         {
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            // Przygotuj listę użytkowników dla formularza
+            PopulateUsersDropdown();
             return View();
         }
 
         // POST: Vehicles/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId")] Vehicle vehicle)
@@ -65,7 +76,8 @@ namespace Fleet_Managment_Production.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", vehicle.UserId);
+            // Jeśli model nie jest poprawny, ponownie załaduj listę użytkowników
+            PopulateUsersDropdown(vehicle.UserId);
             return View(vehicle);
         }
 
@@ -77,22 +89,23 @@ namespace Fleet_Managment_Production.Controllers
                 return NotFound();
             }
 
+            // Używamy VehicleId do znalezienia pojazdu
             var vehicle = await _context.Vehicles.FindAsync(id);
             if (vehicle == null)
             {
                 return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", vehicle.UserId);
+            // Załaduj listę użytkowników do formularza
+            PopulateUsersDropdown(vehicle.UserId);
             return View(vehicle);
         }
 
         // POST: Vehicles/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId")] Vehicle vehicle)
         {
+            // Upewnij się, że ID z URL pasuje do ID z modelu
             if (id != vehicle.VehicleId)
             {
                 return NotFound();
@@ -118,7 +131,8 @@ namespace Fleet_Managment_Production.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", vehicle.UserId);
+            // Jeśli model nie jest poprawny, ponownie załaduj listę użytkowników
+            PopulateUsersDropdown(vehicle.UserId);
             return View(vehicle);
         }
 
@@ -132,7 +146,7 @@ namespace Fleet_Managment_Production.Controllers
 
             var vehicle = await _context.Vehicles
                 .Include(v => v.User)
-                .FirstOrDefaultAsync(m => m.VehicleId == id);
+                .FirstOrDefaultAsync(m => m.VehicleId == id); // Używamy VehicleId
             if (vehicle == null)
             {
                 return NotFound();
@@ -146,6 +160,10 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // UWAGA: Przed usunięciem pojazdu, musisz obsłużyć powiązane ubezpieczenia!
+            // Jeśli ubezpieczenia mają klucz obcy do Vehicle, usunięcie pojazdu może się nie powść
+            // (jeśli jest restrykcja klucza obcego) lub usunie ubezpieczenia (jeśli jest kaskada).
+
             var vehicle = await _context.Vehicles.FindAsync(id);
             if (vehicle != null)
             {
@@ -158,7 +176,17 @@ namespace Fleet_Managment_Production.Controllers
 
         private bool VehicleExists(int id)
         {
-            return _context.Vehicles.Any(e => e.VehicleId == id);
+            return _context.Vehicles.Any(e => e.VehicleId == id); // Używamy VehicleId
+        }
+
+        // Metoda pomocnicza do ładowania listy użytkowników dla pól <select>
+        private void PopulateUsersDropdown(object selectedUser = null)
+        {
+            var usersQuery = from u in _userManager.Users
+                             orderby u.UserName
+                             select new { u.Id, DisplayName = u.UserName }; // Możesz zmienić na Email lub inną właściwość
+
+            ViewBag.UserId = new SelectList(usersQuery.AsNoTracking(), "Id", "DisplayName", selectedUser);
         }
     }
 }

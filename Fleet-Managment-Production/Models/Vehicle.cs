@@ -50,5 +50,8 @@ namespace Fleet_Managment_Production.Models.VehicleTable
 
         [ForeignKey(nameof(UserId))]
         public Users? User { get; set; }
+
+        public virtual ICollection<Insurance> Insurances { get; set; }
+       
     }
 }

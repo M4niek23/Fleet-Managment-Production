@@ -57,6 +57,9 @@
                 <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" title="Vehicles">
                     <span class="link-text">Vehicles</span>
                 </a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Insurances" asp-action="Index" title="Insurances">
+                    <span class="link-text">Insurances</span>
+                </a>
 
                 @if (User.IsInRole("Admin"))
                 {
@@ -84,6 +87,7 @@
             <nav class="nav flex-column py-2">
                 <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" data-bs-dismiss="offcanvas">Home</a>
                 <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" data-bs-dismiss="offcanvas">Vehicles</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Insurances" asp-action="Index" data-bs-dismiss="offcanvas">Insurances</a>
                 @if (User.IsInRole("Admin"))
                 {
                     <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index" data-bs-dismiss="offcanvas">Manage Roles</a>

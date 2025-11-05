@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fleet_Managment_Production.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251101144039_InitVehicles")]
-    partial class InitVehicles
+    [Migration("20251105154720_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,56 @@ namespace Fleet_Managment_Production.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Fleet_Managment_Production.Models.Insurance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AcScope")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("HasAssistance")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasNNW")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasOc")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("InsurareName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PolicyNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("Insurance");
+                });
 
             modelBuilder.Entity("Fleet_Managment_Production.Models.Users", b =>
                 {
@@ -148,7 +198,7 @@ namespace Fleet_Managment_Production.Migrations
                         .IsUnique()
                         .HasFilter("[VIN] IS NOT NULL");
 
-                    b.ToTable("Vehicles");
+                    b.ToTable("Vehicle");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -284,6 +334,17 @@ namespace Fleet_Managment_Production.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Fleet_Managment_Production.Models.Insurance", b =>
+                {
+                    b.HasOne("Fleet_Managment_Production.Models.VehicleTable.Vehicle", "Vehicles")
+                        .WithMany("Insurances")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicles");
+                });
+
             modelBuilder.Entity("Fleet_Managment_Production.Models.VehicleTable.Vehicle", b =>
                 {
                     b.HasOne("Fleet_Managment_Production.Models.Users", "User")
@@ -348,6 +409,11 @@ namespace Fleet_Managment_Production.Migrations
             modelBuilder.Entity("Fleet_Managment_Production.Models.Users", b =>
                 {
                     b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("Fleet_Managment_Production.Models.VehicleTable.Vehicle", b =>
+                {
+                    b.Navigation("Insurances");
                 });
 #pragma warning restore 612, 618
         }
