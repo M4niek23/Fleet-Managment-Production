@@ -24,8 +24,8 @@ namespace Fleet_Managment_Production.Models.VehicleTable
         public string Model { get; set; } = null!;
 
 
-        [StringLength(20)]
-        public string? FuelType { get; set; }
+        [Display(Name = "Typ paliwa")]
+        public FuelType FuelType { get; set; }
 
 
         [Range(1886, 2100)]
