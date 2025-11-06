@@ -119,7 +119,7 @@ namespace Fleet_Managment_Production.Controllers
             return View(insurance);
         }
 
-        public async Task<IActionResult> Detalis(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -127,7 +127,7 @@ namespace Fleet_Managment_Production.Controllers
             }
 
             var insurance = await _context.Insurances
-                .Include(i => i.VehicleId)
+                .Include(i => i.Vehicle)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (insurance == null)
             {
