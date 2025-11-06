@@ -1,0 +1,87 @@
+﻿@model Fleet_Managment_Production.Models.Insurance
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Insurance</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PolicyNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PolicyNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.InsurareName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.InsurareName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.StartDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.StartDate)
+        </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ExpiryDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ExpiryDate)
+        </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Cost)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Cost)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.HasOc)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.HasOc)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AcScope)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AcScope)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.HasAssistance)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.HasAssistance)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.HasNNW)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.HasNNW)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IsCurrent)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.IsCurrent)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Vehicle)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Vehicle.LicensePlate)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+
+    <a asp-action="Index" asp-route-id="@Model.VehicleId">Back to List</a>
+</div>

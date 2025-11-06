@@ -1,0 +1,92 @@
+﻿@model Fleet_Managment_Production.Models.Insurance
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Insurance</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="PolicyNumber" class="control-label"></label>
+                <input asp-for="PolicyNumber" class="form-control" />
+                <span asp-validation-for="PolicyNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="InsurareName" class="control-label"></label>
+                <input asp-for="InsurareName" class="form-control" />
+                <span asp-validation-for="InsurareName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StartDate" class="control-label"></label>
+                <input asp-for="StartDate" class="form-control" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ExpiryDate" class="control-label"></label>
+                <input asp-for="ExpiryDate" class="form-control" />
+                <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Cost" class="control-label"></label>
+                <input asp-for="Cost" class="form-control" />
+                <span asp-validation-for="Cost" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="HasOc" /> @Html.DisplayNameFor(model => model.HasOc)
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="AcScope" class="control-label"></label>
+                <select asp-for="AcScope" class="form-control" asp-items="Html.GetEnumSelectList<Fleet_Managment_Production.Models.AcScope>()"></select>
+                <span asp-validation-for="AcScope" class="text-danger"></span>
+            </div>
+
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="HasAssistance" /> @Html.DisplayNameFor(model => model.HasAssistance)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="HasNNW" /> @Html.DisplayNameFor(model => model.HasNNW)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsCurrent" /> @Html.DisplayNameFor(model => model.IsCurrent)
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="VehicleId" class="control-label">Pojazd</label>
+                <select asp-for="VehicleId" class="form-control" asp-items="ViewBag.VehicleList">
+                    <option value="">-- Wybierz pojazd --</option>
+                </select>
+                <span asp-validation-for="VehicleId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" asp-route-id="@Model.VehicleId">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
