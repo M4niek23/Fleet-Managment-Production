@@ -1,8 +1,67 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model Fleet_Managment_Production.Models.Home.DashboardViewModel
+@{
+    ViewData["Title"] = "Pulpit Nawigacyjny";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Witaj w systemie Fleet Managment</h1>
+</div>
+<div class="row text-center my-4">
+    <div class="col-md-6">
+        <div class="card card-body shadow-sm">
+            <h5 class="card-title">Pojazdy</h5>
+            <a asp-controller="Vehicles" asp-action="Create" class="btn btn-primary btn-lg">
+                <i class="bi bi-car-front-fill"></i> Dodaj nowy pojazd
+            </a>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-body shadow-sm">
+            <h5 class="card-title">Ubezpieczenia</h5>
+            <a asp-controller="Insurance" asp-action="Create" class="btn btn-success btn-lg">
+                <i class="bi bi-shield-shaded"></i> Dodaj nową polisę
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm my-4">
+</div>
+<div class="card shadow-sm my-4">
+
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">🚨 Kończące się ubezpieczenia (w 30 dni)</h5>
+
+        @if (Model.ExpiringInsurances.Any())
+        {
+            <span class="badge bg-danger rounded-pill fs-6">@Model.ExpiringInsurances.Count()</span>
+        }
+    </div>
+
+    <div class="card-body p-4" style="min-height: 200px;">
+
+        @if (Model.ExpiringInsurances.Any())
+        {
+            <ul class="list-group list-group-flush">
+                @foreach (var ins in Model.ExpiringInsurances)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            Pojazd: <strong>@ins.Vehicle?.LicensePlate</strong> (Polisa: @ins.PolicyNumber)
+                        </span>
+                        <span class="badge bg-danger rounded-pill fs-6">
+                            Wygasa: @ins.ExpiryDate.ToShortDateString()
+                        </span>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="d-flex justify-content-center align-items-center h-100" style="min-height: 150px;">
+                <h4 class="text-muted">Brak kończących się ubezpieczeń. ✅</h4>
+            </div>
+        }
+
+    </div>
 </div>
