@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Fleet_Managment_Production.Models;
 using Fleet_Managment_Production.ViewModels;
+using Fleet_Managment_Production.Models;
 
 namespace Fleet_Managment_Production.Controllers
 {

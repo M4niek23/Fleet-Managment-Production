@@ -1,5 +1,4 @@
-﻿using Fleet_Managment_Production.Models.VehicleTable;
-using Microsoft.Identity.Client;
+﻿using Microsoft.Identity.Client;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;

@@ -1,0 +1,38 @@
+﻿@model Fleet_Managment_Production.Models.Inspection
+
+@{
+    ViewData["Title"] = "Usuń przegląd";
+}
+
+<h1>Usuń przegląd</h1>
+
+<h3 class="text-danger">Czy na pewno chcesz usunąć ten wpis?</h3>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Vehicle)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Vehicle.LicensePlate)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.InspectionDate)
+        </dt>
+        <dd class="col-sm-9">
+            @Model.InspectionDate.ToShortDateString()
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Usuń" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+    </form>
+</div>

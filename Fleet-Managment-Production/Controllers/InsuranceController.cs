@@ -1,13 +1,8 @@
 ﻿using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
-using Fleet_Managment_Production.Models.VehicleTable;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System; // 👈 POPRAWKA 1: Dodano brakujący using dla 'DateTime'
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Fleet_Managment_Production.Controllers
 {
@@ -59,13 +54,13 @@ namespace Fleet_Managment_Production.Controllers
         }
 
 
-        public async Task<IActionResult> Create(int? vehicleId) 
+        public async Task<IActionResult> Create(int? vehicleId)
         {
             var vehicleList = await _context.Vehicles
                                     .Select(v => new
                                     {
                                         v.VehicleId,
-                                        DisplayText = v.LicensePlate ?? (v.Make + " " + v.Model) 
+                                        DisplayText = v.LicensePlate ?? (v.Make + " " + v.Model)
                                     })
                                     .ToListAsync();
 
@@ -247,13 +242,13 @@ namespace Fleet_Managment_Production.Controllers
             {
                 _context.Insurances.Remove(insurance);
                 await _context.SaveChangesAsync();
-      
+
                 return RedirectToAction(nameof(Index), new { id = insurance.VehicleId });
             }
 
-      
+
             return RedirectToAction("Index", "Vehicles");
         }
 
-    } 
+    }
 }

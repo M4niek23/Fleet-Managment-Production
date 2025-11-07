@@ -1,8 +1,7 @@
-﻿using Fleet_Managment_Production.Models; // Użyj swojej przestrzeni nazw dla modelu 'Insurance'
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-// Upewnij się, że ta przestrzeń nazw jest poprawna
-namespace Fleet_Managment_Production.Models.Home
+
+namespace Fleet_Managment_Production.Models
 {
     public class DashboardViewModel
     {

@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore; 
-using Fleet_Managment_Production.Models;
+using Microsoft.EntityFrameworkCore;
 
 
-namespace Fleet_Managment_Production.Models.VehicleTable
+namespace Fleet_Managment_Production.Models
 {
     [Index(nameof(VIN), IsUnique = true)]
     [Index(nameof(LicensePlate), IsUnique = true)]
@@ -52,6 +51,7 @@ namespace Fleet_Managment_Production.Models.VehicleTable
         public Users? User { get; set; }
 
         public virtual ICollection<Insurance> Insurances { get; set; } = new List<Insurance>();
+        public virtual ICollection<Inspection> Inspections { get; set; } = new List<Inspection>();
 
     }
 }

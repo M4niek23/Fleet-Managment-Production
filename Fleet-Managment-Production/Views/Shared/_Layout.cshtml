@@ -1,7 +1,5 @@
 ﻿@*
-  Lewy sidebar: rozwijany/zwijany na desktopie (przycisk „☰”).
-  Mobile: offcanvas.
-  Prawa strona topbaru: tylko _LoginPartial.
+
 *@
 <!DOCTYPE html>
 <html lang="en">
@@ -60,6 +58,9 @@
                 <a class="nav-link px-3" asp-area="" asp-controller="Insurance" asp-action="Index" title="Insurances">
                     <span class="link-text">Insurances</span>
                 </a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Inspections" asp-action="Index" title="Inspections">
+                    <span class="link-text">Inspections</span>
+                </a>
 
                 @if (User.IsInRole("Admin"))
                 {
@@ -88,6 +89,7 @@
                 <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" data-bs-dismiss="offcanvas">Home</a>
                 <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" data-bs-dismiss="offcanvas">Vehicles</a>
                 <a class="nav-link px-3" asp-area="" asp-controller="Insurance" asp-action="Index" data-bs-dismiss="offcanvas">Insurances</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Inspections" asp-action="Index" data-bs-dismiss="offcanvas">Inspections</a>
                 @if (User.IsInRole("Admin"))
                 {
                     <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index" data-bs-dismiss="offcanvas">Manage Roles</a>
