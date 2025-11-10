@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fleet_Managment_Production.Migrations
 {
     /// <inheritdoc />
-    public partial class InsuracnesAdd : Migration
+    public partial class InspectionsAdd : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,7 +24,7 @@ namespace Fleet_Managment_Production.Migrations
                     VehicleId = table.Column<int>(type: "int", nullable: false),
                     IsResultPositive = table.Column<bool>(type: "bit", nullable: true),
                     NextInspectionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    VehicleId1 = table.Column<int>(type: "int", nullable: true)
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -35,22 +35,12 @@ namespace Fleet_Managment_Production.Migrations
                         principalTable: "Vehicles",
                         principalColumn: "VehicleId",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Inspections_Vehicles_VehicleId1",
-                        column: x => x.VehicleId1,
-                        principalTable: "Vehicles",
-                        principalColumn: "VehicleId");
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Inspections_VehicleId",
                 table: "Inspections",
                 column: "VehicleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Inspections_VehicleId1",
-                table: "Inspections",
-                column: "VehicleId1");
         }
 
         /// <inheritdoc />

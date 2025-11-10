@@ -50,8 +50,7 @@ namespace Fleet_Managment_Production.Models
         [ForeignKey(nameof(UserId))]
         public Users? User { get; set; }
 
-        public virtual ICollection<Insurance> Insurances { get; set; } = new List<Insurance>();
-        public virtual ICollection<Inspection> Inspections { get; set; } = new List<Inspection>();
-
+        public ICollection<Inspection> Inspections { get; set; } = new List<Inspection>();
+        public ICollection<Insurance> Insurances { get; set; } = new List<Insurance>();
     }
 }

@@ -26,10 +26,10 @@ namespace Fleet_Managment_Production.Controllers
             var viewModel = new InspectionsViewModel
             {
                 UpcomingInspections = allInspections
-                                        .Where(i => i.InspectionDate >= DateTime.Today)
+                                        .Where(i => i.IsActive == true && i.InspectionDate.Date >= DateTime.Today)
                                         .ToList(),
                 HistoricalInspections = allInspections
-                                        .Where(i => i.InspectionDate < DateTime.Today)
+                                        .Where(i => i.IsActive == false || i.InspectionDate.Date < DateTime.Today)
                                         .ToList()
             };
 
@@ -59,11 +59,21 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,InspectionDate,Description,Mileage,Cost,VehicleId,IsResultPositive")] Inspection inspection)
         {
+            var existingUpcoming = await _context.Inspections
+                .FirstOrDefaultAsync(i => i.VehicleId == inspection.VehicleId && 
+                                          i.InspectionDate >= DateTime.Today &&
+                                          i.IsActive == true);
+
+            if (existingUpcoming != null)
+            {
+                ModelState.AddModelError("VehicleId", "Ten pojazd ma jeszcze ważny przegląd. Jeśli poprzedni wygaśnie samoczynnie lub ręcznie do zdezaktywuje, można dodać kolejny");
+
+            }
+
             if (inspection.IsResultPositive == false)
             {
                 inspection.NextInspectionDate = inspection.InspectionDate.AddDays(14);
-            }
-            else
+            }else
             {
                 inspection.NextInspectionDate = null;
             }
@@ -82,7 +92,7 @@ namespace Fleet_Managment_Production.Controllers
                 }
 
                 _context.Add(inspection);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             ViewData["VehicleId"] = new SelectList(_context.Vehicles, "VehicleId", "LicensePlate", inspection.VehicleId);
@@ -92,10 +102,8 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
-
             var inspection = await _context.Inspections.FindAsync(id);
             if (inspection == null) return NotFound();
-
             ViewData["VehicleId"] = new SelectList(_context.Vehicles, "VehicleId", "LicensePlate", inspection.VehicleId);
             return View(inspection);
         }
@@ -106,29 +114,50 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id != inspection.Id) return NotFound();
 
+            // --- LOGIKA BIZNESOWA 1 (Edycja): WALIDACJA "JEDEN AKTYWNY" ---
+            // Sprawdzamy, czy próbujemy ustawić ten przegląd jako aktywny/nadchodzący,
+            // podczas gdy INNY (o innym Id) już taki istnieje.
+            if (inspection.IsActive == true && inspection.InspectionDate.Date >= DateTime.Today)
+            {
+                var existingUpcoming = await _context.Inspections
+                    .FirstOrDefaultAsync(i => i.VehicleId == inspection.VehicleId &&
+                                              i.InspectionDate.Date >= DateTime.Today &&
+                                              i.IsActive == true &&
+                                              i.Id != inspection.Id); // Wykluczamy samych siebie
+
+                if (existingUpcoming != null)
+                {
+                    ModelState.AddModelError("VehicleId", "Ten pojazd ma już zaplanowany inny AKTYWNY przegląd.");
+                }
+            }
+            // --- KONIEC LOGIKI 1 ---
+
+            // --- LOGIKA BIZNESOWA 2: WYNIK NEGATYWNY = 14 DNI ---
+            if (inspection.IsResultPositive == false)
+            {
+                inspection.NextInspectionDate = inspection.InspectionDate.AddDays(14);
+            }
+            else
+            {
+                inspection.NextInspectionDate = null;
+            }
+            // --- KONIEC LOGIKI 2 ---
+
             if (ModelState.IsValid)
             {
-                if (inspection.IsResultPositive == false)
-                {
-                    inspection.NextInspectionDate = inspection.InspectionDate.AddDays(14);
-                }
-                else
-                {
-                    inspection.NextInspectionDate = null;
-                }
-
                 try
                 {
+                    // --- LOGIKA BIZNESOWA 3: SYNCHRONIZACJA PRZEBIEGU ---
                     if (inspection.Mileage.HasValue && inspection.Mileage > 0)
                     {
                         var vehicleToUpdate = await _context.Vehicles.FindAsync(inspection.VehicleId);
-
                         if (vehicleToUpdate != null && inspection.Mileage.Value > vehicleToUpdate.CurrentKm)
                         {
                             vehicleToUpdate.CurrentKm = inspection.Mileage.Value;
                             _context.Update(vehicleToUpdate);
                         }
                     }
+                    // --- KONIEC LOGIKI 3 ---
 
                     _context.Update(inspection);
                     await _context.SaveChangesAsync();
@@ -142,20 +171,18 @@ namespace Fleet_Managment_Production.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["VehicleId"] = new SelectList(_context.Vehicles, "VehicleId", "LicensePlate", inspection.VehicleId);
             return View(inspection);
         }
 
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
-
-            var inspection = await _context.Inspections
-                .Include(i => i.Vehicle)
+           if(id == null) return NotFound();
+           var inspection = await _context.Inspections
+                .Include(i => i.VehicleId)
                 .FirstOrDefaultAsync(m => m.Id == id);
-
             if (inspection == null) return NotFound();
-
             return View(inspection);
         }
 

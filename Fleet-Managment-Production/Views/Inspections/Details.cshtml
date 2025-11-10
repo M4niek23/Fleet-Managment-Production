@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Szczegóły przeglądu";
 
-    // Logika do wyświetlania wyniku
     string resultText = "Oczekujący";
     string resultClass = "text-muted";
     if (Model.IsResultPositive == true)
@@ -23,57 +22,32 @@
 <div>
     <hr />
     <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Vehicle)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Vehicle.LicensePlate)
-        </dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Vehicle)</dt>
+        <dd class="col-sm-9">@(Model.Vehicle?.LicensePlate ?? "Brak pojazdu")</dd>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.InspectionDate)
-        </dt>
-        <dd class="col-sm-9">
-            @Model.InspectionDate.ToShortDateString()
-        </dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.InspectionDate)</dt>
+        <dd class="col-sm-9">@Model.InspectionDate.ToShortDateString()</dd>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Mileage)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Mileage) km
-        </dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Mileage)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Mileage) km</dd>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Cost)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Cost) PLN
-        </dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Cost)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Cost) PLN</dd>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.IsResultPositive)
-        </dt>
-        <dd class="col-sm-9 @resultClass">
-            @resultText
-        </dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.IsResultPositive)</dt>
+        <dd class="col-sm-9 @resultClass">@resultText</dd>
 
         @if (Model.NextInspectionDate.HasValue)
         {
-            <dt class="col-sm-3 text-danger">
-                @Html.DisplayNameFor(model => model.NextInspectionDate)
-            </dt>
-            <dd class="col-sm-9 text-danger">
-                @Model.NextInspectionDate.Value.ToShortDateString()
-            </dd>
+            <dt class="col-sm-3 text-danger">@Html.DisplayNameFor(model => model.NextInspectionDate)</dt>
+            <dd class="col-sm-9 text-danger">@Model.NextInspectionDate.Value.ToShortDateString()</dd>
         }
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Description)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Description)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.IsActive)</dt>
+        <dd class="col-sm-9">@(Model.IsActive ? "Tak" : "Nie")</dd>
     </dl>
 </div>
 <div>

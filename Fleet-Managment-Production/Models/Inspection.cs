@@ -29,7 +29,7 @@ namespace Fleet_Managment_Production.Models
         public int VehicleId { get; set; }
 
         [ForeignKey("VehicleId")]
-        public virtual Vehicle? Vehicle { get; set; }
+        public Vehicle Vehicle { get; set; }
 
         [Display(Name = "Wynik przeglądu")]
         public bool? IsResultPositive { get; set; } 
@@ -37,5 +37,8 @@ namespace Fleet_Managment_Production.Models
         [Display(Name = "Data ponownego przeglądu")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime? NextInspectionDate { get; set; }
+
+        [Display(Name = "Przegląd aktywny")]
+        public bool IsActive { get; set; }
     }
 }

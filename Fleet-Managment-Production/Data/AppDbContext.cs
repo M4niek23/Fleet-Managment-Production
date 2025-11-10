@@ -23,15 +23,18 @@ namespace Fleet_Managment_Production.Data
             .WithOne(v => v.User)
             .HasForeignKey(v => v.UserId)
             .OnDelete(DeleteBehavior.SetNull);
+
             modelBilder.Entity<Vehicle>().ToTable("Vehicles");
             modelBilder.Entity<Insurance>().ToTable("Insurances");
+            modelBilder.Entity<Vehicle>().HasKey(v => v.VehicleId);
 
             //Konfiguracja Vehicles do Inspection
             modelBilder.Entity<Inspection>()
                 .HasOne(i => i.Vehicle)
-                .WithMany()
+                .WithMany(v => v.Inspections)
                 .HasForeignKey(i => i.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
 
 
         }

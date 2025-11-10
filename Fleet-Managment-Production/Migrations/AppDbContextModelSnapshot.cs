@@ -39,6 +39,9 @@ namespace Fleet_Managment_Production.Migrations
                     b.Property<DateTime>("InspectionDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool?>("IsResultPositive")
                         .HasColumnType("bit");
 
@@ -51,14 +54,9 @@ namespace Fleet_Managment_Production.Migrations
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VehicleId1")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("VehicleId");
-
-                    b.HasIndex("VehicleId1");
 
                     b.ToTable("Inspections");
                 });
@@ -182,7 +180,7 @@ namespace Fleet_Managment_Production.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Fleet_Managment_Production.Models.VehicleTable.Vehicle", b =>
+            modelBuilder.Entity("Fleet_Managment_Production.Models.Vehicle", b =>
                 {
                     b.Property<int>("VehicleId")
                         .ValueGeneratedOnAdd()
@@ -373,22 +371,18 @@ namespace Fleet_Managment_Production.Migrations
 
             modelBuilder.Entity("Fleet_Managment_Production.Models.Inspection", b =>
                 {
-                    b.HasOne("Fleet_Managment_Production.Models.VehicleTable.Vehicle", "Vehicle")
-                        .WithMany()
+                    b.HasOne("Fleet_Managment_Production.Models.Vehicle", "Vehicle")
+                        .WithMany("Inspections")
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Fleet_Managment_Production.Models.VehicleTable.Vehicle", null)
-                        .WithMany("Inspections")
-                        .HasForeignKey("VehicleId1");
 
                     b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("Fleet_Managment_Production.Models.Insurance", b =>
                 {
-                    b.HasOne("Fleet_Managment_Production.Models.VehicleTable.Vehicle", "Vehicle")
+                    b.HasOne("Fleet_Managment_Production.Models.Vehicle", "Vehicle")
                         .WithMany("Insurances")
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -397,7 +391,7 @@ namespace Fleet_Managment_Production.Migrations
                     b.Navigation("Vehicle");
                 });
 
-            modelBuilder.Entity("Fleet_Managment_Production.Models.VehicleTable.Vehicle", b =>
+            modelBuilder.Entity("Fleet_Managment_Production.Models.Vehicle", b =>
                 {
                     b.HasOne("Fleet_Managment_Production.Models.Users", "User")
                         .WithMany("Vehicles")
@@ -463,7 +457,7 @@ namespace Fleet_Managment_Production.Migrations
                     b.Navigation("Vehicles");
                 });
 
-            modelBuilder.Entity("Fleet_Managment_Production.Models.VehicleTable.Vehicle", b =>
+            modelBuilder.Entity("Fleet_Managment_Production.Models.Vehicle", b =>
                 {
                     b.Navigation("Inspections");
 
