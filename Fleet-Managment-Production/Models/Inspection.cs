@@ -10,6 +10,7 @@ namespace Fleet_Managment_Production.Models
 
         [Required(ErrorMessage ="Data przeglądu jest wymagana.")]
         [Display(Name="Data przeglądu")]
+        [DataType(DataType.Date)]
         public DateTime InspectionDate { get; set; }
 
         [Display(Name = "Opis")]
@@ -29,7 +30,7 @@ namespace Fleet_Managment_Production.Models
         public int VehicleId { get; set; }
 
         [ForeignKey("VehicleId")]
-        public Vehicle Vehicle { get; set; }
+        public Vehicle? Vehicle { get; set; }
 
         [Display(Name = "Wynik przeglądu")]
         public bool? IsResultPositive { get; set; } 
