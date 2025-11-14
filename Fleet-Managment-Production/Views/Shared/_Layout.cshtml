@@ -53,19 +53,19 @@
                     <span class="link-text">Home</span>
                 </a>
                 <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" title="Vehicles">
-                    <span class="link-text">Vehicles</span>
+                    <span class="link-text">Flota</span>
                 </a>
                 <a class="nav-link px-3" asp-area="" asp-controller="Insurance" asp-action="Index" title="Insurances">
-                    <span class="link-text">Insurances</span>
+                    <span class="link-text">Ubezpieczenia</span>
                 </a>
                 <a class="nav-link px-3" asp-area="" asp-controller="Inspections" asp-action="Index" title="Inspections">
-                    <span class="link-text">Inspections</span>
+                    <span class="link-text">Przeglądy</span>
                 </a>
 
                 @if (User.IsInRole("Admin"))
                 {
                     <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index" title="Manage Roles">
-                        <span class="link-text">Manage Roles</span>
+                        <span class="link-text">Zarządzanie rolami</span>
                     </a>
                 }
                 
@@ -87,12 +87,12 @@
         <div class="offcanvas-body p-0">
             <nav class="nav flex-column py-2">
                 <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" data-bs-dismiss="offcanvas">Home</a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" data-bs-dismiss="offcanvas">Vehicles</a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Insurance" asp-action="Index" data-bs-dismiss="offcanvas">Insurances</a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Inspections" asp-action="Index" data-bs-dismiss="offcanvas">Inspections</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" data-bs-dismiss="offcanvas">Flota</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Insurance" asp-action="Index" data-bs-dismiss="offcanvas">Ubezpieczenia</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Inspections" asp-action="Index" data-bs-dismiss="offcanvas">Przeglądy</a>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index" data-bs-dismiss="offcanvas">Manage Roles</a>
+                    <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index" data-bs-dismiss="offcanvas">Zarządzanie rolami</a>
                 }
 
             </nav>

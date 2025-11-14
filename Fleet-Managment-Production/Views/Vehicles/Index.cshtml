@@ -54,24 +54,24 @@
 
                     <td>
                         @{
-                            // Domyślny kolor, gdyby status był nieznany
                             string badgeClass = "bg-secondary";
 
-                            // Sprawdzamy status (zakładając, że to enum)
-                            // i przypisujemy kolor zgodny z Bootstrapem
                             switch (item.Status.ToString())
                             {
                                 case "Available":
-                                    badgeClass = "bg-success"; // Zielony
+                                    badgeClass = "bg-success"; 
                                     break;
                                 case "InUse":
-                                    badgeClass = "bg-primary"; // Niebieski
+                                    badgeClass = "bg-primary"; 
                                     break;
                                 case "InMaintenance":
-                                    badgeClass = "bg-warning"; // Żółty
+                                    badgeClass = "bg-warning"; 
+                                    break;
+                                case "Sold":
+                                    badgeClass = "bg-danger";
                                     break;
                                 case "Decommissioned":
-                                    badgeClass = "bg-danger"; // Czerwony
+                                    badgeClass = "bg-danger"; 
                                     break;
                             }
                         }

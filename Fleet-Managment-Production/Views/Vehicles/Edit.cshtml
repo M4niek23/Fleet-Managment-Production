@@ -43,11 +43,11 @@
                     <option value="">Wybierz rok produkcji</option>
 
                     @{
-                        // Pobieramy obecny rok (np. 2025)
+                        
                         int currentYear = DateTime.Now.Year;
 
-                        // Pętla generująca lata od 2005 do bieżącego
-                        for (int year = currentYear; year >= 2005; year--)
+                        
+                        for (int year = currentYear; year >= 1930; year--)
                         {
                             <option value="@year">@year</option>
                         }
@@ -77,14 +77,14 @@
                 <span asp-validation-for="UserId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Zapisz" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="btn btn-primary">Powrót</a>
 </div>
 
 @section Scripts {

@@ -7,7 +7,6 @@
 
 <h1>Nowy pojazd</h1>
 
-@* <h4>Vehicle</h4> *@
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -44,11 +43,9 @@
                     <option value="">Wybierz rok produkcji</option>
 
                     @{
-                        // Pobieramy obecny rok (np. 2025)
                         int currentYear = DateTime.Now.Year;
 
-                        // Pętla generująca lata od 2005 do bieżącego
-                        for (int year = currentYear; year >= 2005; year--)
+                        for (int year = currentYear; year >= 1950; year--)
                         {
                             <option value="@year">@year</option>
                         }

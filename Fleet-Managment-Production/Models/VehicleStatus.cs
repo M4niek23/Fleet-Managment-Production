@@ -14,6 +14,9 @@ namespace Fleet_Managment_Production.Models
         [Display(Name = "W serwisie")]
         InMaintenance,
 
+        [Display(Name = "Sprzedany")]
+        Sold,
+
         [Display(Name = "Wycofany")]
         Decommissioned
     }
