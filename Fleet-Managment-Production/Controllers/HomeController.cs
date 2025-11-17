@@ -27,6 +27,9 @@ namespace Fleet_Managment_Production.Controllers
                 .Where(i => i.ExpiryDate >= today && i.ExpiryDate <= alertLimitDate)
                 .OrderBy(i => i.ExpiryDate)
                 .ToListAsync();
+            var expiringInspections = await _context.Inspections
+                .Include(i => i.Vehicle)
+                .Where(i => i.ex)
 
             var viewModel = new DashboardViewModel
             {
