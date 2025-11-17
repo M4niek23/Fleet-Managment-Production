@@ -61,6 +61,9 @@
                 <a class="nav-link px-3" asp-area="" asp-controller="Inspections" asp-action="Index" title="Inspections">
                     <span class="link-text">Przeglądy</span>
                 </a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Costs" asp-action="Index" title="Costs">
+                    <span class="link-text">Koszty</span>
+                </a>
 
                 @if (User.IsInRole("Admin"))
                 {
@@ -90,6 +93,7 @@
                 <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" data-bs-dismiss="offcanvas">Flota</a>
                 <a class="nav-link px-3" asp-area="" asp-controller="Insurance" asp-action="Index" data-bs-dismiss="offcanvas">Ubezpieczenia</a>
                 <a class="nav-link px-3" asp-area="" asp-controller="Inspections" asp-action="Index" data-bs-dismiss="offcanvas">Przeglądy</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Costs" asp-action="Index" data-bs-dismiss="offcanvas">Koszty</a>
                 @if (User.IsInRole("Admin"))
                 {
                     <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index" data-bs-dismiss="offcanvas">Zarządzanie rolami</a>

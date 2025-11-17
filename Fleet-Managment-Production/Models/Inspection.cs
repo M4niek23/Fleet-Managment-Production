@@ -20,10 +20,10 @@ namespace Fleet_Managment_Production.Models
         [Range(0,int.MaxValue,ErrorMessage = "Przebieg musi być liczbą dokładną")]
         public int? Mileage {  get; set; }
 
-        [Display(Name = "Koszt (PLN)")]
-        [Column(TypeName = "decimal(18, 2)")]
-        [Range(0, double.MaxValue, ErrorMessage = "Koszt musi być liczbą dodatnią.")]
-        public decimal? Cost { get; set; }
+        [Display(Name = "Koszt")]
+        [Column(TypeName = "decimal(18,2)")]
+        [Range(0, (double)decimal.MaxValue)]
+        public decimal Cost { get; set; }
 
         [Required]
         [Display(Name = "Pojazd")]

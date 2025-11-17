@@ -1,0 +1,50 @@
+﻿@model Fleet_Managment_Production.Models.Cost
+
+@{
+    ViewData["Title"] = "Usuń Koszt";
+}
+
+<h1>Usuń Koszt</h1>
+
+<h3>Czy na pewno chcesz usunąć ten wpis?</h3>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Data)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Data)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Vehicle)
+        </dt>
+        <dd class="col-sm-10">
+            @(Model.Vehicle?.LicensePlate ?? (Model.Vehicle != null ? $"{Model.Vehicle.Make} {Model.Vehicle.Model}" : "Brak pojazdu"))
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Type)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Type)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Opis)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Opis)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Kwota)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Kwota) zł
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Usuń" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
+    </form>
+</div>
