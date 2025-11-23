@@ -1,0 +1,41 @@
+﻿.sidebar {
+    width: 280px;
+}
+
+    .sidebar .nav-link {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.65);
+    }
+
+        .sidebar .nav-link .bi {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .sidebar .nav-link:hover {
+            color: #fff;
+        }
+
+        .sidebar .nav-link.active {
+            color: #fff;
+            background-color: #0d6efd; /* Bootstrap Primary Blue */
+        }
+
+    /* Custom class for the main toggle link of a submenu */
+    .sidebar .nav-link-collapse {
+        color: rgba(255, 255, 255, 0.65);
+    }
+
+        .sidebar .nav-link-collapse:hover {
+            color: #fff;
+            background-color: transparent;
+        }
+
+    .sidebar .dropdown-toggle {
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+        .sidebar .dropdown-toggle:hover {
+            color: #fff;
+        }

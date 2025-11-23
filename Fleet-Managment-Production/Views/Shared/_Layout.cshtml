@@ -14,18 +14,15 @@
 </head>
 <body>
     <header>
-        <!-- Topbar -->
         <nav class="navbar navbar-light bg-white border-bottom">
             <div class="container-fluid">
                 <div class="d-flex align-items-center gap-2">
-                    <!-- Hamburger: mobile (offcanvas) -->
                     <button class="navbar-toggler d-md-none" type="button"
                             data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas"
                             aria-controls="sidebarOffcanvas" aria-label="Open menu">
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <!-- Toggler: desktop (zwija/rozwija sidebar) -->
                     <button id="sidebarToggle" class="btn btn-outline-secondary d-none d-md-inline-flex"
                             type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
                         ☰
@@ -36,52 +33,60 @@
                     </a>
                 </div>
 
-                <!-- Prawa strona: tylko logowanie/rejestracja -->
                 <div class="ms-auto d-flex align-items-center">
-                    <partial name="_LoginPartial" />
+                    <partial name="_LoginPartial"/>
                 </div>
             </div>
         </nav>
     </header>
 
-    <!-- Główna struktura: FLEX (desktop) -->
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    }
+
     <div class="app-wrap d-none d-md-flex">
-        <!-- Sidebar desktop -->
         <aside class="sidebar bg-light border-end">
             <nav class="nav flex-column py-3">
                 <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" title="Home">
-                    <span class="link-text">Home</span>
+                    <span class="link-text">Dashboard</span>
                 </a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" title="Vehicles">
-                    <span class="link-text">Flota</span>
+
+                <a class="nav-link px-3" data-bs-toggle="collapse" href="#fleetSubmenuDesktop" role="button" aria-expanded="false" aria-controls="fleetSubmenuDesktop">
+                    <span class="link-text">Moja Flota</span>
                 </a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Insurance" asp-action="Index" title="Insurances">
-                    <span class="link-text">Ubezpieczenia</span>
-                </a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Inspections" asp-action="Index" title="Inspections">
-                    <span class="link-text">Przeglądy</span>
-                </a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Costs" asp-action="Index" title="Costs">
+                <div class="collapse" id="fleetSubmenuDesktop">
+                    <nav class="nav flex-column ps-4">
+                        <a class="nav-link px-3 @(currentController == "Vehicles" ? "active" : "")" asp-area="" asp-controller="Vehicles" asp-action="Index" title="Vehicles">
+                            <span class="link-text">Flota</span>
+                        </a>
+                        <a class="nav-link px-3 @(currentController == "Insurance" ? "active" : "")" asp-area="" asp-controller="Insurance" asp-action="Index" title="Insurances">
+                            <span class="link-text">Ubezpieczenia</span>
+                        </a>
+                        <a class="nav-link px-3 @(currentController == "Inspections" ? "active" : "")" asp-area="" asp-controller="Inspections" asp-action="Index" title="Inspections">
+                            <span class="link-text">Przeglądy</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <a class="nav-link px-3 @(currentController == "Costs" ? "active" : "")" asp-area="" asp-controller="Costs" asp-action="Index" title="Costs">
                     <span class="link-text">Koszty</span>
                 </a>
 
                 @if (User.IsInRole("Admin"))
                 {
-                    <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index" title="Manage Roles">
+                    <a class="nav-link px-3 @(currentController == "Admin" ? "active" : "")" asp-area="" asp-controller="Admin" asp-action="Index" title="Manage Roles">
                         <span class="link-text">Zarządzanie rolami</span>
                     </a>
                 }
-                
+
             </nav>
         </aside>
 
-        <!-- Treść -->
         <main class="content flex-grow-1 px-3 py-3">
             @RenderBody()
         </main>
     </div>
 
-    <!-- Mobile: offcanvas -->
     <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="sidebarOffcanvasLabel">Menu</h5>
@@ -89,14 +94,23 @@
         </div>
         <div class="offcanvas-body p-0">
             <nav class="nav flex-column py-2">
-                <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" data-bs-dismiss="offcanvas">Home</a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index" data-bs-dismiss="offcanvas">Flota</a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Insurance" asp-action="Index" data-bs-dismiss="offcanvas">Ubezpieczenia</a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Inspections" asp-action="Index" data-bs-dismiss="offcanvas">Przeglądy</a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Costs" asp-action="Index" data-bs-dismiss="offcanvas">Koszty</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" data-bs-dismiss="offcanvas">Dashboard</a>
+
+                <a class="nav-link px-3" data-bs-toggle="collapse" href="#fleetSubmenuMobile" role="button" aria-expanded="false" aria-controls="fleetSubmenuMobile">
+                    Moja Flota
+                </a>
+                <div class="collapse" id="fleetSubmenuMobile">
+                    <nav class="nav flex-column ps-4">
+                        <a class="nav-link px-3 @(currentController == "Vehicles" ? "active" : "")" asp-area="" asp-controller="Vehicles" asp-action="Index" data-bs-dismiss="offcanvas">Flota</a>
+                        <a class="nav-link px-3 @(currentController == "Insurance" ? "active" : "")" asp-area="" asp-controller="Insurance" asp-action="Index" data-bs-dismiss="offcanvas">Ubezpieczenia</a>
+                        <a class="nav-link px-3 @(currentController == "Inspections" ? "active" : "")" asp-area="" asp-controller="Inspections" asp-action="Index" data-bs-dismiss="offcanvas">Przeglądy</a>
+                    </nav>
+                </div>
+
+                <a class="nav-link px-3 @(currentController == "Costs" ? "active" : "")" asp-area="" asp-controller="Costs" asp-action="Index" data-bs-dismiss="offcanvas">Koszty</a>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index" data-bs-dismiss="offcanvas">Zarządzanie rolami</a>
+                    <a class="nav-link px-3 @(currentController == "Admin" ? "active" : "")" asp-area="" asp-controller="Admin" asp-action="Index" data-bs-dismiss="offcanvas">Zarządzanie rolami</a>
                 }
 
             </nav>
@@ -129,7 +143,44 @@
                 });
             }
         })();
+
+        // Fleet Submenu collapse state management
+        (function () {
+            const storageKey = 'fleet-menu-open';
+            const desktopSubmenuEl = document.getElementById('fleetSubmenuDesktop');
+            const mobileSubmenuEl = document.getElementById('fleetSubmenuMobile');
+            const desktopToggleEl = document.querySelector('a[href="#fleetSubmenuDesktop"]');
+            const mobileToggleEl = document.querySelector('a[href="#fleetSubmenuMobile"]');
+
+            const restoreState = () => {
+                if (localStorage.getItem(storageKey) === '1') {
+                    if (desktopSubmenuEl) {
+                        desktopSubmenuEl.classList.add('show');
+                        desktopToggleEl?.setAttribute('aria-expanded', 'true');
+                    }
+                    if (mobileSubmenuEl) {
+                        mobileSubmenuEl.classList.add('show');
+                        mobileToggleEl?.setAttribute('aria-expanded', 'true');
+                    }
+                }
+            };
+
+            const saveState = (isOpen) => {
+                localStorage.setItem(storageKey, isOpen ? '1' : '0');
+            };
+
+            if (desktopSubmenuEl) {
+                desktopSubmenuEl.addEventListener('show.bs.collapse', () => saveState(true));
+                desktopSubmenuEl.addEventListener('hide.bs.collapse', () => saveState(false));
+            }
+            if (mobileSubmenuEl) {
+                mobileSubmenuEl.addEventListener('show.bs.collapse', () => saveState(true));
+                mobileSubmenuEl.addEventListener('hide.bs.collapse', () => saveState(false));
+            }
+
+            restoreState();
+        })();
     </script>
-    @await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", false)
 </body>
 </html>
