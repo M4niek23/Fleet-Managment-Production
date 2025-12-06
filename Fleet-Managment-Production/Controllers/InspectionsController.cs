@@ -19,9 +19,13 @@ namespace Fleet_Managment_Production.Controllers
             _context = context;
         }
 
-        // --- Metoda Index (bez zmian) ---
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? id)
         {
+            if (!_context.Vehicles.Any())
+            {
+                return View("NoVehicles");
+            }
+
             var allInspections = await _context.Inspections
                                                 .Include(i => i.Vehicle)
                                                 .OrderByDescending(i => i.InspectionDate)
@@ -40,7 +44,6 @@ namespace Fleet_Managment_Production.Controllers
             return View(viewModel);
         }
 
-        // --- Metoda Details (bez zmian) ---
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -54,7 +57,6 @@ namespace Fleet_Managment_Production.Controllers
             return View(inspection);
         }
 
-        // --- Metoda [GET] Create (bez zmian) ---
         public async Task<IActionResult> Create(int? vehicleId)
         {
             var vehicleList = await _context.Vehicles
@@ -74,7 +76,6 @@ namespace Fleet_Managment_Production.Controllers
             });
         }
 
-        // ========== POPRAWIONA METODA [POST] CREATE ==========
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,InspectionDate,Description,Mileage,Cost,VehicleId,IsResultPositive,IsActive")] Inspection inspection)
@@ -93,7 +94,6 @@ namespace Fleet_Managment_Production.Controllers
                 }
             }
 
-            // --- POPRAWIONA LOGIKA DATY (3 STANY) ---
             if (inspection.IsResultPositive == true)
             {
                 inspection.NextInspectionDate = inspection.InspectionDate.AddYears(1);
@@ -106,7 +106,6 @@ namespace Fleet_Managment_Production.Controllers
             {
                 inspection.NextInspectionDate = null;
             }
-            // --- KONIEC POPRAWKI ---
 
             if (ModelState.IsValid)
             {
@@ -126,7 +125,6 @@ namespace Fleet_Managment_Production.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Ponowne ładowanie listy do ViewBag, gdy walidacja zawiedzie
             var vehicleList = await _context.Vehicles
                 .Select(v => new
                 {
@@ -140,7 +138,6 @@ namespace Fleet_Managment_Production.Controllers
             return View(inspection);
         }
 
-        // --- Metoda [GET] Edit (bez zmian) ---
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -159,14 +156,12 @@ namespace Fleet_Managment_Production.Controllers
             return View(inspection);
         }
 
-        // --- Metoda [POST] Edit (bez zmian, już była poprawna) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,InspectionDate,Description,Mileage,Cost,VehicleId,IsResultPositive,IsActive")] Inspection inspection)
         {
             if (id != inspection.Id) return NotFound();
 
-            // Logika walidacji "jeden aktywny"
             if (inspection.IsActive == true && inspection.InspectionDate.Date >= DateTime.Today)
             {
                 var existingUpcoming = await _context.Inspections
@@ -181,7 +176,6 @@ namespace Fleet_Managment_Production.Controllers
                 }
             }
 
-            // Logika "wynik negatywny = 14 dni" (POPRAWNA)
             if (inspection.IsResultPositive == true)
             {
                 inspection.NextInspectionDate = inspection.InspectionDate.AddYears(1);
@@ -199,7 +193,6 @@ namespace Fleet_Managment_Production.Controllers
             {
                 try
                 {
-                    // Logika synchronizacji przebiegu
                     if (inspection.Mileage.HasValue && inspection.Mileage > 0)
                     {
                         var vehicleToUpdate = await _context.Vehicles.FindAsync(inspection.VehicleId);
@@ -223,7 +216,6 @@ namespace Fleet_Managment_Production.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Ponowne ładowanie listy do ViewBag
             var vehicleList = await _context.Vehicles
                 .Select(v => new
                 {
@@ -236,7 +228,6 @@ namespace Fleet_Managment_Production.Controllers
             return View(inspection);
         }
 
-        // --- Metoda [GET] Delete (bez zmian) ---
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -249,7 +240,6 @@ namespace Fleet_Managment_Production.Controllers
             return View(inspection);
         }
 
-        // --- Metoda [POST] Delete (bez zmian) ---
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
