@@ -65,6 +65,9 @@
                         <a class="nav-link px-3 @(currentController == "Inspections" ? "active" : "")" asp-area="" asp-controller="Inspections" asp-action="Index" title="Inspections">
                             <span class="link-text">Przeglądy</span>
                         </a>
+                        <a class="nav-link px-3 @(currentController == "Drivers" ? "active" : "")" asp-area="" asp-controller="Drivers" asp-action="Index" title="Drivers">
+                            <span class="link-text">Kierowcy </span>
+                        </a>
                     </nav>
                 </div>
 
@@ -104,6 +107,8 @@
                         <a class="nav-link px-3 @(currentController == "Vehicles" ? "active" : "")" asp-area="" asp-controller="Vehicles" asp-action="Index" data-bs-dismiss="offcanvas">Flota</a>
                         <a class="nav-link px-3 @(currentController == "Insurance" ? "active" : "")" asp-area="" asp-controller="Insurance" asp-action="Index" data-bs-dismiss="offcanvas">Ubezpieczenia</a>
                         <a class="nav-link px-3 @(currentController == "Inspections" ? "active" : "")" asp-area="" asp-controller="Inspections" asp-action="Index" data-bs-dismiss="offcanvas">Przeglądy</a>
+                        <a class="nav-link px-3 @(currentController == "Drivers" ? "active" : "")" asp-area="" asp-controller="Drivers" asp-action="Index" data-bs-dismiss="offcanvas">Kierowcy</a>
+
                     </nav>
                 </div>
 

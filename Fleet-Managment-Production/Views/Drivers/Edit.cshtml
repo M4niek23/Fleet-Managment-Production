@@ -1,0 +1,142 @@
+﻿@model Fleet_Managment_Production.Models.Driver
+@using Fleet_Managment_Production.Models
+
+@{
+    ViewData["Title"] = "Edytuj Kierowcę";
+}
+
+<h1>Edytuj Kierowcę</h1>
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group mb-3">
+                <label asp-for="UserId" class="control-label">Powiązane konto</label>
+                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
+                <span asp-validation-for="UserId" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="FirstName" class="control-label"></label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="LastName" class="control-label"></label>
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" asp-for="IsForeigner" id="isForeignerCheck" />
+                <label class="form-check-label" asp-for="IsForeigner"></label>
+            </div>
+
+            <div class="form-group mb-3" id="peselGroup">
+                <label asp-for="PESEL" class="control-label"></label>
+                <input asp-for="PESEL" class="form-control" id="peselInput" />
+                <span asp-validation-for="PESEL" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="DateOfBirth" class="control-label"></label>
+                <input asp-for="DateOfBirth" class="form-control" id="dobInput" />
+                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="LicenseNumber" class="control-label"></label>
+                <input asp-for="LicenseNumber" class="form-control" />
+                <span asp-validation-for="LicenseNumber" class="text-danger"></span>
+            </div>
+
+            <div class="card p-3 mb-3 bg-light">
+                <label asp-for="LicenseCategories" class="control-label fw-bold mb-2"></label>
+                <div class="row">
+                    @{
+                        // 1. Pobieramy wszystkie możliwe kategorie (z Enum)
+                        var allCats = ViewBag.AllCategories as List<LicenseCategory>;
+
+                        // 2. Pobieramy kategorie, które kierowca MA JUŻ wybrane
+                        // (używamy ?? new List... na wypadek gdyby lista była null)
+                        var currentCats = Model.LicenseCategories ?? new List<LicenseCategory>();
+                    }
+
+                    @if (allCats != null)
+                    {
+                        foreach (var cat in allCats)
+                        {
+                            // 3. Sprawdzamy, czy dana kategoria jest na liście kierowcy
+                            bool isChecked = currentCats.Contains(cat);
+
+                            <div class="col-md-3 col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="LicenseCategories"
+                                           value="@cat"
+                                           id="cat_@cat"
+                                           @(isChecked ? "checked" : "") /> <label class="form-check-label" for="cat_@cat">
+                                        @cat
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+                <span asp-validation-for="LicenseCategories" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="LicenseExpiryDate" class="control-label"></label>
+                    <input asp-for="LicenseExpiryDate" class="form-control" />
+                    <span asp-validation-for="LicenseExpiryDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="MedicalExamExpiryDate" class="control-label"></label>
+                    <input asp-for="MedicalExamExpiryDate" class="form-control" />
+                    <span asp-validation-for="MedicalExamExpiryDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group mt-3">
+                <input type="submit" value="Zapisz zmiany" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Powrót</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            // Logika ukrywania/pokazywania PESEL (identyczna jak w Create)
+            function togglePesel() {
+                if ($('#isForeignerCheck').is(':checked')) {
+                    $('#peselGroup').hide();
+                    // Opcjonalnie: czyścimy wartość tylko przy Create, przy Edit lepiej zostawić jak jest
+                    // lub wyczyścić jeśli logika biznesowa tego wymaga.
+                     $('#peselInput').val('');
+                } else {
+                    $('#peselGroup').show();
+                }
+            }
+
+            // Uruchomienie przy załadowaniu strony (ważne dla Edit!)
+            togglePesel();
+
+            // Uruchomienie przy zmianie checkboxa
+            $('#isForeignerCheck').change(togglePesel);
+        });
+    </script>
+}

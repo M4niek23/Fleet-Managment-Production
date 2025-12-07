@@ -44,11 +44,18 @@ namespace Fleet_Managment_Production.Models
         public int CurrentKm { get; set; }
 
 
+        [Display(Name = "Przypisany kierowca")]
+        public int? DriverId { get; set; }
+
+        [ForeignKey(nameof(DriverId))]
+        public Driver? Driver { get; set; }
         public string? UserId { get; set; }
 
 
         [ForeignKey(nameof(UserId))]
         public Users? User { get; set; }
+
+        
 
         public ICollection<Inspection> Inspections { get; set; } = new List<Inspection>();
         public ICollection<Insurance> Insurances { get; set; } = new List<Insurance>();

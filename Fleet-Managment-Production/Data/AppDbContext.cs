@@ -14,6 +14,7 @@ namespace Fleet_Managment_Production.Data
         public DbSet<Insurance> Insurances { get; set; }
         public DbSet<Inspection> Inspections { get; set; }
         public DbSet<Cost> Costs { get; set; }
+        public DbSet<Driver> Drivers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBilder)
         {
             base.OnModelCreating(modelBilder);
@@ -43,6 +44,14 @@ namespace Fleet_Managment_Production.Data
                 .WithMany(v => v.Costs)
                 .HasForeignKey(c => c.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBilder.Entity<Driver>()
+                .Property(e => e.LicenseCategories)
+                .HasConversion(
+                    v => string.Join(',', v),
+                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(Enum.Parse<LicenseCategory>)
+                    .ToList()
+                );
         }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

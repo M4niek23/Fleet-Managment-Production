@@ -1,0 +1,37 @@
+﻿@model Fleet_Managment_Production.Models.Driver
+
+@{
+    ViewData["Title"] = "Usuń Kierowcę";
+}
+
+<h1>Usuń Kierowcę</h1>
+
+<div class="alert alert-danger">
+    <h3>Czy na pewno chcesz usunąć tego kierowcę?</h3>
+    <p>Tej operacji nie można cofnąć. Historia przypisania do pojazdów zostanie zachowana (jako archiwalna), ale dane kierowcy znikną.</p>
+</div>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Imię i Nazwisko</dt>
+        <dd class="col-sm-10">@Model.FirstName @Model.LastName</dd>
+
+        <dt class="col-sm-2">Email</dt>
+        <dd class="col-sm-10">@Model.User?.Email</dd>
+
+        <dt class="col-sm-2">Uprawnienia</dt>
+        <dd class="col-sm-10">
+            @if (Model.LicenseCategories != null && Model.LicenseCategories.Any())
+            {
+                <span>@string.Join(", ", Model.LicenseCategories)</span>
+            }
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Usuń definitywnie" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+    </form>
+</div>

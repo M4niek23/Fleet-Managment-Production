@@ -4,6 +4,7 @@ using Fleet_Managment_Production.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fleet_Managment_Production.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251207190639_Driver")]
+    partial class Driver
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -506,7 +509,7 @@ namespace Fleet_Managment_Production.Migrations
 
             modelBuilder.Entity("Fleet_Managment_Production.Models.Vehicle", b =>
                 {
-                    b.HasOne("Fleet_Managment_Production.Models.Driver", "Driver")
+                    b.HasOne("Fleet_Managment_Production.Models.Driver", null)
                         .WithMany("Vehicles")
                         .HasForeignKey("DriverId");
 
@@ -514,8 +517,6 @@ namespace Fleet_Managment_Production.Migrations
                         .WithMany("Vehicles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Driver");
 
                     b.Navigation("User");
                 });
