@@ -48,7 +48,6 @@ namespace Fleet_Managment_Production.Controllers
             PopulateVehiclesDropdown(vehicleId);
             PopulateManualCostTypesDropdown();
 
-            // Ustawiamy domyślny pojazd, jeśli ID zostało przekazane (np. z widoku pojazdu)
             var model = new Cost();
             if (vehicleId.HasValue)
             {
@@ -167,7 +166,6 @@ namespace Fleet_Managment_Production.Controllers
                 return NotFound();
             }
 
-            // BLOKADA: Nie pozwalamy usuwać kosztów automatycznych
             if (cost.Type == CostType.Przegląd || cost.Type == CostType.Ubezpieczenie)
             {
                 TempData["ErrorMessage"] = "Nie można usunąć kosztów wygenerowanych automatycznie. Usuń powiązaną inspekcję lub ubezpieczenie.";
@@ -188,7 +186,6 @@ namespace Fleet_Managment_Production.Controllers
                 return NotFound();
             }
 
-            // BLOKADA: Ostateczne sprawdzenie
             if (cost.Type == CostType.Przegląd || cost.Type == CostType.Ubezpieczenie)
             {
                 TempData["ErrorMessage"] = "Nie można usunąć kosztów wygenerowanych automatycznie.";
@@ -205,7 +202,6 @@ namespace Fleet_Managment_Production.Controllers
             return _context.Costs.Any(e => e.Id == id);
         }
 
-        // === Metody Pomocnicze ===
 
         private void PopulateVehiclesDropdown(object selectedVehicle = null)
         {
@@ -221,7 +217,6 @@ namespace Fleet_Managment_Production.Controllers
 
         private void PopulateManualCostTypesDropdown(object selectedType = null)
         {
-            // Pobieramy tylko te typy kosztów, które można dodawać ręcznie
             var manualTypes = Enum.GetValues(typeof(CostType))
                 .Cast<CostType>()
                 .Where(t => t != CostType.Przegląd && t != CostType.Ubezpieczenie)
