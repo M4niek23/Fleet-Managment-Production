@@ -11,63 +11,63 @@
     <h4>Vehicle</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-2 mb-1">
             @Html.DisplayNameFor(model => model.Status)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10 mb-1">
             @Html.DisplayFor(model => model.Status)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2 mb-1">
             @Html.DisplayNameFor(model => model.Make)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10 mb-1">
             @Html.DisplayFor(model => model.Make)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2 mb-1">
             @Html.DisplayNameFor(model => model.Model)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10 mb-1">
             @Html.DisplayFor(model => model.Model)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2 mb-1">
             @Html.DisplayNameFor(model => model.FuelType)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10 mb-1">
             @Html.DisplayFor(model => model.FuelType)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2 mb-1">
             @Html.DisplayNameFor(model => model.ProductionYear)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10 mb-1">
             @Html.DisplayFor(model => model.ProductionYear)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2 mb-1">
             @Html.DisplayNameFor(model => model.LicensePlate)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10 mb-1">
             @Html.DisplayFor(model => model.LicensePlate)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2 mb-1">
             @Html.DisplayNameFor(model => model.VIN)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10 mb-1">
             @Html.DisplayFor(model => model.VIN)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2 mb-1">
             @Html.DisplayNameFor(model => model.CurrentKm)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CurrentKm)
+        <dd class="col-sm-10 mb-1">
+            @Html.DisplayFor(model => model.CurrentKm) <span> km</span>
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2 mb-1">
             @Html.DisplayNameFor(model => model.User)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10 mb-1">
             @Html.DisplayFor(model => model.User.Id)
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.VehicleId">Edit</a> |
-    <a asp-action="Index">Powrót</a>
+    <a asp-action="Edit" asp-route-id="@Model?.VehicleId" class="btn btn-primary mb-1">Edytuj</a>
+    <a asp-action="Index" class="btn btn-success mb-1">Powrót do listy</a>
 </div>

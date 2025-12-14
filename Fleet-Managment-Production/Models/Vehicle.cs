@@ -40,14 +40,15 @@ namespace Fleet_Managment_Production.Models
         public string? VIN { get; set; }
 
 
-        [Display(Name = "Aktualny przebieg"), Range(0, int.MaxValue)]
+        [Display(Name = "Aktualny przebieg (km)"), Range(0, int.MaxValue)]
         public int CurrentKm { get; set; }
 
-
+        [Display(Name = "Email Użytkownika")]
         public string? UserId { get; set; }
 
 
         [ForeignKey(nameof(UserId))]
+        [Display(Name = "Użytkownik")]
         public Users? User { get; set; }
 
         public ICollection<Inspection> Inspections { get; set; } = new List<Inspection>();

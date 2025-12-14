@@ -27,6 +27,9 @@
                     @Html.DisplayNameFor(model => model.ProductionYear)
                 </th>
                 <th>
+                    @Html.DisplayNameFor(model => model.CurrentKm)
+                </th>
+                <th>
                     @Html.DisplayNameFor(model => model.Status)
                 </th>
                 <th>
@@ -51,7 +54,9 @@
                     <td>
                         @Html.DisplayFor(modelItem => item.ProductionYear)
                     </td>
-
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CurrentKm)<span> km</span>
+                    </td>
                     <td>
                         @{
                             string badgeClass = "bg-secondary";
