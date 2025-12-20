@@ -84,11 +84,6 @@
                     </nav>
                 </div>
 
-                <a class="nav-link @(currentController == "Costs" ? "active" : "")" asp-area="" asp-controller="Costs" asp-action="Index" title="Rejestr Kosztów">
-                    <i class="bi bi-wallet2"></i>
-                    <span class="link-text">Koszty</span>
-                </a>
-
                 @if (User.IsInRole("Admin"))
                 {
                     <div class="mt-3 mb-2 px-3 border-top border-secondary border-opacity-25 pt-3">
@@ -127,7 +122,7 @@
                     </nav>
                 </div>
 
-                <a class="nav-link px-3" asp-area="" asp-controller="Costs" asp-action="Index">Koszty</a>
+               
                 @if (User.IsInRole("Admin"))
                 {
                     <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index">Zarządzanie rolami</a>
@@ -154,12 +149,10 @@
             const toggleBtn = document.getElementById('sidebarToggle');
             const storageKey = 'sidebar-collapsed';
 
-            // 1. Przywróć stan
             if (localStorage.getItem(storageKey) === 'true') {
                 body.classList.add('sidebar-collapsed');
             }
 
-            // 2. Obsługa kliknięcia
             if (toggleBtn) {
                 toggleBtn.addEventListener('click', function (e) {
                     e.preventDefault();
