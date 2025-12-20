@@ -19,10 +19,9 @@
 
         .sidebar .nav-link.active {
             color: #fff;
-            background-color: #0d6efd; /* Bootstrap Primary Blue */
+            background-color: #0d6efd;
         }
 
-    /* Custom class for the main toggle link of a submenu */
     .sidebar .nav-link-collapse {
         color: rgba(255, 255, 255, 0.65);
     }

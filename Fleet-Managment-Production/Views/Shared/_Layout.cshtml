@@ -44,8 +44,8 @@
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     }
 
-    <div class="app-wrap d-none d-md-flex">
-        <aside class="sidebar bg-light border-end">
+    <div class="app-wrap d-md-flex">
+        <aside class="sidebar bg-light border-end d-none d-md-block">
             <nav class="nav flex-column py-3">
                 <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" title="Home">
                     <span class="link-text">Dashboard</span>
@@ -94,32 +94,37 @@
         </div>
         <div class="offcanvas-body p-0">
             <nav class="nav flex-column py-2">
-                <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index" data-bs-dismiss="offcanvas">Dashboard</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index">Dashboard</a>
 
                 <a class="nav-link px-3" data-bs-toggle="collapse" href="#fleetSubmenuMobile" role="button" aria-expanded="false" aria-controls="fleetSubmenuMobile">
                     Moja Flota
                 </a>
                 <div class="collapse" id="fleetSubmenuMobile">
                     <nav class="nav flex-column ps-4">
-                        <a class="nav-link px-3 @(currentController == "Vehicles" ? "active" : "")" asp-area="" asp-controller="Vehicles" asp-action="Index" data-bs-dismiss="offcanvas">Flota</a>
-                        <a class="nav-link px-3 @(currentController == "Insurance" ? "active" : "")" asp-area="" asp-controller="Insurance" asp-action="Index" data-bs-dismiss="offcanvas">Ubezpieczenia</a>
-                        <a class="nav-link px-3 @(currentController == "Inspections" ? "active" : "")" asp-area="" asp-controller="Inspections" asp-action="Index" data-bs-dismiss="offcanvas">Przeglądy</a>
+                        <a class="nav-link px-3 @(currentController == "Vehicles" ? "active" : "")" asp-area="" asp-controller="Vehicles" asp-action="Index">Flota</a>
+
+                        <a class="nav-link px-3 @(currentController == "Insurance" ? "active" : "")" asp-area="" asp-controller="Insurance" asp-action="Index">Ubezpieczenia</a>
+
+                        <a class="nav-link px-3 @(currentController == "Inspections" ? "active" : "")" asp-area="" asp-controller="Inspections" asp-action="Index">Przeglądy</a>
                     </nav>
                 </div>
 
-                <a class="nav-link px-3 @(currentController == "Costs" ? "active" : "")" asp-area="" asp-controller="Costs" asp-action="Index" data-bs-dismiss="offcanvas">Koszty</a>
+                <a class="nav-link px-3 @(currentController == "Costs" ? "active" : "")" asp-area="" asp-controller="Costs" asp-action="Index">Koszty</a>
+
                 @if (User.IsInRole("Admin"))
                 {
-                    <a class="nav-link px-3 @(currentController == "Admin" ? "active" : "")" asp-area="" asp-controller="Admin" asp-action="Index" data-bs-dismiss="offcanvas">Zarządzanie rolami</a>
+                    <a class="nav-link px-3 @(currentController == "Admin" ? "active" : "")" asp-area="" asp-controller="Admin" asp-action="Index">Zarządzanie rolami</a>
                 }
 
             </nav>
         </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="footer-custom">
+        <div class="container-fluid text-center">
+            <span>&copy; 2025 <strong>Fleet Managment</strong></span>
+            <span>&bull;</span>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Polityka prywatności</a>      
         </div>
     </footer>
 
@@ -127,13 +132,11 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
-        // Sidebar collapse (desktop) + zapamiętanie stanu
         (function () {
             const key = 'sidebar-collapsed';
             const body = document.body;
             const btn = document.getElementById('sidebarToggle');
 
-            // Przywróć stan
             if (localStorage.getItem(key) === '1') body.classList.add('sidebar-collapsed');
 
             if (btn) {
@@ -144,7 +147,6 @@
             }
         })();
 
-        // Fleet Submenu collapse state management
         (function () {
             const storageKey = 'fleet-menu-open';
             const desktopSubmenuEl = document.getElementById('fleetSubmenuDesktop');
