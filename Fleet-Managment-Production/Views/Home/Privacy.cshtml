@@ -1,6 +1,117 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Polityka Prywatności";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="container py-4">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold"><i class="bi bi-shield-lock-fill text-primary"></i> Polityka Prywatności</h1>
+        <p class="lead text-muted">Zasady gromadzenia i przetwarzania danych w systemie Fleet Management</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-0">
+                    <h4 class="card-title mt-2"><i class="bi bi-person-badge"></i> 1. Administrator Danych</h4>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Administratorem Twoich danych osobowych jest operator systemu <strong>Fleet Management</strong>.
+                        System służy do wewnętrznego zarządzania flotą pojazdów, monitorowania kosztów, ubezpieczeń oraz przeglądów technicznych.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-0">
+                    <h4 class="card-title mt-2"><i class="bi bi-database-fill-gear"></i> 2. Przetwarzane Dane</h4>
+                </div>
+                <div class="card-body">
+                    <p>W ramach funkcjonowania aplikacji gromadzimy następujące kategorie danych:</p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check-circle text-success me-2"></i> <strong>Dane Użytkowników:</strong> Adres e-mail (służący jako login), hasło (przechowywane w formie zaszyfrowanej), przypisane role w systemie.
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check-circle text-success me-2"></i> <strong>Dane Floty:</strong> Marka, model, numer rejestracyjny, numer VIN, rok produkcji, przebieg pojazdów.
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check-circle text-success me-2"></i> <strong>Dane Operacyjne:</strong> Historie przeglądów, dane polis ubezpieczeniowych (nr polisy, zakres AC/OC, daty ważności), rejestr kosztów eksploatacyjnych.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-0">
+                    <h4 class="card-title mt-2"><i class="bi bi-bullseye"></i> 3. Cel Przetwarzania</h4>
+                </div>
+                <div class="card-body">
+                    <p>Twoje dane są przetwarzane wyłącznie w celach:</p>
+                    <ul>
+                        <li>Umożliwienia logowania i autoryzacji w systemie.</li>
+                        <li>Prowadzenia ewidencji pojazdów służbowych.</li>
+                        <li>Monitorowania terminów ważności ubezpieczeń i przeglądów technicznych.</li>
+                        <li>Analizy kosztów utrzymania floty.</li>
+                        <li>Generowania raportów i zestawień dla administratorów.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card shadow-sm border-info">
+                <div class="card-header bg-info text-white">
+                    <h4 class="card-title mt-2 text-white"><i class="bi bi-cookie"></i> 4. Pliki Cookies i Pamięć Przeglądarki</h4>
+                </div>
+                <div class="card-body">
+                    <p>Aplikacja wykorzystuje technologie niezbędne do jej prawidłowego działania:</p>
+                    <dl class="row">
+                        <dt class="col-sm-3">Ciasteczka Sesyjne (Cookies)</dt>
+                        <dd class="col-sm-9">Używane do utrzymania sesji zalogowanego użytkownika. Są one niezbędne do bezpiecznego dostępu do Twojego konta.</dd>
+
+                        <dt class="col-sm-3">Local Storage</dt>
+                        <dd class="col-sm-9">
+                            Wykorzystujemy pamięć lokalną przeglądarki do zapamiętywania Twoich preferencji dotyczących wyglądu interfejsu (np. informacja o zwiniętym/rozwiniętym menu bocznym - <code>sidebar-collapsed</code>, <code>fleet-menu-open</code>).
+                        </dd>
+                    </dl>
+                    <div class="alert alert-light border small">
+                        <i class="bi bi-info-circle-fill"></i> Nie wykorzystujemy plików cookies w celach reklamowych ani marketingowych. Nie udostępniamy danych o Twojej aktywności podmiotom trzecim.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h4 class="card-title mt-2"><i class="bi bi-lock-fill"></i> 5. Bezpieczeństwo Danych</h4>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Stosujemy szereg zabezpieczeń, aby chronić Twoje dane. Hasła użytkowników są hashowane przy użyciu bezpiecznych algorytmów kryptograficznych przed zapisaniem w bazie danych.
+                        Dostęp do danych mają tylko autoryzowani użytkownicy z odpowiednimi uprawnieniami (np. Administratorzy).
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm bg-light">
+                <div class="card-body text-center">
+                    <h4 class="card-title"><i class="bi bi-person-check-fill"></i> Twoje Prawa</h4>
+                    <p class="card-text">
+                        Masz prawo dostępu do swoich danych, ich sprostowania, usunięcia lub ograniczenia przetwarzania.
+                        W celu realizacji tych praw, skontaktuj się z administratorem systemu w Twojej organizacji.
+                    </p>
+                    <hr />
+                    <p class="small text-muted">Ostatnia aktualizacja: @DateTime.Now.ToString("dd.MM.yyyy")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
