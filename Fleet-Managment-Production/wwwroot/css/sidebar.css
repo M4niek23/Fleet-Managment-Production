@@ -1,40 +1,99 @@
 ﻿.sidebar {
     width: 280px;
+    position: sticky;
+    top: 60px; 
+    height: calc(100vh - 90px);
+    background: linear-gradient(180deg, #1a252f 0%, #2c3e50 100%);
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+    overflow-y: auto; 
+    overflow-x: hidden;
+    z-index: 1000;
+    transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out;
+    white-space: nowrap;
 }
+
+    .sidebar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+    }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
 
     .sidebar .nav-link {
         font-size: 0.95rem;
         font-weight: 500;
         color: rgba(255, 255, 255, 0.65);
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        border-left: 4px solid transparent;
+        transition: all 0.2s;
     }
 
         .sidebar .nav-link .bi {
             margin-right: 0.75rem;
             font-size: 1.1rem;
+            min-width: 20px;
+            text-align: center;
+            transition: color 0.2s;
         }
 
         .sidebar .nav-link:hover {
             color: #fff;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left-color: #3498db;
         }
+
+            .sidebar .nav-link:hover .bi {
+                color: #3498db;
+            }
 
         .sidebar .nav-link.active {
             color: #fff;
-            background-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.15);
+            border-left-color: #0d6efd;
+            font-weight: 600;
         }
 
-    .sidebar .nav-link-collapse {
-        color: rgba(255, 255, 255, 0.65);
+            .sidebar .nav-link.active .bi {
+                color: #0d6efd;
+            }
+
+sidebar .nav-link-collapse {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.sidebar .nav-link-collapse:hover {
+    color: #fff;
+    background: transparent;
+}
+
+.sidebar .dropdown-toggle {
+    display: flex;
+    align-items: center;
+}
+
+    .sidebar .dropdown-toggle::after {
+        margin-left: auto;
+        transition: transform 0.2s;
     }
 
-        .sidebar .nav-link-collapse:hover {
-            color: #fff;
-            background-color: transparent;
-        }
-
-    .sidebar .dropdown-toggle {
-        color: rgba(255, 255, 255, 0.85);
+    .sidebar .dropdown-toggle[aria-expanded="true"]::after {
+        transform: rotate(-180deg);
     }
-
-        .sidebar .dropdown-toggle:hover {
-            color: #fff;
-        }
+body.sidebar-collapsed .sidebar {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
