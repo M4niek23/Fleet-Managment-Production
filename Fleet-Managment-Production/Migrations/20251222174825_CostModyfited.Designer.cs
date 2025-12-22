@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fleet_Managment_Production.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251117190434_CostsAdded")]
-    partial class CostsAdded
+    [Migration("20251222174825_CostModyfited")]
+    partial class CostModyfited
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,14 @@ namespace Fleet_Managment_Production.Migrations
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("DocumentType")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Kwota")
                         .HasColumnType("decimal(18, 2)");
 
@@ -45,6 +53,9 @@ namespace Fleet_Managment_Production.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Vat")
                         .HasColumnType("int");
 
                     b.Property<int>("VehicleId")

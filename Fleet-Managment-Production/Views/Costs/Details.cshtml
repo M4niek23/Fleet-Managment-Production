@@ -1,4 +1,5 @@
-﻿@model Fleet_Managment_Production.Models.Cost
+﻿@using Fleet_Managment_Production.Models.CostsType
+@model Fleet_Managment_Production.Models.Cost
 
 @{
     ViewData["Title"] = "Szczegóły rozliczenia";
@@ -42,7 +43,7 @@
     </dl>
 </div>
 <div>
-    @if (Model.Type != Fleet_Managment_Production.Models.CostType.Przegląd && Model.Type != Fleet_Managment_Production.Models.CostType.Ubezpieczenie)
+    @if (Model.Type != CostType.Przegląd && Model.Type != CostType.Ubezpieczenie)
     {
         <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Edytuj</a>
     }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fleet_Managment_Production.Migrations
 {
     /// <inheritdoc />
-    public partial class CostsAdded : Migration
+    public partial class CostModyfited : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,7 +30,10 @@ namespace Fleet_Managment_Production.Migrations
                     Type = table.Column<int>(type: "int", nullable: false),
                     Opis = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Kwota = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Vat = table.Column<int>(type: "int", nullable: false),
                     Data = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DocumentNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    DocumentType = table.Column<int>(type: "int", nullable: false),
                     VehicleId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

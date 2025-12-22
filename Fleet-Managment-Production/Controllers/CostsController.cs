@@ -1,5 +1,6 @@
 ﻿using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
+using Fleet_Managment_Production.Models.CostsType;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;

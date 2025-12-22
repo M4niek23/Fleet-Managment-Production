@@ -33,6 +33,14 @@ namespace Fleet_Managment_Production.Migrations
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("DocumentType")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Kwota")
                         .HasColumnType("decimal(18, 2)");
 
@@ -42,6 +50,9 @@ namespace Fleet_Managment_Production.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Vat")
                         .HasColumnType("int");
 
                     b.Property<int>("VehicleId")
