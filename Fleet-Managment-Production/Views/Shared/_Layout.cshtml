@@ -84,9 +84,9 @@
                     </nav>
                 </div>
 
-                <a class="nav-link @(currentController == "Costs" ? "active" : "")" asp-area="" asp-controller="Costs" asp-action="Index" title="Rejestr Kosztów">
+                <a class="nav-link @(currentController == "Costs" ? "active" : "")" asp-area="" asp-controller="Costs" asp-action="Index" title="System rozliczeń">
                     <i class="bi bi-wallet2"></i>
-                    <span class="link-text">Koszty</span>
+                    <span class="link-text">System rozliczeń</span>
                 </a>
 
                 @if (User.IsInRole("Admin"))
@@ -127,7 +127,7 @@
                     </nav>
                 </div>
 
-                <a class="nav-link px-3" asp-area="" asp-controller="Costs" asp-action="Index">Koszty</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Costs" asp-action="Index">System rozliczeń</a>
                 @if (User.IsInRole("Admin"))
                 {
                     <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index">Zarządzanie rolami</a>
