@@ -65,6 +65,21 @@
         <dd class="col-sm-10 mb-1">
             @Html.DisplayFor(model => model.User.Id)
         </dd>
+        <dt class="col-sm-2">
+            Przypisany Kierowca
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Driver != null)
+            {
+                <a asp-controller="Drivers" asp-action="Details" asp-route-id="@Model.Driver.Id" class="btn btn-sm btn-outline-info">
+                    @Model.Driver.FullName
+                </a>
+            }
+            else
+            {
+                <span>Brak przypisanego kierowcy</span>
+            }
+        </dd>
     </dl>
 </div>
 <div>

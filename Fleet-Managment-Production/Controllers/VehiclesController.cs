@@ -26,45 +26,45 @@ namespace Fleet_Managment_Production.Controllers
         // GET: Vehicles
         public async Task<IActionResult> Index()
         {
-            var vehicles = await _context.Vehicles
+            var appDbContext = _context.Vehicles
                 .Include(v => v.User)
-                .ToListAsync();
-            return View(vehicles);
+                .Include(v => v.Driver); // Jest OK
+            return View(await appDbContext.ToListAsync());
         }
 
         // GET: Vehicles/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var vehicle = await _context.Vehicles
                 .Include(v => v.User)
                 .Include(v => v.Insurances)
+                .Include(v => v.Driver) // <--- DODANO: Aby widzieć kierowcę w szczegółach
                 .FirstOrDefaultAsync(m => m.VehicleId == id);
 
-            if (vehicle == null)
-                return NotFound();
+            if (vehicle == null) return NotFound();
 
             return View(vehicle);
         }
 
         // GET: Vehicles/Create
-        
         public IActionResult Create()
         {
             PopulateUsersDropdown();
+            PopulateDriversDropdown(); // <--- DODANO: Ładowanie listy kierowców
             return View();
         }
-        
+
         // POST: Vehicles/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId")] Vehicle vehicle)
+        // DODANO "DriverId" do Bind poniżej:
+        public async Task<IActionResult> Create([Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId,DriverId")] Vehicle vehicle)
         {
             if (ModelState.IsValid)
             {
-                // Jeśli UserId nie został wybrany w formularzu, przypisz aktualnie zalogowanego użytkownika
+                // Jeśli UserId nie został wybrany, przypisz aktualnie zalogowanego
                 if (string.IsNullOrEmpty(vehicle.UserId))
                 {
                     var user = await _userManager.GetUserAsync(User);
@@ -78,32 +78,32 @@ namespace Fleet_Managment_Production.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // jeśli model jest niepoprawny
+            // W razie błędu walidacji, załaduj listy ponownie
             PopulateUsersDropdown(vehicle.UserId);
+            PopulateDriversDropdown(vehicle.DriverId); // <--- DODANO
             return View(vehicle);
         }
 
         // GET: Vehicles/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var vehicle = await _context.Vehicles.FindAsync(id);
-            if (vehicle == null)
-                return NotFound();
+            if (vehicle == null) return NotFound();
 
             PopulateUsersDropdown(vehicle.UserId);
+            PopulateDriversDropdown(vehicle.DriverId); // <--- DODANO
             return View(vehicle);
         }
 
         // POST: Vehicles/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId")] Vehicle vehicle)
+        // DODANO "DriverId" do Bind poniżej:
+        public async Task<IActionResult> Edit(int id, [Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId,DriverId")] Vehicle vehicle)
         {
-            if (id != vehicle.VehicleId)
-                return NotFound();
+            if (id != vehicle.VehicleId) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -114,31 +114,29 @@ namespace Fleet_Managment_Production.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!VehicleExists(vehicle.VehicleId))
-                        return NotFound();
-                    else
-                        throw;
+                    if (!VehicleExists(vehicle.VehicleId)) return NotFound();
+                    else throw;
                 }
-
                 return RedirectToAction(nameof(Index));
             }
 
+            // W razie błędu walidacji, załaduj listy ponownie
             PopulateUsersDropdown(vehicle.UserId);
+            PopulateDriversDropdown(vehicle.DriverId); // <--- DODANO
             return View(vehicle);
         }
 
         // GET: Vehicles/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var vehicle = await _context.Vehicles
                 .Include(v => v.User)
+                .Include(v => v.Driver) // <--- DODANO: Żeby widzieć kogo usuwamy
                 .FirstOrDefaultAsync(m => m.VehicleId == id);
 
-            if (vehicle == null)
-                return NotFound();
+            if (vehicle == null) return NotFound();
 
             return View(vehicle);
         }
@@ -163,6 +161,8 @@ namespace Fleet_Managment_Production.Controllers
             return _context.Vehicles.Any(e => e.VehicleId == id);
         }
 
+        // --- Metody Pomocnicze ---
+
         private void PopulateUsersDropdown(object selectedUser = null)
         {
             var usersQuery = _userManager.Users
@@ -181,6 +181,22 @@ namespace Fleet_Managment_Production.Controllers
             {
                 ViewBag.UserId = new SelectList(usersQuery, "Id", "DisplayName", selectedUser);
             }
+        }
+
+        // Nowa metoda do ładowania kierowców
+        private void PopulateDriversDropdown(object selectedDriver = null)
+        {
+            // Pobieramy kierowców i tworzymy anonimowy obiekt z połączonym Imieniem i Nazwiskiem
+            var driversQuery = _context.Drivers
+                .Select(d => new
+                {
+                    d.Id,
+                    FullName = d.FirstName + " " + d.LastName + " (" + d.Pesel + ")"
+                })
+                .OrderBy(d => d.FullName)
+                .ToList();
+
+            ViewBag.DriverId = new SelectList(driversQuery, "Id", "FullName", selectedDriver);
         }
     }
 }
