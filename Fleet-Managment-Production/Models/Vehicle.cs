@@ -51,6 +51,12 @@ namespace Fleet_Managment_Production.Models
         [Display(Name = "Użytkownik")]
         public Users? User { get; set; }
 
+        [Display(Name = "Kierowca")]
+        public int? DriverId { get; set; }
+
+        [ForeignKey(nameof(DriverId))]
+        public Driver? Driver { get; set; }
+
         public ICollection<Inspection> Inspections { get; set; } = new List<Inspection>();
         public ICollection<Insurance> Insurances { get; set; } = new List<Insurance>();
         public ICollection<Cost> Costs { get; set; } = new List<Cost>();

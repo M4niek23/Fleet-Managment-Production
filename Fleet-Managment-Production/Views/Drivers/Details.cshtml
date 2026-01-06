@@ -1,0 +1,102 @@
+﻿@model Fleet_Managment_Production.Models.Driver
+
+@{
+    ViewData["Title"] = "Szczegóły Kierowcy";
+}
+
+<h1>Szczegóły Kierowcy</h1>
+
+<div>
+    <h4>Kierowca</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.FirstName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.FirstName)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.LastName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.LastName)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Pesel)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Pesel)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.LicenseCategory)
+        </dt>
+        <dd class="col-sm-9">
+            <span class="badge bg-info text-dark">@Html.DisplayFor(model => model.LicenseCategory)</span>
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.PhoneNumber)
+        </dt>
+        <dd class="col-sm-9">
+            @if (string.IsNullOrEmpty(Model.PhoneNumber))
+            {
+                <span class="text-muted">Brak numeru</span>
+            }
+            else
+            {
+                @Html.DisplayFor(model => model.PhoneNumber)
+            }
+        </dd>
+
+        <dt class="col-sm-3">
+            Powiązane Konto (Login)
+        </dt>
+        <dd class="col-sm-9">
+            @if (Model.User != null)
+            {
+                <span class="badge bg-success">@Model.User.Email</span>
+            }
+            else
+            {
+                <span class="text-muted">Brak powiązanego konta systemowego</span>
+            }
+        </dd>
+
+        <dt class="col-sm-3">
+            Przypisane Pojazdy
+        </dt>
+        <dd class="col-sm-9">
+            @if (Model.Vehicles != null && Model.Vehicles.Any())
+            {
+                <ul class="list-group">
+                    @foreach (var car in Model.Vehicles)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @car.Make @car.Model (@car.LicensePlate)
+                            <a asp-controller="Vehicles" asp-action="Details" asp-route-id="@car.VehicleId" class="btn btn-sm btn-outline-primary">Zobacz auto</a>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <span class="text-warning">Brak przypisanych pojazdów</span>
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Edytuj</a>
+    <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
+</div>

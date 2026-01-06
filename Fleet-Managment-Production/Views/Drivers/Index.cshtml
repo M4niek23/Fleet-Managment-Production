@@ -1,0 +1,48 @@
+﻿@model IEnumerable<Fleet_Managment_Production.Models.Driver>
+
+@{ ViewData["Title"] = "Lista Kierowców"; }
+
+<h1>Kierowcy</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Dodaj Kierowcę</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Imię i Nazwisko</th>
+            <th>PESEL</th>
+            <th>Kategoria</th>
+            <th>Konto Użytkownika / Email</th>
+            <th>Pojazdy</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>@item.FullName</td>
+            <td>@item.Pesel</td>
+            <td><span class="badge bg-info text-dark">@item.LicenseCategory</span></td>
+            <td>
+                @if(item.User != null)
+                {
+                    <span class="badge bg-primary">Konto: @item.User.Email</span>
+                }
+                else
+                {
+                     @item.Email
+                }
+            </td>
+            <td>
+                <span class="badge bg-secondary">@item.Vehicles.Count()</span>
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edytuj</a>
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Szczegóły</a>
+                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Usuń</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -1,0 +1,62 @@
+﻿@model Fleet_Managment_Production.Models.Driver
+
+@{
+    ViewData["Title"] = "Usuń Kierowcę";
+}
+
+<h1>Usuń Kierowcę</h1>
+
+<div class="alert alert-danger">
+    <h3>Czy na pewno chcesz usunąć tego kierowcę?</h3>
+    <p>
+        <strong>Uwaga:</strong> Usunięcie kierowcy spowoduje, że przypisane do niego samochody
+        stracą przypisanie (pole Kierowca stanie się puste), ale same pojazdy <strong>nie zostaną usunięte</strong> z bazy.
+    </p>
+</div>
+
+<div>
+    <h4>Dane usuwanego kierowcy</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.FullName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.FullName)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Pesel)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Pesel)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+
+        <dt class="col-sm-3">
+            Liczba pojazdów
+        </dt>
+        <dd class="col-sm-9">
+            @if (Model.Vehicles != null && Model.Vehicles.Any())
+            {
+                <span class="badge bg-warning text-dark">@Model.Vehicles.Count() pojazdów zostanie odpiętych</span>
+            }
+            else
+            {
+                <span>0</span>
+            }
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Usuń Kierowcę" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+    </form>
+</div>

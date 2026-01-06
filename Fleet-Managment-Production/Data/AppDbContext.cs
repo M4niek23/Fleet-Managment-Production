@@ -14,6 +14,7 @@ namespace Fleet_Managment_Production.Data
         public DbSet<Insurance> Insurances { get; set; }
         public DbSet<Inspection> Inspections { get; set; }
         public DbSet<Cost> Costs { get; set; }
+        public DbSet<Driver> Drivers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBilder)
         {
             base.OnModelCreating(modelBilder);
@@ -43,6 +44,12 @@ namespace Fleet_Managment_Production.Data
                 .WithMany(v => v.Costs)
                 .HasForeignKey(c => c.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
+            //Konfiguracja relacji Driver do Vehicle (jeden do wielu)
+            modelBilder.Entity<Driver>()
+                .HasMany(v => v.Vehicles)
+                .WithOne(d => d.Driver)
+                .HasForeignKey(v => v.DriverId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
