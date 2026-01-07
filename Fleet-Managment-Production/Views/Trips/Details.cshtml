@@ -1,0 +1,73 @@
+﻿@model Fleet_Managment_Production.Models.Trip
+
+@{
+    ViewData["Title"] = "Szczegóły Podróży";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>#map { height: 400px; width: 100%; border-radius: 8px; }</style>
+
+<h1>Szczegóły Podróży</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <dl class="row">
+            <dt class="col-sm-4">Pojazd</dt>
+            <dd class="col-sm-8">@Model.Vehicle?.Make @Model.Vehicle?.Model (@Model.Vehicle?.LicensePlate)</dd>
+
+            <dt class="col-sm-4">Kierowca</dt>
+            <dd class="col-sm-8">@Model.Driver?.FirstName @Model.Driver?.LastName</dd>
+
+            <dt class="col-sm-4">Data</dt>
+            <dd class="col-sm-8">@Model.StartDate.ToString("g") - @Model.EndTime?.ToString("g")</dd>
+
+            <dt class="col-sm-4">Trasa</dt>
+            <dd class="col-sm-8">@Model.StartLocation &rarr; @Model.EndLocation</dd>
+
+            <dt class="col-sm-4">Dystans (Licznik)</dt>
+            <dd class="col-sm-8 fw-bold">@Model.RealDistance km</dd>
+
+            <dt class="col-sm-4">Opis</dt>
+            <dd class="col-sm-8">@Model.Description</dd>
+        </dl>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edytuj</a>
+            <a asp-action="Index" class="btn btn-secondary">Powrót</a>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div id="map"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    var map = L.map('map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OSM' }).addTo(map);
+
+    var startLat = '@Model.StartLatitude'.replace(',', '.');
+    var startLng = '@Model.StartLongitude'.replace(',', '.');
+    var endLat = '@Model.EndLatitude'.replace(',', '.');
+    var endLng = '@Model.EndLongitude'.replace(',', '.');
+
+    var bounds = [];
+
+    if (startLat && startLng) {
+        var start = [parseFloat(startLat), parseFloat(startLng)];
+        L.marker(start).addTo(map).bindPopup("<b>Start:</b> @Model.StartLocation");
+        bounds.push(start);
+    }
+
+    if (endLat && endLng) {
+        var end = [parseFloat(endLat), parseFloat(endLng)];
+        L.marker(end).addTo(map).bindPopup("<b>Koniec:</b> @Model.EndLocation");
+        bounds.push(end);
+    }
+
+    if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+    } else {
+        map.setView([52.0693, 19.4803], 6); 
+    }
+</script>

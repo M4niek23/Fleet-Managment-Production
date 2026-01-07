@@ -1,0 +1,77 @@
+﻿@model IEnumerable<Fleet_Managment_Production.Models.Trip>
+
+@{
+    ViewData["Title"] = "Rejestr Podróży";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Rejestr Podróży</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fa fa-plus-circle"></i> Dodaj Podróż
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Data</th>
+                <th>Pojazd</th>
+                <th>Kierowca</th>
+                <th>Trasa</th>
+                <th class="text-center">Dystans</th>
+                <th>Status</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="fw-bold">@item.StartDate.ToShortDateString()</div>
+                        <small class="text-muted">@item.StartDate.ToString("HH:mm")</small>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Vehicle.Make) @Html.DisplayFor(modelItem => item.Vehicle.Model)
+                        <br /><span class="badge bg-secondary">@item.Vehicle.LicensePlate</span>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Driver.FirstName) @Html.DisplayFor(modelItem => item.Driver.LastName)
+                    </td>
+                    <td>
+                        <i class="fa fa-circle text-success" style="font-size: 8px;"></i> @item.StartLocation <br />
+                        <i class="fa fa-circle text-danger" style="font-size: 8px;"></i> @item.EndLocation
+                    </td>
+                    <td class="text-center">
+                        @if (item.RealDistance > 0)
+                        {
+                            <span class="fw-bold text-success">@item.RealDistance km</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">--</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.EndOdometer.HasValue)
+                        {
+                            <span class="badge bg-success">Zakończona</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">W trakcie</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Edytuj"><i class="fa fa-edit"></i></a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" title="Szczegóły"><i class="fa fa-info"></i></a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger" title="Usuń"><i class="fa fa-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

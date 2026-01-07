@@ -92,6 +92,10 @@
                     <i class="bi bi-person-badge-fill"></i>
                     <span class="link-text">Kierowcy</span>
                 </a>
+                <a class="nav-link @(currentController == "Trips" ? "active" : "")" asp-area="" asp-controller="Trips" asp-action="Index" title="Podróż">
+                    <i class="bi bi-suitcase-lg-fill"></i>
+                    <span class="link-text">Podróż</span>
+                </a>
 
                 @if (User.IsInRole("Admin"))
                 {
@@ -133,6 +137,8 @@
 
                 <a class="nav-link px-3" asp-area="" asp-controller="Costs" asp-action="Index">System rozliczeń</a>
                 <a class="nav-link px-3" asp-area="" asp-controller="Drivers" asp-action="Index">Kierowcy</a>
+                <a class="nav-link px-3" asp-area="" asp-controller="Trips" asp-action="Index">Podróż</a>
+
                 @if (User.IsInRole("Admin"))
                 {
                     <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index">Zarządzanie rolami</a>
@@ -159,12 +165,10 @@
             const toggleBtn = document.getElementById('sidebarToggle');
             const storageKey = 'sidebar-collapsed';
 
-            // 1. Przywróć stan
             if (localStorage.getItem(storageKey) === 'true') {
                 body.classList.add('sidebar-collapsed');
             }
 
-            // 2. Obsługa kliknięcia
             if (toggleBtn) {
                 toggleBtn.addEventListener('click', function (e) {
                     e.preventDefault();
