@@ -108,6 +108,10 @@
                 }
             </tbody>
         </table>
+        @if (!Model.NegativeInspections.Any())
+        {
+            <div class="alert alert-light mt-3 border">Brak negatywnych przeglądów</div>
+        }
     </div>
 
     <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
@@ -144,5 +148,6 @@
         {
             <div class="alert alert-light mt-3 border">Brak przeglądów historycznych.</div>
         }
+        
     </div>
 </div>
