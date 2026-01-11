@@ -76,7 +76,7 @@
                 </select>
                 <span asp-validation-for="UserId" class="text-danger"></span>
             </div>
-            <div class="form-group mb-3">
+            <div class="form-group mb-1">
                 <label asp-for="DriverId" class="control-label">Przypisz Kierowcę</label>
                 <select asp-for="DriverId" class="form-control" asp-items="ViewBag.DriverId">
                     <option value="">-- Brak kierowcy --</option>
@@ -84,7 +84,7 @@
                 <span asp-validation-for="DriverId" class="text-danger"></span>
             </div>
             <div class="form-group mb-1">
-                <input type="submit" value="Utwórz" class="btn btn-primary" />
+                <input type="submit" value="Dodaj" class="btn btn-primary" />
             </div>
         </form>
     </div>

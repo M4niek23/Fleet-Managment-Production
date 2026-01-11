@@ -7,46 +7,102 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="bi bi-tools"></i> @ViewData["Title"]</h1>
     <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
-        <i class="bi bi-plus-circle-fill"></i> Dodaj 
+        <i class="bi bi-plus-circle-fill"></i> Dodaj
     </a>
 </div>
 
 <ul class="nav nav-tabs" id="inspectionTabs" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="true">
-            Nadchodzące (@Model.UpcomingInspections.Count)
+        <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab" aria-controls="active" aria-selected="true">
+            Aktywne (@Model.ActiveInspections.Count)
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">
-            Wykonane (@Model.HistoricalInspections.Count)
+        <button class="nav-link text-danger" id="negative-tab" data-bs-toggle="tab" data-bs-target="#negative" type="button" role="tab" aria-controls="negative" aria-selected="false">
+            Negatywne (@Model.NegativeInspections.Count)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link text-secondary" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">
+            Historyczne (@Model.HistoricalInspections.Count)
         </button>
     </li>
 </ul>
 
 <div class="tab-content" id="inspectionTabsContent">
 
-    <div class="tab-pane fade show active" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
-        <table class="table table-striped mt-3">
-            <thead>
+    <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="active-tab">
+        <table class="table table-striped mt-3 align-middle">
+            <thead class="table-light">
                 <tr>
                     <th>Pojazd</th>
-                    <th>Data przeglądu</th>
-                    <th>Opis</th>
+                    <th>Data przeglądu / Planowana</th>
+                    <th>Ważny do</th>
+                    <th>Status</th>
                     <th>Akcje</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.UpcomingInspections)
+                @foreach (var item in Model.ActiveInspections)
                 {
+                    string statusText = "Zaplanowany";
+                    string statusClass = "badge bg-primary";
+                    string nextDate = "-";
+
+                    if (item.IsResultPositive == true)
+                    {
+                        statusText = "Ważny";
+                        statusClass = "badge bg-success";
+                        nextDate = item.NextInspectionDate?.ToShortDateString() ?? "-";
+                    }
+                    else if (item.InspectionDate < DateTime.Today)
+                    {
+                        statusClass = "badge bg-warning text-dark";
+                        statusText = "Zaległy";
+                    }
+
                     <tr>
                         <td>@(item.Vehicle?.LicensePlate ?? "Brak pojazdu")</td>
                         <td>@item.InspectionDate.ToShortDateString()</td>
-                        <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                        <td>@nextDate</td>
+                        <td><span class="@statusClass">@statusText</span></td>
                         <td>
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edytuj</a>
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Szczegóły</a>
                             <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Usuń</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!Model.ActiveInspections.Any())
+        {
+            <div class="alert alert-info mt-3">Brak aktywnych przeglądów.</div>
+        }
+    </div>
+
+    <div class="tab-pane fade" id="negative" role="tabpanel" aria-labelledby="negative-tab">
+        <table class="table table-striped mt-3 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Pojazd</th>
+                    <th>Data przeglądu</th>
+                    <th>Opis</th>
+                    <th>Koszt</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.NegativeInspections)
+                {
+                    <tr>
+                        <td>@(item.Vehicle?.LicensePlate ?? "Brak pojazdu")</td>
+                        <td>@item.InspectionDate.ToShortDateString()</td>
+                        <td>@item.Description <span class="badge bg-danger">Negatywny</span></td>
+                        <td>@item.Cost PLN</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Szczegóły</a>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edytuj</a>
                         </td>
                     </tr>
                 }
@@ -55,56 +111,38 @@
     </div>
 
     <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
-        <table class="table table-striped mt-3">
-            <thead>
+        <table class="table table-striped mt-3 align-middle">
+            <thead class="table-light">
                 <tr>
                     <th>Pojazd</th>
-                    <th>Data przeglądu</th>
-                    <th>Przebieg (km)</th>
-                    <th>Koszt (PLN)</th>
-                    <th>Wynik</th>
-                    <th>Data ponownego</th>
+                    <th>Data wykonania</th>
+                    <th>Wygasł dnia</th>
+                    <th>Przebieg</th>
+                    <th>Koszt</th>
                     <th>Akcje</th>
                 </tr>
             </thead>
             <tbody>
-                
                 @foreach (var item in Model.HistoricalInspections)
                 {
-
-                    string resultText = "Oczekujący";
-                    string resultClass = "text-muted";
-                    if (item.IsResultPositive == true)
-                    {
-                        resultText = "Pozytywny";
-                        resultClass = "text-success fw-bold";
-                    }
-                    else if (item.IsResultPositive == false)
-                    {
-                        resultText = "Negatywny";
-                        resultClass = "text-danger fw-bold";
-                    }
-
                     <tr>
                         <td>@(item.Vehicle?.LicensePlate ?? "Brak pojazdu")</td>
                         <td>@item.InspectionDate.ToShortDateString()</td>
-                        <td>@Html.DisplayFor(modelItem => item.Mileage)</td>
-                        <td>@Html.DisplayFor(modelItem => item.Cost)</td>
-                        <td class="@resultClass">@resultText</td>
-                        <td>
-                            @if (item.NextInspectionDate.HasValue)
-                            {
-                                <span class="text-danger">@item.NextInspectionDate.Value.ToShortDateString()</span>
-                            }
+                        <td class="text-secondary">
+                            @item.NextInspectionDate?.ToShortDateString()
                         </td>
+                        <td>@Html.DisplayFor(modelItem => item.Mileage) km</td>
+                        <td>@Html.DisplayFor(modelItem => item.Cost) PLN</td>
                         <td>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edytuj</a>
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Szczegóły</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Usuń</a>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
+        @if (!Model.HistoricalInspections.Any())
+        {
+            <div class="alert alert-light mt-3 border">Brak przeglądów historycznych.</div>
+        }
     </div>
 </div>

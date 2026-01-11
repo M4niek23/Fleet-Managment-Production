@@ -78,17 +78,18 @@ namespace Fleet_Managment_Production.Models
         [Display(Name = "Aktualny przebieg (km)"), Range(0, int.MaxValue)]
         public int CurrentKm { get; set; }
 
-        [Display(Name = "Email Użytkownika")]
+        [Display(Name = "Właściciel")]
         public string? UserId { get; set; }
 
 
         [ForeignKey(nameof(UserId))]
-        [Display(Name = "Użytkownik")]
+        [Display(Name = "Właścicel")]
         public Users? User { get; set; }
 
         [Display(Name = "Kierowca")]
         public int? DriverId { get; set; }
 
+        [Display(Name = "Kierowca")]
         [ForeignKey(nameof(DriverId))]
         public Driver? Driver { get; set; }
 

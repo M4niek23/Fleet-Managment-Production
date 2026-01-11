@@ -64,6 +64,7 @@ namespace Fleet_Managment_Production.Models
         [Required(ErrorMessage ="Musisz wybrać pojazd z listy.")]
         public int? VehicleId { get; set; }
         [ValidateNever]
+        [Display(Name ="Pojazd")]
         public Vehicle Vehicle { get; set; }
     }
 }
