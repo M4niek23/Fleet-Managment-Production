@@ -16,6 +16,7 @@ namespace Fleet_Managment_Production.Data
         public DbSet<Cost> Costs { get; set; }
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<Trip> Trips { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBilder)
         {
             base.OnModelCreating(modelBilder);

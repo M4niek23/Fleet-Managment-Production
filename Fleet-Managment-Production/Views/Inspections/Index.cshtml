@@ -4,11 +4,12 @@
     ViewData["Title"] = "Przeglądy";
 }
 
-<h1>Przeglądy</h1>
-
-<p>
-    <a asp-action="Create" class="btn btn-primary">Dodaj nowy przegląd</a>
-</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-tools"></i> @ViewData["Title"]</h1>
+    <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
+        <i class="bi bi-plus-circle-fill"></i> Dodaj 
+    </a>
+</div>
 
 <ul class="nav nav-tabs" id="inspectionTabs" role="tablist">
     <li class="nav-item" role="presentation">
