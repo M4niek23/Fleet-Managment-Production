@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Fleet_Managment_Production.Models;
+using System.Collections.Generic;
 
 
-namespace Fleet_Managment_Production.Models
+namespace Fleet_Managment_Production.ViewModels
 {
     public class DashboardViewModel
     {
