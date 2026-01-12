@@ -3,7 +3,8 @@ using Fleet_Managment_Production.Models;
 using Fleet_Managment_Production.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,19 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 var app = builder.Build();
+
+var defaultDateCulture = "pl-PL";
+var ci  = new CultureInfo(defaultDateCulture);
+ci.NumberFormat.NumberDecimalSeparator = ",";
+ci.NumberFormat.CurrencyDecimalSeparator = ",";
+
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(ci),
+    SupportedCultures = new List<CultureInfo> { ci },
+    SupportedUICultures = new List<CultureInfo> { ci }
+};
+app.UseRequestLocalization(localizationOptions);
 
 await SeedService.SeedDatabase(app.Services);
 

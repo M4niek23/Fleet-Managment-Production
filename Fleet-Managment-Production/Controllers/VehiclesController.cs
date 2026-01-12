@@ -40,7 +40,7 @@ namespace Fleet_Managment_Production.Controllers
             var vehicle = await _context.Vehicles
                 .Include(v => v.User)
                 .Include(v => v.Insurances)
-                .Include(v => v.Driver) // <--- DODANO: Aby widzieć kierowcę w szczegółach
+                .Include(v => v.Driver) 
                 .FirstOrDefaultAsync(m => m.VehicleId == id);
 
             if (vehicle == null) return NotFound();
@@ -52,19 +52,17 @@ namespace Fleet_Managment_Production.Controllers
         public IActionResult Create()
         {
             PopulateUsersDropdown();
-            PopulateDriversDropdown(); // <--- DODANO: Ładowanie listy kierowców
+            PopulateDriversDropdown(); 
             return View();
         }
 
         // POST: Vehicles/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // DODANO "DriverId" do Bind poniżej:
         public async Task<IActionResult> Create([Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId,DriverId")] Vehicle vehicle)
         {
             if (ModelState.IsValid)
             {
-                // Jeśli UserId nie został wybrany, przypisz aktualnie zalogowanego
                 if (string.IsNullOrEmpty(vehicle.UserId))
                 {
                     var user = await _userManager.GetUserAsync(User);
@@ -78,9 +76,8 @@ namespace Fleet_Managment_Production.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // W razie błędu walidacji, załaduj listy ponownie
             PopulateUsersDropdown(vehicle.UserId);
-            PopulateDriversDropdown(vehicle.DriverId); // <--- DODANO
+            PopulateDriversDropdown(vehicle.DriverId); 
             return View(vehicle);
         }
 
@@ -93,14 +90,13 @@ namespace Fleet_Managment_Production.Controllers
             if (vehicle == null) return NotFound();
 
             PopulateUsersDropdown(vehicle.UserId);
-            PopulateDriversDropdown(vehicle.DriverId); // <--- DODANO
+            PopulateDriversDropdown(vehicle.DriverId);
             return View(vehicle);
         }
 
         // POST: Vehicles/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // DODANO "DriverId" do Bind poniżej:
         public async Task<IActionResult> Edit(int id, [Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId,DriverId")] Vehicle vehicle)
         {
             if (id != vehicle.VehicleId) return NotFound();
@@ -120,9 +116,8 @@ namespace Fleet_Managment_Production.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // W razie błędu walidacji, załaduj listy ponownie
             PopulateUsersDropdown(vehicle.UserId);
-            PopulateDriversDropdown(vehicle.DriverId); // <--- DODANO
+            PopulateDriversDropdown(vehicle.DriverId); 
             return View(vehicle);
         }
 
@@ -133,7 +128,7 @@ namespace Fleet_Managment_Production.Controllers
 
             var vehicle = await _context.Vehicles
                 .Include(v => v.User)
-                .Include(v => v.Driver) // <--- DODANO: Żeby widzieć kogo usuwamy
+                .Include(v => v.Driver) 
                 .FirstOrDefaultAsync(m => m.VehicleId == id);
 
             if (vehicle == null) return NotFound();
@@ -161,7 +156,6 @@ namespace Fleet_Managment_Production.Controllers
             return _context.Vehicles.Any(e => e.VehicleId == id);
         }
 
-        // --- Metody Pomocnicze ---
 
         private void PopulateUsersDropdown(object selectedUser = null)
         {
@@ -183,10 +177,8 @@ namespace Fleet_Managment_Production.Controllers
             }
         }
 
-        // Nowa metoda do ładowania kierowców
         private void PopulateDriversDropdown(object selectedDriver = null)
         {
-            // Pobieramy kierowców i tworzymy anonimowy obiekt z połączonym Imieniem i Nazwiskiem
             var driversQuery = _context.Drivers
                 .Select(d => new
                 {
