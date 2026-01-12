@@ -61,13 +61,11 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Type,Opis,Kwota,Data,VehicleId")] Cost cost)
         {
-            // Walidacja, aby upewnić się, że nikt nie próbuje dodać automatycznego kosztu
             if (cost.Type == CostType.Przegląd || cost.Type == CostType.Ubezpieczenie)
             {
                 ModelState.AddModelError("Type", "Nie można ręcznie dodać kosztu typu 'Przegląd' lub 'Ubezpieczenie'.");
             }
 
-            // Sprawdzamy, czy model jest poprawny (łącznie z naszym błędem)
             if (ModelState.IsValid)
             {
                 _context.Add(cost);
@@ -75,7 +73,6 @@ namespace Fleet_Managment_Production.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Jeśli model nie jest poprawny, ponownie wypełniamy listy rozwijane
             PopulateVehiclesDropdown(cost.VehicleId);
             PopulateManualCostTypesDropdown(cost.Type);
             return View(cost);
@@ -95,7 +92,6 @@ namespace Fleet_Managment_Production.Controllers
                 return NotFound();
             }
 
-            // BLOKADA: Nie pozwalamy edytować kosztów automatycznych
             if (cost.Type == CostType.Przegląd || cost.Type == CostType.Ubezpieczenie)
             {
                 TempData["ErrorMessage"] = "Nie można edytować kosztów wygenerowanych automatycznie.";
@@ -117,7 +113,6 @@ namespace Fleet_Managment_Production.Controllers
                 return NotFound();
             }
 
-            // BLOKADA: Podwójne sprawdzenie na wypadek próby obejścia
             var originalCost = await _context.Costs.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
             if (originalCost.Type == CostType.Przegląd || originalCost.Type == CostType.Ubezpieczenie)
             {
@@ -205,12 +200,11 @@ namespace Fleet_Managment_Production.Controllers
 
         private void PopulateVehiclesDropdown(object selectedVehicle = null)
         {
-            // Pobieramy pojazdy do listy rozwijanej (używam LicensePlate, możesz zmienić na Make/Model)
             var vehiclesQuery = _context.Vehicles
                                 .OrderBy(v => v.LicensePlate)
                                 .Select(v => new {
                                     v.VehicleId,
-                                    DisplayText = v.LicensePlate ?? $"{v.Make} {v.Model}" // Pokaż rejestrację, a jeśli brak, to Markę+Model
+                                    DisplayText = v.LicensePlate ?? $"{v.Make} {v.Model}" 
                                 });
             ViewData["VehicleId"] = new SelectList(vehiclesQuery, "VehicleId", "DisplayText", selectedVehicle);
         }

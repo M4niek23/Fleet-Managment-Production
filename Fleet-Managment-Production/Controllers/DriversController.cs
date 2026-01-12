@@ -20,7 +20,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             var drivers = await _context.Drivers
                 .Include(d => d.Vehicles)
-                .Include(d => d.User) // Pobieramy dane konta użytkownika
+                .Include(d => d.User) 
                 .ToListAsync();
             return View(drivers);
         }
@@ -52,18 +52,16 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Pesel,LicenseCategory,PhoneNumber,UserId,Email")] Driver driver)
         {
-            // Jeśli wybrano usera, nadpisz email kierowcy emailem z konta
             if (!string.IsNullOrEmpty(driver.UserId))
             {
                 var user = await _context.Users.FindAsync(driver.UserId);
                 if (user != null) driver.Email = user.Email;
             }
 
-            ModelState.Remove("User"); // Ignoruj walidację obiektu nawigacyjnego
+            ModelState.Remove("User"); 
 
             if (ModelState.IsValid)
             {
-                // Sprawdź unikalność PESEL
                 if (await _context.Drivers.AnyAsync(d => d.Pesel == driver.Pesel))
                 {
                     ModelState.AddModelError("Pesel", "Ten PESEL już istnieje w bazie.");

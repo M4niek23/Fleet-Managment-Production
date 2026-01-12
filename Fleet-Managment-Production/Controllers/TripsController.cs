@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Fleet_Managment_Production.Data;
@@ -59,7 +55,6 @@ namespace Fleet_Managment_Production.Controllers
             {
                 _context.Add(trip);
 
-                // Jeśli podano licznik końcowy przy tworzeniu -> aktualizuj pojazd
                 if (trip.EndOdometer.HasValue)
                 {
                     await UpdateVehicleOdometer(trip.VehicleId, trip.EndOdometer.Value);
@@ -97,7 +92,6 @@ namespace Fleet_Managment_Production.Controllers
                 {
                     _context.Update(trip);
 
-                    // Aktualizacja przebiegu pojazdu
                     if (trip.EndOdometer.HasValue)
                     {
                         await UpdateVehicleOdometer(trip.VehicleId, trip.EndOdometer.Value);

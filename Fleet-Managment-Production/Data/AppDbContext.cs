@@ -1,5 +1,4 @@
-﻿using AspNetCoreGeneratedDocument;
-using Fleet_Managment_Production.Models;
+﻿using Fleet_Managment_Production.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
