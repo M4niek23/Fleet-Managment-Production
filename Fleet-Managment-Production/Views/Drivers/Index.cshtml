@@ -1,49 +1,80 @@
 ﻿@model IEnumerable<Fleet_Managment_Production.Models.Driver>
 
-@{ ViewData["Title"] = "Lista Kierowców"; }
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-person-badge-fill"></i> @ViewData["Title"]</h1>
-    <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
-        <i class="bi bi-plus-circle"></i> Dodaj
-    </a>
-</div>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Imię i Nazwisko</th>
-            <th>PESEL</th>
-            <th>Kategoria</th>
-            <th>Email</th>
-            <th>Pojazdy</th>
-            <th>Akcje</th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>@item.FullName</td>
-            <td>@item.Pesel</td>
-            <td><span class="badge bg-info text-dark">@item.LicenseCategory</span></td>
-            <td>
-                @if(item.User != null)
-                {
-                    <span class="badge bg-primary">Konto: @item.User.Email</span>
-                }
-                else
-                {
-                     @item.Email
-                }
-            </td>
-            <td>
-                <span class="badge bg-secondary">@item.Vehicles.Count()</span>
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edytuj</a>
-                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Szczegóły</a>
-                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Usuń</a>
-            </td>
-        </tr>
+@{
+    ViewData["Title"] = "Lista Kierowców";
 }
-    </tbody>
-</table>
+
+<div class="container-fluid py-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-person-badge-fill me-2"></i>Kierowcy</h5>
+            <a asp-action="Create" class="btn btn-dark btn-sm rounded-pill px-3 shadow-sm">
+                <i class="bi bi-plus-lg"></i> Dodaj kierowcę
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Imię i Nazwisko</th>
+                            <th>Kategoria</th>
+                            <th>PESEL</th>
+                            <th>Telefon</th>
+                            <th class="text-end pe-4">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light rounded-circle p-2 me-3 border">
+                                            <i class="bi bi-person-fill text-secondary fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@item.FirstName @item.LastName</div>
+                                            <small class="text-muted">@item.Email</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-white border border-secondary text-dark rounded-1 fw-normal">
+                                        <i class="bi bi-card-heading me-1 text-muted"></i>Kat. @item.LicenseCategory
+                                    </span>
+                                </td>
+                                <td><span class="font-monospace text-dark">@item.Pesel</span></td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.PhoneNumber))
+                                    {
+                                        <a href="tel:@item.PhoneNumber" class="text-decoration-none text-dark">
+                                            <i class="bi bi-telephone-fill text-muted me-1"></i>@item.PhoneNumber
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group shadow-sm" role="group">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm" title="Edytuj">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm text-white" title="Szczegóły">
+                                            <i class="bi bi-info-circle-fill"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Usuń">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

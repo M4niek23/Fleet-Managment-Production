@@ -51,6 +51,29 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,VehicleId,DriverId,StartDate,EndTime,StartLocation,EndLocation,StartLatitude,StartLongitude,EndLatitude,EndLongitude,EstimatedDistanceKm,StartOdometer,EndOdometer,Description,TripType")] Trip trip)
         {
+            // 1. Walidacja Ubezpieczenia
+            bool hasValidInsurance = await _context.Insurances
+                .AnyAsync(i => i.VehicleId == trip.VehicleId &&
+                               i.StartDate.Date <= trip.StartDate.Date &&
+                               i.ExpiryDate.Date >= trip.StartDate.Date);
+
+            if (!hasValidInsurance)
+            {
+                ModelState.AddModelError("VehicleId", "Wybrany pojazd nie posiada ważnego ubezpieczenia w dniu rozpoczęcia podróży!");
+            }
+
+            // 2. NOWA WALIDACJA: Sprawdzenie ważności przeglądu
+            // Sprawdzamy czy jest przegląd pozytywny i czy jego data ważności (NextInspectionDate) jest >= dacie podróży
+            bool hasValidInspection = await _context.Inspections
+                .AnyAsync(i => i.VehicleId == trip.VehicleId &&
+                               i.IsResultPositive == true &&
+                               (i.NextInspectionDate != null && i.NextInspectionDate.Value.Date >= trip.StartDate.Date));
+
+            if (!hasValidInspection)
+            {
+                ModelState.AddModelError("VehicleId", "Wybrany pojazd nie posiada ważnego przeglądu technicznego!");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(trip);
@@ -85,6 +108,28 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,VehicleId,DriverId,StartDate,EndTime,StartLocation,EndLocation,StartLatitude,StartLongitude,EndLatitude,EndLongitude,EstimatedDistanceKm,StartOdometer,EndOdometer,Description,TripType")] Trip trip)
         {
             if (id != trip.Id) return NotFound();
+
+            // 1. Walidacja Ubezpieczenia
+            bool hasValidInsurance = await _context.Insurances
+                .AnyAsync(i => i.VehicleId == trip.VehicleId &&
+                               i.StartDate.Date <= trip.StartDate.Date &&
+                               i.ExpiryDate.Date >= trip.StartDate.Date);
+
+            if (!hasValidInsurance)
+            {
+                ModelState.AddModelError("VehicleId", "Pojazd nie posiada ważnego ubezpieczenia w wybranym terminie!");
+            }
+
+            // 2. NOWA WALIDACJA: Sprawdzenie ważności przeglądu
+            bool hasValidInspection = await _context.Inspections
+                .AnyAsync(i => i.VehicleId == trip.VehicleId &&
+                               i.IsResultPositive == true &&
+                               (i.NextInspectionDate != null && i.NextInspectionDate.Value.Date >= trip.StartDate.Date));
+
+            if (!hasValidInspection)
+            {
+                ModelState.AddModelError("VehicleId", "Pojazd nie posiada ważnego przeglądu technicznego w wybranym terminie!");
+            }
 
             if (ModelState.IsValid)
             {

@@ -53,16 +53,16 @@ namespace Fleet_Managment_Production.Data
                 .OnDelete(DeleteBehavior.SetNull);
             // Konfiguracja relacji Vehicle do Trip
             modelBilder.Entity<Trip>()
-                .HasOne(t => t.Vehicle)
-                .WithMany()
-                .HasForeignKey(t => t.VehicleId)
-                .OnDelete(DeleteBehavior.Cascade);
-            //Konfiguracja relacji Driver do Trip
-            modelBilder.Entity<Trip>()
                 .HasOne(t => t.Driver)
-                .WithMany()
+                .WithMany(d => d.Trips)
                 .HasForeignKey(t => t.DriverId)
                 .OnDelete(DeleteBehavior.Restrict);
+            //Konfiguracja relacji Driver do Trip
+            modelBilder.Entity<Trip>()
+                .HasOne(t => t.Vehicle)
+                .WithMany(v => v.Trips) // <-- POPRAWKA: Wskazujemy listę Trips w pojeździe
+                .HasForeignKey(t => t.VehicleId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

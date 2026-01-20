@@ -31,11 +31,15 @@ namespace Fleet_Managment_Production.Controllers
             if (id == null) return NotFound();
 
             var driver = await _context.Drivers
-                .Include(d => d.Vehicles)
-                .Include(d => d.User)
+                .Include(d => d.Vehicles)              // Pobierz przypisane auta
+                .Include(d => d.Trips)                 // Pobierz trasy
+                    .ThenInclude(t => t.Vehicle)       // ...i auta z tych tras
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (driver == null) return NotFound();
+
+            // Sortowanie tras od najnowszych
+            driver.Trips = driver.Trips.OrderByDescending(t => t.StartDate).ToList();
 
             return View(driver);
         }

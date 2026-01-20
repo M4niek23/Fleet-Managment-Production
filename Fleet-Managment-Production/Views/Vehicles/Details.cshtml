@@ -1,88 +1,264 @@
-﻿@using Fleet_Managment_Production.Models;
-@model Vehicle
+﻿@model Fleet_Managment_Production.Models.Vehicle
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Karta Pojazdu - " + Model.LicensePlate;
+
+    // Obliczamy sumę kosztów (używając poprawnej nazwy 'Kwota')
+    var totalCost = Model.Costs?.Sum(c => c.Kwota) ?? 0;
 }
 
-<h1>Szczegóły</h1>
+<div class="container-fluid py-4">
 
-<div>
-    <h4>Pojazd</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2 mb-1">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class="col-sm-10 mb-1">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class="col-sm-2 mb-1">
-            @Html.DisplayNameFor(model => model.Make)
-        </dt>
-        <dd class="col-sm-10 mb-1">
-            @Html.DisplayFor(model => model.Make)
-        </dd>
-        <dt class="col-sm-2 mb-1">
-            @Html.DisplayNameFor(model => model.Model)
-        </dt>
-        <dd class="col-sm-10 mb-1">
-            @Html.DisplayFor(model => model.Model)
-        </dd>
-        <dt class="col-sm-2 mb-1">
-            @Html.DisplayNameFor(model => model.FuelType)
-        </dt>
-        <dd class="col-sm-10 mb-1">
-            @Html.DisplayFor(model => model.FuelType)
-        </dd>
-        <dt class="col-sm-2 mb-1">
-            @Html.DisplayNameFor(model => model.ProductionYear)
-        </dt>
-        <dd class="col-sm-10 mb-1">
-            @Html.DisplayFor(model => model.ProductionYear)
-        </dd>
-        <dt class="col-sm-2 mb-1">
-            @Html.DisplayNameFor(model => model.LicensePlate)
-        </dt>
-        <dd class="col-sm-10 mb-1">
-            @Html.DisplayFor(model => model.LicensePlate)
-        </dd>
-        <dt class="col-sm-2 mb-1">
-            @Html.DisplayNameFor(model => model.VIN)
-        </dt>
-        <dd class="col-sm-10 mb-1">
-            @Html.DisplayFor(model => model.VIN)
-        </dd>
-        <dt class="col-sm-2 mb-1">
-            @Html.DisplayNameFor(model => model.CurrentKm)
-        </dt>
-        <dd class="col-sm-10 mb-1">
-            @Html.DisplayFor(model => model.CurrentKm) <span> km</span>
-        </dd>
-        <dt class="col-sm-2 mb-1">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class="col-sm-10 mb-1">
-            @Html.DisplayFor(model => model.User.FullName)
-        </dd>
-        <dt class="col-sm-2">
-            Przypisany Kierowca
-        </dt>
-        <dd class="col-sm-10">
-            @if (Model.Driver != null)
-            {
-                <a asp-controller="Drivers" asp-action="Details" asp-route-id="@Model.Driver.Id" class="btn btn-sm btn-outline-info">
-                    @Model.Driver.FullName
-                </a>
-            }
-            else
-            {
-                <span>Brak przypisanego kierowcy</span>
-            }
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.VehicleId" class="btn btn-primary mb-1">Edytuj</a>
-    <a asp-action="Index" class="btn btn-success mb-1">Powrót do listy</a>
+    <div class="row mb-4">
+        <div class="col-md-8 mb-3 mb-md-0">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-4 me-4 d-none d-sm-block">
+                        <i class="bi bi-car-front-fill fs-1"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-1">@Model.Make @Model.Model</h2>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <span class="badge bg-dark fs-6 border border-light shadow-sm">@Model.LicensePlate</span>
+                            <span class="text-muted">|</span>
+                            <span class="text-muted font-monospace">@Model.VIN</span>
+                        </div>
+                        <div class="mt-2">
+                            @switch (Model.Status)
+                            {
+                                case Fleet_Managment_Production.Models.VehicleStatus.Available:
+                                    <span class="badge bg-success rounded-pill">Dostępny</span>
+                                    break;
+                                case Fleet_Managment_Production.Models.VehicleStatus.InUse:
+                                    <span class="badge bg-primary rounded-pill">W trasie</span>
+                                    break;
+                                case Fleet_Managment_Production.Models.VehicleStatus.InMaintenance:
+                                    <span class="badge bg-warning text-dark rounded-pill">W serwisie</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary rounded-pill">@Model.Status</span>
+                                    break;
+                            }
+                            <span class="ms-2 text-muted small"><i class="bi bi-fuel-pump me-1"></i>@Model.FuelType</span>
+                            <span class="ms-2 text-muted small"><i class="bi bi-calendar me-1"></i>@Model.ProductionYear</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100 bg-white">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem;">Podsumowanie</h6>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Przebieg:</span>
+                        <span class="fw-bold fs-5">@Model.CurrentKm km</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span>Łączne koszty:</span>
+                        <span class="fw-bold fs-5 text-danger">@totalCost.ToString("C")</span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.VehicleId" class="btn btn-primary shadow-sm">
+                            <i class="bi bi-pencil-square me-2"></i>Edytuj pojazd
+                        </a>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Powrót do listy
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom-0">
+            <ul class="nav nav-tabs card-header-tabs" id="vehicleTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active fw-bold" id="trips-tab" data-bs-toggle="tab" data-bs-target="#trips" type="button">
+                        <i class="bi bi-geo-alt me-2"></i>Historia Tras
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" id="inspections-tab" data-bs-toggle="tab" data-bs-target="#inspections" type="button">
+                        <i class="bi bi-tools me-2"></i>Przeglądy
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" id="insurance-tab" data-bs-toggle="tab" data-bs-target="#insurance" type="button">
+                        <i class="bi bi-shield-check me-2"></i>Ubezpieczenia
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" id="costs-tab" data-bs-toggle="tab" data-bs-target="#costs" type="button">
+                        <i class="bi bi-wallet2 me-2"></i>Koszty
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="tab-content" id="vehicleTabsContent">
+
+                <div class="tab-pane fade show active" id="trips" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Data</th>
+                                    <th>Trasa</th>
+                                    <th>Kierowca</th>
+                                    <th>Dystans</th>
+                                    <th>Typ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Trips != null && Model.Trips.Any())
+                                {
+                                    @foreach (var trip in Model.Trips)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">@trip.StartDate.ToShortDateString()</td>
+                                            <td>@trip.StartLocation &rarr; @trip.EndLocation</td>
+                                            <td>@(trip.Driver?.LastName ?? "-")</td>
+                                            <td>@trip.EstimatedDistanceKm km</td>
+                                            <td>@(trip.TripType == Fleet_Managment_Production.Models.TripType.Business ? "Służbowa" : "Prywatna")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="5" class="text-center py-4 text-muted">Brak zarejestrowanych tras.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="inspections" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Data</th>
+                                    <th>Przebieg</th>
+                                    <th>Opis</th>
+                                    <th>Wynik</th>
+                                    <th>Następny</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Inspections != null && Model.Inspections.Any())
+                                {
+                                    @foreach (var insp in Model.Inspections)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">@insp.InspectionDate.ToShortDateString()</td>
+                                            <td>@(insp.Mileage?.ToString() ?? "-") km</td>
+                                            <td>@insp.Description</td>
+                                            <td>
+                                                @if (insp.IsResultPositive == true)
+                                                {
+                                                    <span class="badge bg-success">Pozytywny</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Negatywny</span>
+                                                }
+                                            </td>
+                                            <td>@(insp.NextInspectionDate?.ToShortDateString() ?? "-")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="5" class="text-center py-4 text-muted">Brak historii przeglądów.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="insurance" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Polisa</th>
+                                    <th>Ważna od</th>
+                                    <th>Ważna do</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Insurances != null && Model.Insurances.Any())
+                                {
+                                    @foreach (var ins in Model.Insurances)
+                                    {
+                                        var isExpired = ins.ExpiryDate < DateTime.Today;
+                                        <tr>
+                                            <td class="ps-4">@ins.PolicyNumber <span class="text-muted small">(@ins.InsurareName)</span></td>
+                                            <td>@ins.StartDate.ToShortDateString()</td>
+                                            <td class="@(isExpired ? "text-danger fw-bold" : "text-success")">
+                                                @ins.ExpiryDate.ToShortDateString()
+                                            </td>
+                                            <td>
+                                                @if (isExpired)
+                                                {
+                                                    <span class="badge bg-secondary">Archiwalna</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">Aktywna</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="4" class="text-center py-4 text-muted">Brak historii ubezpieczeń.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="costs" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Data</th>
+                                    <th>Kategoria</th>
+                                    <th>Opis</th>
+                                    <th class="text-end pe-4">Kwota</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Costs != null && Model.Costs.Any())
+                                {
+                                    @foreach (var cost in Model.Costs)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">@cost.Data.ToShortDateString()</td>
+                                            <td><span class="badge bg-light text-dark border">@cost.Type</span></td>
+                                            <td>@cost.Opis</td>
+                                            <td class="text-end pe-4 fw-bold">@cost.Kwota.ToString("C")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="4" class="text-center py-4 text-muted">Brak zarejestrowanych kosztów.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>

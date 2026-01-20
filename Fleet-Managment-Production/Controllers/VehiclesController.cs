@@ -35,12 +35,20 @@ namespace Fleet_Managment_Production.Controllers
             if (id == null) return NotFound();
 
             var vehicle = await _context.Vehicles
-                .Include(v => v.User)
-                .Include(v => v.Insurances)
-                .Include(v => v.Driver) 
+                // Dołączamy powiązane dane (Relacje)
+                .Include(v => v.Trips).ThenInclude(t => t.Driver) // Pobierz trasy wraz z kierowcami
+                .Include(v => v.Inspections)                      // Pobierz przeglądy
+                .Include(v => v.Insurances)                       // Pobierz ubezpieczenia
+                .Include(v => v.Costs)                            // Pobierz koszty
                 .FirstOrDefaultAsync(m => m.VehicleId == id);
 
             if (vehicle == null) return NotFound();
+
+            // Sortujemy listy, aby najnowsze wpisy były na górze
+            vehicle.Trips = vehicle.Trips.OrderByDescending(t => t.StartDate).ToList();
+            vehicle.Inspections = vehicle.Inspections.OrderByDescending(i => i.InspectionDate).ToList();
+            vehicle.Insurances = vehicle.Insurances.OrderByDescending(i => i.ExpiryDate).ToList();
+            vehicle.Costs = vehicle.Costs.OrderByDescending(c => c.Data).ToList();
 
             return View(vehicle);
         }

@@ -80,6 +80,7 @@ namespace Fleet_Managment_Production.Controllers
                 [Bind("PolicyNumber,InsurareName,StartDate,ExpiryDate,Cost,VehicleId,HasOc,HasAssistance,AcScope,IsCurrent,HasNNW")]
             Insurance insurance)
         {
+            ModelState.Remove("Vehicle");
             if (ModelState.IsValid)
             {
                 if (insurance.IsCurrent)
@@ -166,6 +167,7 @@ namespace Fleet_Managment_Production.Controllers
             {
                 return NotFound();
             }
+
 
             if (ModelState.IsValid)
             {

@@ -1,97 +1,83 @@
-﻿@using Fleet_Managment_Production.Models;
-@model IEnumerable<Insurance>
+﻿@model IEnumerable<Fleet_Managment_Production.Models.Insurance>
 
 @{
-    ViewData["Title"] = "Ubezpieczenia";
+    ViewData["Title"] = "Polisy Ubezpieczeniowe";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-shield-check"></i> @ViewData["Title"]</h1>
-    <a asp-action="Create" asp-route-vehicleId="@ViewBag.VehicleId" class="btn btn-primary btn-lg shadow-sm">
-        <i class="bi bi-plus-circle-fill"></i> Dodaj
-    </a>
-</div>
-
-<div class="card shadow-sm rounded table-responsive">
-    <table class="table table-striped table-hover mb-0">
-        <thead class="table-dark">
-            <tr>
-                <th>@Html.DisplayNameFor(model => model.PolicyNumber)</th>
-                <th>@Html.DisplayNameFor(model => model.InsurareName)</th>
-                <th>@Html.DisplayNameFor(model => model.StartDate)</th>
-                <th>@Html.DisplayNameFor(model => model.ExpiryDate)</th>
-                <th>@Html.DisplayNameFor(model => model.Cost)</th>
-
-                <th class="d-none d-md-table-cell">Zakres AC</th>
-
-                <th>@Html.DisplayNameFor(model => model.IsCurrent)</th>
-                <th>@Html.DisplayNameFor(model => model.Vehicle)</th>
-                <th style="width: 180px;">Akcje</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@Html.DisplayFor(modelItem => item.PolicyNumber)</td>
-                    <td>@Html.DisplayFor(modelItem => item.InsurareName)</td>
-                    <td>@item.StartDate.ToShortDateString()</td>
-                    <td>@item.ExpiryDate.ToShortDateString()</td>
-                    <td>@Html.DisplayFor(modelItem => item.Cost) zł</td>
-
-                    <td class="d-none d-md-table-cell">
-                        <div class="d-flex flex-wrap gap-1">
-                            @if (item.HasOc)
-                            {
-                                <span class="badge bg-primary">OC</span>
-                            }
-
-                            @if (item.AcScope != AcScope.None)
-                            {
-                                <span class="badge bg-info text-dark" title="Zakres AC">
-                                    AC: @Html.DisplayFor(modelItem => item.AcScope)
-                                </span>
-                            }
-
-                            @if (item.HasNNW)
-                            {
-                                <span class="badge bg-secondary">NNW</span>
-                            }
-                            @if (item.HasAssistance)
-                            {
-                                <span class="badge bg-warning text-dark">ASS</span>
-                            }
-                        </div>
-                    </td>
-
-                    <td>
-                        @if (item.IsCurrent)
+<div class="container-fluid py-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-success"><i class="bi bi-shield-check me-2"></i>Ubezpieczenia</h5>
+            <a asp-action="Create" class="btn btn-success btn-sm rounded-pill px-3">
+                <i class="bi bi-plus-lg"></i> Nowa polisa
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Pojazd</th>
+                            <th>Nr Polisy / Ubezpieczyciel</th>
+                            <th>Zakres</th>
+                            <th>Ważne od</th>
+                            <th>Ważne do</th>
+                            <th class="text-end pe-4">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
                         {
-                            <span class="badge bg-success">Aktualne</span>
+                            var isExpired = item.ExpiryDate < DateTime.Today;
+                            <tr>
+                                <td class="ps-4">
+                                    @if (item.Vehicle != null)
+                                    {
+                                        <strong>@item.Vehicle.LicensePlate</strong>
+                                        <div class="small text-muted">@item.Vehicle.Make @item.Vehicle.Model</div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger">Brak pojazdu</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@item.PolicyNumber</div>
+                                    <small class="text-muted">@item.InsurareName</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">OC</span>
+                                    @if (item.AcScope != Fleet_Managment_Production.Models.AcScope.None)
+                                    {
+                                        <span class="badge bg-info text-dark">AC: @item.AcScope</span>
+                                    }
+                                </td>
+                                <td>@item.StartDate.ToShortDateString()</td>
+                                <td class="@(isExpired ? "text-danger fw-bold" : "text-success")">
+                                    @item.ExpiryDate.ToShortDateString()
+                                    @if (isExpired)
+                                    {
+                                        <i class="bi bi-exclamation-circle-fill ms-1" title="Polisa wygasła"></i>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary" title="Edytuj">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" title="Szczegóły">
+                                            <i class="bi bi-info-circle"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger" title="Usuń">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
                         }
-                        else
-                        {
-                            <span class="badge bg-secondary">Archiwalne</span>
-                        }
-                    </td>
-                    <td>
-                        @(item.Vehicle?.LicensePlate ?? "Brak pojazdu")
-                    </td>
-                    <td>
-                        <div class="btn-group btn-group-sm" role="group">
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">
-                                <i class="bi bi-pencil-fill"></i>
-                            </a>
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info">
-                                <i class="bi bi-eye-fill"></i>
-                            </a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">
-                                <i class="bi bi-trash-fill"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>

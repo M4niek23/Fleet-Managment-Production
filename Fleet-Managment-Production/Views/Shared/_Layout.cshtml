@@ -4,156 +4,237 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Fleet Manager</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/sidebar.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
+        @* Tło całej aplikacji - jasnoszare, żeby karty się wyróżniały *@
         body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Roboto, "Helvetica Neue", Arial, sans-serif;
             overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR (MENU BOCZNE) --- */
+        .sidebar {
+            min-width: 260px;
+            max-width: 260px;
+            background-color: #ffffff; /* Białe tło */
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05); /* Delikatny cień */
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+            /* Linki w menu */
+            .sidebar .nav-link {
+                color: #555; /* Ciemnoszary tekst */
+                font-weight: 500;
+                padding: 12px 20px;
+                margin: 4px 12px;
+                border-radius: 8px; /* Zaokrąglenie przycisków */
+                transition: all 0.2s ease-in-out;
+                display: flex;
+                align-items: center;
+            }
+
+                .sidebar .nav-link i {
+                    font-size: 1.1rem;
+                    margin-right: 12px;
+                    color: #adb5bd; /* Ikony szare gdy nieaktywne */
+                }
+
+                /* Hover (najechanie myszką) */
+                .sidebar .nav-link:hover {
+                    background-color: #f1f3f5;
+                    color: #0d6efd; /* Niebieski tekst */
+                }
+
+                    .sidebar .nav-link:hover i {
+                        color: #0d6efd;
+                    }
+
+                /* AKTYWNY LINK (To robi efekt "WOW") */
+                .sidebar .nav-link.active {
+                    background-color: #0d6efd; /* Niebieskie tło */
+                    color: #ffffff; /* Biały tekst */
+                    box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+                }
+
+                    .sidebar .nav-link.active i {
+                        color: #ffffff; /* Biała ikona */
+                    }
+
+        /* Submenu (np. Moja Flota) */
+        .collapse .nav-link {
+            padding-left: 45px; /* Wcięcie dla podkategorii */
+            font-size: 0.95rem;
+        }
+
+        /* Logo w menu */
+        .sidebar-brand {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #000;
+            text-decoration: none;
+        }
+
+        /* --- CONTEN & NAVBAR --- */
+        .app-wrap {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .content {
+            flex-grow: 1;
+            padding-bottom: 60px; /* Miejsce na stopkę */
+        }
+
+        .navbar {
+            background-color: #ffffff !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); /* Bardzo subtelny cień pod górnym paskiem */
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Ukrywanie sidebara na mobile */
+        @@media (max-width: 768px) {
+            .sidebar {
+                display: none !important; /* Ukryj domyślny sidebar na telefonach */
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand navbar-light bg-white shadow-sm sticky-top" style="z-index: 1020; height: 60px;">
-            <div class="container-fluid px-4">
-                <div class="d-flex align-items-center gap-3">
 
-                    <button class="navbar-toggler border-0 p-0" type="button"
-                            data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas"
-                            aria-controls="sidebarOffcanvas" aria-label="Open menu">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
+    <div class="app-wrap">
 
-                    <button id="sidebarToggle" class="btn btn-link text-secondary text-decoration-none p-0 d-none d-md-inline-flex fs-4"
-                            type="button" aria-label="Toggle sidebar" title="Zwiń/Rozwiń menu">
-                        <i class="bi bi-list"></i>
-                    </button>
+        <aside class="sidebar d-none d-md-flex flex-column">
 
-                    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-dark" asp-area="" asp-controller="Home" asp-action="Index">
-                        <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                            <i class="bi bi-truck"></i>
-                        </div>
-                        <span>Fleet<span class="text-primary">Manager</span></span>
-                    </a>
+            <a class="sidebar-brand" asp-controller="Home" asp-action="Index">
+                <div class="bg-primary text-white rounded p-2 d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 36px; height: 36px;">
+                    <i class="bi bi-truck"></i>
+                </div>
+                <span>Fleet<span class="text-primary">Manager</span></span>
+            </a>
+
+            <nav class="nav flex-column flex-grow-1 mt-2">
+
+                @{
+                    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+                    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+                }
+
+                <div class="px-3 mb-2 mt-2">
+                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Pulpit</small>
                 </div>
 
-                <div class="ms-auto d-flex align-items-center">
-                    <partial name="_LoginPartial" />
+                <a class="nav-link @(currentController == "Home" && currentAction == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+
+                <div class="px-3 mb-2 mt-4">
+                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Zarządzanie</small>
                 </div>
-            </div>
-        </nav>
-    </header>
 
-    @{
-        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
-    }
+                @{
+                    bool isFleetActive = new[] { "Vehicles", "Insurance", "Inspections" }.Contains(currentController);
+                }
 
-    <div class="app-wrap d-flex">
-
-        <aside class="sidebar d-none d-md-flex flex-column bg-dark text-white">
-            <div class="py-4 px-3 mb-2 border-bottom border-secondary border-opacity-25">
-                <small class="text-uppercase text-muted fw-bold" style="letter-spacing: 1px; font-size: 0.7rem;">Menu Główne</small>
-            </div>
-
-            <nav class="nav flex-column w-100">
-                <a class="nav-link @(currentController == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
-                   asp-area="" asp-controller="Home" asp-action="Index" title="Dashboard">
-                    <i class="bi bi-speedometer2"></i>
-                    <span class="link-text">Dashboard</span>
+                <a class="nav-link @(isFleetActive ? "text-primary fw-bold" : "")" data-bs-toggle="collapse" href="#fleetSubmenu" role="button" aria-expanded="@isFleetActive.ToString().ToLower()">
+                    <i class="bi bi-collection-fill"></i> Moja Flota
+                    <i class="bi bi-chevron-down ms-auto" style="font-size: 0.8rem;"></i>
                 </a>
-
-                <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" href="#fleetSubmenuDesktop" role="button" aria-expanded="false" aria-controls="fleetSubmenuDesktop">
-                    <i class="bi bi-collection-fill"></i>
-                    <span class="link-text">Moja Flota</span>
-                </a>
-                <div class="collapse @(new[] { "Vehicles", "Insurance", "Inspections" }.Contains(currentController) ? "show" : "")" id="fleetSubmenuDesktop">
-                    <nav class="nav flex-column ps-3">
-                        <a class="nav-link @(currentController == "Vehicles" ? "active" : "")" asp-area="" asp-controller="Vehicles" asp-action="Index">
-                            <i class="bi bi-car-front"></i> Flota
+                <div class="collapse @(isFleetActive ? "show" : "")" id="fleetSubmenu">
+                    <nav class="nav flex-column">
+                        <a class="nav-link @(currentController == "Vehicles" ? "active" : "")" asp-controller="Vehicles" asp-action="Index">
+                            Pojazdy
                         </a>
-                        <a class="nav-link @(currentController == "Insurance" ? "active" : "")" asp-area="" asp-controller="Insurance" asp-action="Index">
-                            <i class="bi bi-shield-check"></i> Ubezpieczenia
+                        <a class="nav-link @(currentController == "Insurance" ? "active" : "")" asp-controller="Insurance" asp-action="Index">
+                            Ubezpieczenia
                         </a>
-                        <a class="nav-link @(currentController == "Inspections" ? "active" : "")" asp-area="" asp-controller="Inspections" asp-action="Index">
-                            <i class="bi bi-tools"></i> Przeglądy
+                        <a class="nav-link @(currentController == "Inspections" ? "active" : "")" asp-controller="Inspections" asp-action="Index">
+                            Przeglądy
                         </a>
                     </nav>
                 </div>
 
-                <a class="nav-link @(currentController == "Costs" ? "active" : "")" asp-area="" asp-controller="Costs" asp-action="Index" title="System rozliczeń">
-                    <i class="bi bi-wallet2"></i>
-                    <span class="link-text">System rozliczeń</span>
+                <a class="nav-link @(currentController == "Drivers" ? "active" : "")" asp-controller="Drivers" asp-action="Index">
+                    <i class="bi bi-person-badge-fill"></i> Kierowcy
                 </a>
-                <a class="nav-link @(currentController == "Drivers" ? "active" : "")" asp-area="" asp-controller="Drivers" asp-action="Index" title="Kierowcy">
-                    <i class="bi bi-person-badge-fill"></i>
-                    <span class="link-text">Kierowcy</span>
+
+                <a class="nav-link @(currentController == "Trips" ? "active" : "")" asp-controller="Trips" asp-action="Index">
+                    <i class="bi bi-geo-alt-fill"></i> Trasy
                 </a>
-                <a class="nav-link @(currentController == "Trips" ? "active" : "")" asp-area="" asp-controller="Trips" asp-action="Index" title="Podróż">
-                    <i class="bi bi-suitcase-lg-fill"></i>
-                    <span class="link-text">Podróż</span>
+
+                <a class="nav-link @(currentController == "Costs" ? "active" : "")" asp-controller="Costs" asp-action="Index">
+                    <i class="bi bi-wallet2"></i> Koszty
                 </a>
 
                 @if (User.IsInRole("Admin"))
                 {
-                    <div class="mt-3 mb-2 px-3 border-top border-secondary border-opacity-25 pt-3">
-                        <small class="text-uppercase text-muted fw-bold" style="letter-spacing: 1px; font-size: 0.7rem;">Administracja</small>
+                    <div class="px-3 mb-2 mt-4">
+                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Admin</small>
                     </div>
-                    <a class="nav-link @(currentController == "Admin" ? "active" : "")" asp-area="" asp-controller="Admin" asp-action="Index">
-                        <i class="bi bi-person-gear"></i>
-                        <span class="link-text">Zarządzanie rolami</span>
+                    <a class="nav-link @(currentController == "Admin" ? "active" : "")" asp-controller="Admin" asp-action="Index">
+                        <i class="bi bi-shield-lock-fill"></i> Role i Uprawnienia
                     </a>
                 }
+
             </nav>
+
+            <div class="p-3 border-top mt-auto">
+                <small class="text-muted d-block text-center">&copy; 2025 Fleet Manager</small>
+            </div>
         </aside>
 
-        <main class="content flex-grow-1 px-4 py-4 bg-light">
-            @RenderBody()
-        </main>
+
+        <div class="d-flex flex-column flex-grow-1">
+
+            <header>
+                <nav class="navbar navbar-expand navbar-light bg-white sticky-top px-4 py-2">
+
+                    <button class="btn btn-light d-md-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+
+                    <span class="navbar-text fw-bold text-dark d-none d-md-block fs-5">
+                        @ViewData["Title"]
+                    </span>
+
+                    <div class="ms-auto">
+                        <partial name="_LoginPartial" />
+                    </div>
+                </nav>
+            </header>
+
+            <main class="content px-4 py-4">
+                @RenderBody()
+            </main>
+
+        </div>
     </div>
 
-    <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="sidebarOffcanvasLabel">Menu</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold">Fleet Manager</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body p-0">
-            <nav class="nav flex-column py-2">
-                <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index">Dashboard</a>
-
-                <a class="nav-link px-3" data-bs-toggle="collapse" href="#fleetSubmenuMobile" role="button" aria-expanded="false" aria-controls="fleetSubmenuMobile">
-                    Moja Flota
-                </a>
-                <div class="collapse" id="fleetSubmenuMobile">
-                    <nav class="nav flex-column ps-4">
-                        <a class="nav-link px-3" asp-area="" asp-controller="Vehicles" asp-action="Index">Flota</a>
-                        <a class="nav-link px-3" asp-area="" asp-controller="Insurance" asp-action="Index">Ubezpieczenia</a>
-                        <a class="nav-link px-3" asp-area="" asp-controller="Inspections" asp-action="Index">Przeglądy</a>
-                    </nav>
-                </div>
-
-                <a class="nav-link px-3" asp-area="" asp-controller="Costs" asp-action="Index">System rozliczeń</a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Drivers" asp-action="Index">Kierowcy</a>
-                <a class="nav-link px-3" asp-area="" asp-controller="Trips" asp-action="Index">Podróż</a>
-
-                @if (User.IsInRole("Admin"))
-                {
-                    <a class="nav-link px-3" asp-area="" asp-controller="Admin" asp-action="Index">Zarządzanie rolami</a>
-                }
+            <nav class="nav flex-column p-3">
+                <a class="nav-link py-3 border-bottom text-dark" asp-controller="Home" asp-action="Index">Dashboard</a>
+                <a class="nav-link py-3 border-bottom text-dark" asp-controller="Vehicles" asp-action="Index">Pojazdy</a>
+                <a class="nav-link py-3 border-bottom text-dark" asp-controller="Trips" asp-action="Index">Trasy</a>
+                <a class="nav-link py-3 border-bottom text-dark" asp-controller="Drivers" asp-action="Index">Kierowcy</a>
             </nav>
         </div>
     </div>
 
-    <footer class="footer-custom">
-        <div class="container-fluid text-center">
-            <span>&copy; 2025 <strong>Fleet Manager</strong></span>
-            <span>&bull;</span>
-            <a asp-area="" asp-controller="Home" asp-action="Privacy">Polityka prywatności</a>
-        </div>
-    </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -161,25 +242,18 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const body = document.body;
-            const toggleBtn = document.getElementById('sidebarToggle');
-            const storageKey = 'sidebar-collapsed';
-
-            if (localStorage.getItem(storageKey) === 'true') {
-                body.classList.add('sidebar-collapsed');
-            }
-
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    body.classList.toggle('sidebar-collapsed');
-
-                    const isCollapsed = body.classList.contains('sidebar-collapsed');
-                    localStorage.setItem(storageKey, isCollapsed);
-                });
-            }
+            // Wymuszamy inicjalizację wszystkich elementów interaktywnych Bootstrapa
+            var triggerTabList = [].slice.call(document.querySelectorAll('#vehicleTabs button'))
+            triggerTabList.forEach(function (triggerEl) {
+                var tabTrigger = new bootstrap.Tab(triggerEl)
+                triggerEl.addEventListener('click', function (event) {
+                    event.preventDefault()
+                    tabTrigger.show()
+                })
+            });
         });
     </script>
+
     @await RenderSectionAsync("Scripts", false)
 </body>
 </html>

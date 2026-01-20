@@ -61,5 +61,6 @@ namespace Fleet_Managment_Production.Models
         public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
 
         public string FullName => $"{FirstName} {LastName}";
+        public ICollection<Trip> Trips { get; set; } = new List<Trip>();
     }
 }

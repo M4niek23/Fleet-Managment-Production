@@ -1,0 +1,81 @@
+﻿@model IEnumerable<Fleet_Managment_Production.Models.Inspection>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th class="ps-4">Data przeglądu</th>
+                <th>Pojazd</th>
+                <th>Przebieg</th>
+                <th>Koszt</th>
+                <th class="text-center">Wynik</th>
+                <th>Następny przegląd</th>
+                <th class="text-end pe-4">Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        Brak wpisów w tej kategorii.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="ps-4">@item.InspectionDate.ToShortDateString()</td>
+                        <td>
+                            @if (item.Vehicle != null)
+                            {
+                                <strong>@item.Vehicle.LicensePlate</strong>
+                                <span class="text-muted ms-1 small">(@item.Vehicle.Make @item.Vehicle.Model)</span>
+                            }
+                        </td>
+                        <td>@(item.Mileage.HasValue ? item.Mileage.ToString() + " km" : "-")</td>
+                        <td>@item.Cost.ToString("C")</td>
+                        <td class="text-center">
+                            @if (item.IsResultPositive == true)
+                            {
+                                <span class="badge bg-success"><i class="bi bi-check-lg"></i> Pozytywny</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger"><i class="bi bi-x-lg"></i> Negatywny</span>
+                            }
+                        </td>
+                        <td>
+                            @if (item.NextInspectionDate.HasValue)
+                            {
+                                var daysLeft = (item.NextInspectionDate.Value - DateTime.Today).TotalDays;
+                                <span class="@(daysLeft < 30 ? "text-danger fw-bold" : "")">
+                                    @item.NextInspectionDate.Value.ToShortDateString()
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary" title="Edytuj">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" title="Szczegóły">
+                                    <i class="bi bi-info-circle"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger" title="Usuń">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

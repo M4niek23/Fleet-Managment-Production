@@ -1,77 +1,87 @@
 ﻿@model IEnumerable<Fleet_Managment_Production.Models.Trip>
 
 @{
-    ViewData["Title"] = "Rejestr Podróży";
+    ViewData["Title"] = "Rejestr Tras";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-suitcase-lg-fill"></i> @ViewData["Title"]</h1>
-    <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
-        <i class="bi bi-plus-circle"></i> Dodaj
-    </a>
-</div>
-
-<div class="table-responsive">
-    <table class="table table-hover align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>Data</th>
-                <th>Pojazd</th>
-                <th>Kierowca</th>
-                <th>Trasa</th>
-                <th class="text-center">Dystans</th>
-                <th>Status</th>
-                <th>Akcje</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>
-                        <div class="fw-bold">@item.StartDate.ToShortDateString()</div>
-                        <small class="text-muted">@item.StartDate.ToString("HH:mm")</small>
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Vehicle.Make) @Html.DisplayFor(modelItem => item.Vehicle.Model)
-                        <br /><span class="badge bg-secondary">@item.Vehicle.LicensePlate</span>
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Driver.FirstName) @Html.DisplayFor(modelItem => item.Driver.LastName)
-                    </td>
-                    <td>
-                        <i class="fa fa-circle text-success" style="font-size: 8px;"></i> @item.StartLocation <br />
-                        <i class="fa fa-circle text-danger" style="font-size: 8px;"></i> @item.EndLocation
-                    </td>
-                    <td class="text-center">
-                        @if (item.RealDistance > 0)
+<div class="container-fluid py-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-geo-alt-fill me-2"></i>Rejestr Tras</h5>
+            <a asp-action="Create" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                <i class="bi bi-plus-lg"></i> Nowa trasa
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Data i Czas</th>
+                            <th>Trasa (Start &rarr; Cel)</th>
+                            <th>Pojazd / Kierowca</th>
+                            <th>Dystans</th>
+                            <th>Typ</th>
+                            <th class="text-end pe-4">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
                         {
-                            <span class="fw-bold text-success">@item.RealDistance km</span>
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">@item.StartDate.ToShortDateString()</div>
+                                    <small class="text-muted">@item.StartDate.ToShortTimeString()</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-dark fw-bold">@item.StartLocation</span>
+                                        <i class="bi bi-arrow-right mx-2 text-primary"></i>
+                                        <span class="text-dark fw-bold">@item.EndLocation</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (item.Vehicle != null)
+                                    {
+                                        <div class="badge bg-light text-dark border mb-1">
+                                            <i class="bi bi-car-front me-1"></i>@item.Vehicle.LicensePlate
+                                        </div>
+                                    }
+                                    <div class="small text-muted">
+                                        <i class="bi bi-person me-1"></i>@(item.Driver != null ? item.Driver.LastName : "Brak kierowcy")
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fw-bold">@item.EstimatedDistanceKm</span> <span class="text-muted small">km</span>
+                                </td>
+                                <td>
+                                    @if (item.TripType == Fleet_Managment_Production.Models.TripType.Business)
+                                    {
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">Służbowa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary">Prywatna</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group shadow-sm" role="group">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm" title="Edytuj">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm text-white" title="Szczegóły">
+                                            <i class="bi bi-info-circle-fill"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Usuń">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
                         }
-                        else
-                        {
-                            <span class="text-muted">--</span>
-                        }
-                    </td>
-                    <td>
-                        @if (item.EndOdometer.HasValue)
-                        {
-                            <span class="badge bg-success">Zakończona</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-warning text-dark">W trakcie</span>
-                        }
-                    </td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Edytuj"><i class="fa fa-edit"></i></a>
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" title="Szczegóły"><i class="fa fa-info"></i></a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger" title="Usuń"><i class="fa fa-trash"></i></a>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
