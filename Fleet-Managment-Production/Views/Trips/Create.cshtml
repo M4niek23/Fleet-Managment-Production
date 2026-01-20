@@ -1,184 +1,223 @@
 ﻿@model Fleet_Managment_Production.Models.Trip
 
 @{
-    ViewData["Title"] = "Nowa Podróż";
+    ViewData["Title"] = "Nowa Trasa";
 }
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
 <style>
+    /* Mapa na pełną wysokość dostępnego obszaru */
+    #map-container {
+        position: sticky;
+        top: 20px;
+        height: calc(100vh - 140px); /* Dopasowanie do okna */
+        min-height: 500px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
     #map {
-        height: 500px;
+        height: 100%;
         width: 100%;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        position: relative;
         z-index: 1;
     }
 
+    /* Ukrywamy domyślny panel Routing Machine, bo mamy własne pola */
     .leaflet-routing-container {
         display: none !important;
     }
 
-    /* Style dla listy podpowiedzi */
-    .autocomplete-items {
-        position: absolute;
-        border: 1px solid #d4d4d4;
-        border-bottom: none;
-        border-top: none;
-        z-index: 9999; /* Musi być nad wszystkim */
-        top: 100%;
-        left: 0;
-        right: 0;
-        background-color: #fff;
-        border-radius: 0 0 5px 5px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        max-height: 200px;
-        overflow-y: auto;
-    }
-
-        .autocomplete-items div {
-            padding: 10px;
-            cursor: pointer;
-            background-color: #fff;
-            border-bottom: 1px solid #d4d4d4;
-            font-size: 0.9em;
-        }
-
-            .autocomplete-items div:hover {
-                background-color: #e9e9e9;
-            }
-
-            .autocomplete-items div strong {
-                color: #0d6efd;
-            }
-
-    /* Rodzic inputa musi być relative, żeby lista była pod nim */
+    /* Stylizacja listy podpowiedzi (Autocomplete) */
     .autocomplete-container {
         position: relative;
     }
 
-    .loader {
-        display: none;
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #3498db;
-        border-radius: 50%;
-        width: 16px;
-        height: 16px;
-        animation: spin 1s linear infinite;
+    .autocomplete-items {
         position: absolute;
-        right: 10px;
-        top: 38px;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        max-height: 250px;
+        overflow-y: auto;
     }
 
-    @@keyframes spin {
-        0% {
-            transform: rotate(0deg);
+    .autocomplete-item {
+        padding: 10px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f1f1;
+        transition: background 0.2s;
+    }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
         }
 
-        100% {
-            transform: rotate(360deg);
+        .autocomplete-item:hover {
+            background-color: #f8f9fa;
         }
+
+        .autocomplete-item strong {
+            color: #0d6efd;
+            display: block;
+        }
+
+    /* Loader wewnątrz inputa */
+    .input-loader {
+        display: none;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.2rem;
+        height: 1.2rem;
+        z-index: 10;
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Nowa Podróż</h1>
-    <a asp-action="Index" class="btn btn-secondary">Powrót</a>
-</div>
-<hr />
+<div class="container-fluid py-4">
 
-<div class="row">
-    <div class="col-md-5">
-        <form asp-action="Create">
-            <div asp-validation-summary="All" class="text-danger"></div>
-
-            <input type="hidden" asp-for="StartLatitude" id="startLat" />
-            <input type="hidden" asp-for="StartLongitude" id="startLng" />
-            <input type="hidden" asp-for="EndLatitude" id="endLat" />
-            <input type="hidden" asp-for="EndLongitude" id="endLng" />
-            <input type="hidden" asp-for="EstimatedDistanceKm" id="estDistance" />
-
-            <div class="card mb-3 shadow-sm border-primary">
-                <div class="card-header bg-primary text-white">1. Planowanie Trasy</div>
-                <div class="card-body">
-
-                    <div class="mb-2 autocomplete-container">
-                        <label asp-for="StartLocation" class="control-label">Miejsce startu</label>
-                        <input asp-for="StartLocation" class="form-control" id="startInput" placeholder="Zacznij pisać (np. Warszawa)..." autocomplete="off" />
-                        <div id="startLoader" class="loader"></div>
-                        <div id="startList" class="autocomplete-items" style="display:none;"></div>
-                        <span asp-validation-for="StartLocation" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-2 autocomplete-container">
-                        <label asp-for="EndLocation" class="control-label">Miejsce docelowe</label>
-                        <input asp-for="EndLocation" class="form-control" id="endInput" placeholder="Zacznij pisać (np. Kraków)..." autocomplete="off" />
-                        <div id="endLoader" class="loader"></div>
-                        <div id="endList" class="autocomplete-items" style="display:none;"></div>
-                        <span asp-validation-for="EndLocation" class="text-danger"></span>
-                    </div>
-
-                    <div class="alert alert-light border mt-3 text-center mb-0">
-                        <div class="small text-muted mb-1">Dystans trasy:</div>
-                        <strong id="displayDistance" class="text-primary" style="font-size: 1.4em;">0 km</strong>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mb-3 shadow-sm">
-                <div class="card-body">
-                    <div class="mb-2">
-                        <label asp-for="VehicleId" class="control-label"></label>
-                        <select asp-for="VehicleId" class="form-control" asp-items="ViewBag.VehicleId"></select>
-                    </div>
-                    <div class="mb-2">
-                        <label asp-for="DriverId" class="control-label"></label>
-                        <select asp-for="DriverId" class="form-control" asp-items="ViewBag.DriverId"></select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mb-3 shadow-sm">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-6 mb-2">
-                            <label asp-for="StartOdometer" class="control-label"></label>
-                            <input asp-for="StartOdometer" class="form-control" />
-                            <span asp-validation-for="StartOdometer" class="text-danger"></span>
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label asp-for="EndOdometer" class="control-label"></label>
-                            <input asp-for="EndOdometer" class="form-control" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-2">
-                            <label asp-for="StartDate" class="control-label"></label>
-                            <input asp-for="StartDate" class="form-control" />
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label asp-for="TripType" class="control-label"></label>
-                            <select asp-for="TripType" class="form-control" asp-items="Html.GetEnumSelectList<Fleet_Managment_Production.Models.TripType>()"></select>
-                        </div>
-                    </div>
-                    <div class="mb-2">
-                        <label asp-for="Description" class="control-label"></label>
-                        <textarea asp-for="Description" class="form-control" rows="2"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-success w-100 py-3 fw-bold" style="font-size: 1.1em;">ZAPISZ PODRÓŻ</button>
-        </form>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Planowanie Trasy</h2>
+            <p class="text-muted mb-0">Zdefiniuj punkty podróży, przypisz kierowcę i pojazd.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Powrót do listy
+        </a>
     </div>
 
-    <div class="col-md-7">
-        <div id="map"></div>
-        <div class="text-muted small mt-1 text-end">© OpenStreetMap contributors</div>
+    <div class="row g-4">
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-map me-2"></i>Szczegóły podróży</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <input type="hidden" asp-for="StartLatitude" id="startLat" />
+                        <input type="hidden" asp-for="StartLongitude" id="startLng" />
+                        <input type="hidden" asp-for="EndLatitude" id="endLat" />
+                        <input type="hidden" asp-for="EndLongitude" id="endLng" />
+                        <input type="hidden" asp-for="EstimatedDistanceKm" id="estDistance" />
+
+                        <div class="mb-4">
+                            <label class="text-muted text-uppercase small fw-bold mb-3">Punkty trasy</label>
+
+                            <div class="autocomplete-container mb-3">
+                                <label asp-for="StartLocation" class="form-label fw-bold small text-success">MIEJSCE STARTU</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-success text-white border-success"><i class="bi bi-geo-alt-fill"></i></span>
+                                    <input asp-for="StartLocation" class="form-control border-success" id="startInput" placeholder="Wpisz adres początkowy..." autocomplete="off" />
+                                    <div class="spinner-border text-primary input-loader" id="startLoader" role="status"></div>
+                                </div>
+                                <div id="startList" class="autocomplete-items" style="display:none;"></div>
+                                <span asp-validation-for="StartLocation" class="text-danger small"></span>
+                            </div>
+
+                            <div class="autocomplete-container mb-3">
+                                <label asp-for="EndLocation" class="form-label fw-bold small text-danger">MIEJSCE DOCELOWE</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-danger text-white border-danger"><i class="bi bi-flag-fill"></i></span>
+                                    <input asp-for="EndLocation" class="form-control border-danger" id="endInput" placeholder="Wpisz adres końcowy..." autocomplete="off" />
+                                    <div class="spinner-border text-primary input-loader" id="endLoader" role="status"></div>
+                                </div>
+                                <div id="endList" class="autocomplete-items" style="display:none;"></div>
+                                <span asp-validation-for="EndLocation" class="text-danger small"></span>
+                            </div>
+
+                            <div class="alert alert-primary d-flex align-items-center justify-content-between border-0 shadow-sm mt-3">
+                                <div>
+                                    <i class="bi bi-signpost-split fs-4 me-2"></i>
+                                    <span class="text-uppercase small fw-bold">Szacowany dystans</span>
+                                </div>
+                                <div class="fs-4 fw-bold" id="displayDistance">0 km</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="text-muted text-uppercase small fw-bold mb-2 border-bottom pb-1">Zasoby</div>
+                            <div class="row g-3 mt-1">
+                                <div class="col-md-12">
+                                    <label asp-for="VehicleId" class="form-label fw-bold">Pojazd</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-car-front"></i></span>
+                                        <select asp-for="VehicleId" class="form-select" asp-items="ViewBag.VehicleId"></select>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label asp-for="DriverId" class="form-label fw-bold">Kierowca</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
+                                        <select asp-for="DriverId" class="form-select" asp-items="ViewBag.DriverId"></select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="text-muted text-uppercase small fw-bold mb-2 border-bottom pb-1">Dane Szczegółowe</div>
+                            <div class="row g-3 mt-1">
+                                <div class="col-md-6">
+                                    <label asp-for="StartDate" class="form-label fw-bold">Data rozpoczęcia</label>
+                                    <input asp-for="StartDate" class="form-control" type="date" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="TripType" class="form-label fw-bold">Rodzaj trasy</label>
+                                    <select asp-for="TripType" class="form-select" asp-items="Html.GetEnumSelectList<Fleet_Managment_Production.Models.TripType>()"></select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="StartOdometer" class="form-label fw-bold">Licznik Start</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-123"></i></span>
+                                        <input asp-for="StartOdometer" class="form-control" placeholder="km" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="EndOdometer" class="form-label fw-bold">Licznik Stop</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-123"></i></span>
+                                        <input asp-for="EndOdometer" class="form-control" placeholder="km" />
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label asp-for="Description" class="form-label fw-bold">Opis / Cel podróży</label>
+                                    <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary py-3 shadow-sm fw-bold text-uppercase">
+                                <i class="bi bi-check2-circle me-2"></i>Zatwierdź Trasę
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div id="map-container">
+                <div id="map"></div>
+                <div class="position-absolute bottom-0 end-0 m-3 bg-white p-2 rounded shadow-sm opacity-75 small" style="z-index: 1000;">
+                    &copy; OpenStreetMap contributors
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
@@ -188,139 +227,171 @@
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
     <script>
-        // --- 1. Konfiguracja Mapy ---
-        var map = L.map('map').setView([52.0693, 19.4803], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+        document.addEventListener("DOMContentLoaded", function() {
 
-        var routingControl = L.Routing.control({
-            waypoints: [],
-            routeWhileDragging: false,
-            showAlternatives: false,
-            addWaypoints: false,
-            createMarker: function(i, wp) {
-                return L.marker(wp.latLng).bindPopup(i === 0 ? "Start" : "Cel");
-            }
-        }).addTo(map);
+            // --- 1. INICJALIZACJA MAPY ---
+            // Środek Polski jako domyślny widok
+            var map = L.map('map').setView([52.0693, 19.4803], 6);
 
-        routingControl.on('routesfound', function(e) {
-            var distanceKm = (e.routes[0].summary.totalDistance / 1000).toFixed(1);
-            document.getElementById('displayDistance').innerText = distanceKm + " km";
-            // Tu też zamieniamy kropkę na przecinek dla serwera
-            document.getElementById('estDistance').value = distanceKm.replace('.', ',');
-        });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: ''
+            }).addTo(map);
 
-        // --- 2. Mechanizm Autocomplete ---
-
-        // Konfiguracja podpowiedzi dla pola START
-        setupAutocomplete(
-            document.getElementById('startInput'),
-            document.getElementById('startList'),
-            document.getElementById('startLoader'),
-            (lat, lng) => {
-                // Zapisujemy z PRZECINKIEM dla serwera (C#)
-                document.getElementById('startLat').value = lat.toString().replace('.', ',');
-                document.getElementById('startLng').value = lng.toString().replace('.', ',');
-                tryUpdateRoute();
-            }
-        );
-
-        // Konfiguracja podpowiedzi dla pola KONIEC
-        setupAutocomplete(
-            document.getElementById('endInput'),
-            document.getElementById('endList'),
-            document.getElementById('endLoader'),
-            (lat, lng) => {
-                // Zapisujemy z PRZECINKIEM dla serwera (C#)
-                document.getElementById('endLat').value = lat.toString().replace('.', ',');
-                document.getElementById('endLng').value = lng.toString().replace('.', ',');
-                tryUpdateRoute();
-            }
-        );
-
-        // Funkcja główna do obsługi autouzupełniania
-        function setupAutocomplete(input, listContainer, loader, callbackSelect) {
-            let timeoutId;
-
-            input.addEventListener('input', function() {
-                const query = this.value;
-
-                listContainer.innerHTML = '';
-                listContainer.style.display = 'none';
-                clearTimeout(timeoutId);
-
-                if (!query || query.length < 3) return;
-
-                timeoutId = setTimeout(() => {
-                    loader.style.display = 'block';
-
-                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&countrycodes=pl`)
-                        .then(response => response.json())
-                        .then(data => {
-                            loader.style.display = 'none';
-                            listContainer.innerHTML = '';
-
-                            if (data.length > 0) {
-                                listContainer.style.display = 'block';
-                                data.forEach(item => {
-                                    let displayName = item.display_name;
-                                    if(displayName.length > 60) displayName = displayName.substring(0, 60) + "...";
-
-                                    const div = document.createElement('div');
-                                    div.innerHTML = `<strong>${item.name || query}</strong> <br/><small class="text-muted">${displayName}</small>`;
-
-                                    div.addEventListener('click', function() {
-                                        input.value = item.display_name;
-                                        listContainer.style.display = 'none';
-                                        callbackSelect(item.lat, item.lon);
-                                    });
-
-                                    listContainer.appendChild(div);
-                                });
-                            }
+            // Konfiguracja routingu (trasy)
+            var routingControl = L.Routing.control({
+                waypoints: [],
+                routeWhileDragging: false,
+                showAlternatives: false,
+                addWaypoints: false, // Blokujemy dodawanie punktów pośrednich myszką, żeby nie psuć formularza
+                lineOptions: {
+                    styles: [{color: '#0d6efd', opacity: 0.7, weight: 5}] // Kolor trasy zgodny z motywem
+                },
+                createMarker: function(i, wp) {
+                    // Dedykowane markery dla Startu (Zielony) i Końca (Czerwony)
+                    var color = (i === 0) ? 'green' : 'red';
+                    // Używamy prostych kółek Leafleta, ale można by tu dać customowe ikony
+                    return L.marker(wp.latLng, {
+                        icon: L.divIcon({
+                            className: 'bg-transparent',
+                            html: `<div style="background-color:${color}; width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow:0 0 4px black;"></div>`
                         })
-                        .catch(err => {
-                            console.error(err);
-                            loader.style.display = 'none';
-                        });
-                }, 500);
-            });
-
-            document.addEventListener('click', function(e) {
-                if (e.target !== input) {
-                    listContainer.style.display = 'none';
+                    }).bindPopup(i === 0 ? "Start" : "Cel");
                 }
+            }).addTo(map);
+
+            // Obsługa zdarzenia: Znaleziono trasę
+            routingControl.on('routesfound', function(e) {
+                var routes = e.routes;
+                var summary = routes[0].summary;
+
+                // Konwersja metrów na km (1 miejsce po przecinku)
+                var distanceKm = (summary.totalDistance / 1000).toFixed(1);
+
+                // Wyświetlenie dla użytkownika
+                document.getElementById('displayDistance').innerText = distanceKm + " km";
+
+                // Zapisanie do ukrytego pola (zamiana kropki na przecinek dla C# decimal)
+                document.getElementById('estDistance').value = distanceKm.replace('.', ',');
             });
-        }
 
-        // --- 3. Funkcja aktualizująca trasę (POPRAWIONA) ---
-        function tryUpdateRoute() {
-            // Pobieramy wartości z ukrytych pól (które mogą mieć przecinki)
-            let startLat = document.getElementById('startLat').value;
-            let startLng = document.getElementById('startLng').value;
-            let endLat = document.getElementById('endLat').value;
-            let endLng = document.getElementById('endLng').value;
 
-            // ZAMIENIAMY Przecinki na Kropki (tylko na potrzeby JavaScript/Mapy)
-            startLat = startLat.replace(',', '.');
-            startLng = startLng.replace(',', '.');
-            endLat = endLat.replace(',', '.');
-            endLng = endLng.replace(',', '.');
+            // --- 2. LOGIKA AUTOCOMPLETE (Nominatim) ---
 
-            // Uruchom trasę tylko jeśli mamy komplet punktów
-            if (startLat && startLng && endLat && endLng) {
-                // Sprawdzamy czy to poprawne liczby
-                if (!isNaN(startLat) && !isNaN(startLng) && !isNaN(endLat) && !isNaN(endLng)) {
-                    const startPoint = L.latLng(startLat, startLng);
-                    const endPoint = L.latLng(endLat, endLng);
+            function setupAutocomplete(input, listContainer, loader, callbackSelect) {
+                let timeoutId;
 
-                    routingControl.setWaypoints([startPoint, endPoint]);
+                input.addEventListener('input', function() {
+                    const query = this.value;
 
-                    var bounds = L.latLngBounds(startPoint, endPoint);
-                    map.fitBounds(bounds, { padding: [50, 50] });
+                    // Reset
+                    listContainer.innerHTML = '';
+                    listContainer.style.display = 'none';
+                    clearTimeout(timeoutId);
+
+                    if (!query || query.length < 3) return;
+
+                    // Debounce (czekamy 500ms po ostatnim naciśnięciu klawisza)
+                    timeoutId = setTimeout(() => {
+                        loader.style.display = 'block';
+
+                        // Zapytanie do OpenStreetMap Nominatim
+                        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&countrycodes=pl`)
+                            .then(response => response.json())
+                            .then(data => {
+                                loader.style.display = 'none';
+                                listContainer.innerHTML = '';
+
+                                if (data.length > 0) {
+                                    listContainer.style.display = 'block';
+                                    data.forEach(item => {
+                                        // Skracanie zbyt długich nazw
+                                        let displayName = item.display_name;
+                                        if(displayName.length > 55) displayName = displayName.substring(0, 55) + "...";
+
+                                        const div = document.createElement('div');
+                                        div.className = 'autocomplete-item';
+                                        div.innerHTML = `<strong>${item.name || query}</strong><small class="text-muted">${displayName}</small>`;
+
+                                        div.addEventListener('click', function() {
+                                            input.value = item.display_name; // Wstaw pełną nazwę do inputa
+                                            listContainer.style.display = 'none';
+
+                                            // Wywołanie callbacka z koordynatami
+                                            callbackSelect(item.lat, item.lon);
+                                        });
+
+                                        listContainer.appendChild(div);
+                                    });
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                loader.style.display = 'none';
+                            });
+                    }, 500);
+                });
+
+                // Ukryj listę po kliknięciu gdziekolwiek indziej
+                document.addEventListener('click', function(e) {
+                    if (e.target !== input) {
+                        listContainer.style.display = 'none';
+                    }
+                });
+            }
+
+            // --- 3. PODPIĘCIE PÓL ---
+
+            // Pole START
+            setupAutocomplete(
+                document.getElementById('startInput'),
+                document.getElementById('startList'),
+                document.getElementById('startLoader'),
+                (lat, lng) => {
+                    // Zapisz do ukrytych pól (z przecinkiem dla C#)
+                    document.getElementById('startLat').value = lat.toString().replace('.', ',');
+                    document.getElementById('startLng').value = lng.toString().replace('.', ',');
+
+                    tryUpdateRoute();
+                }
+            );
+
+            // Pole KONIEC
+            setupAutocomplete(
+                document.getElementById('endInput'),
+                document.getElementById('endList'),
+                document.getElementById('endLoader'),
+                (lat, lng) => {
+                    document.getElementById('endLat').value = lat.toString().replace('.', ',');
+                    document.getElementById('endLng').value = lng.toString().replace('.', ',');
+
+                    tryUpdateRoute();
+                }
+            );
+
+            // Funkcja rysująca trasę na mapie
+            function tryUpdateRoute() {
+                let sLat = document.getElementById('startLat').value.replace(',', '.');
+                let sLng = document.getElementById('startLng').value.replace(',', '.');
+                let eLat = document.getElementById('endLat').value.replace(',', '.');
+                let eLng = document.getElementById('endLng').value.replace(',', '.');
+
+                if (sLat && sLng && eLat && eLng) {
+                    if (!isNaN(sLat) && !isNaN(sLng) && !isNaN(eLat) && !isNaN(eLng)) {
+                        const startPoint = L.latLng(sLat, sLng);
+                        const endPoint = L.latLng(eLat, eLng);
+
+                        routingControl.setWaypoints([startPoint, endPoint]);
+
+                        // Dopasuj zoom mapy, żeby pokazać całą trasę
+                        // Dodajemy małe opóźnienie, żeby RoutingMachine zdążył przeliczyć
+                        setTimeout(() => {
+                             var bounds = L.latLngBounds(startPoint, endPoint);
+                             map.fitBounds(bounds, { padding: [50, 50] });
+                        }, 100);
+                    }
                 }
             }
-        }
+
+        });
     </script>
 }

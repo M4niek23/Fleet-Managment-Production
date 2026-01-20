@@ -1,27 +1,31 @@
 ﻿@model IEnumerable<Fleet_Managment_Production.Models.Vehicle>
 
 @{
-    ViewData["Title"] = "Zarządzanie Flotą";
+    ViewData["Title"] = "Lista Pojazdów";
 }
 
 <div class="container-fluid py-4">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-car-front-fill me-2"></i>Lista Pojazdów</h5>
-            <a asp-action="Create" class="btn btn-primary btn-sm rounded-pill px-3">
-                <i class="bi bi-plus-lg"></i> Dodaj pojazd
-            </a>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Pojazdy</h2>
+            <p class="text-muted mb-0">Zarządzaj flotą samochodową w Twojej firmie.</p>
         </div>
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i>Dodaj Pojazd
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+                    <thead class="bg-light">
                         <tr>
-                            <th class="ps-4">@Html.DisplayNameFor(model => model.Make) / @Html.DisplayNameFor(model => model.Model)</th>
-                            <th>@Html.DisplayNameFor(model => model.LicensePlate)</th>
-                            <th>@Html.DisplayNameFor(model => model.VIN)</th>
-                            <th>@Html.DisplayNameFor(model => model.ProductionYear)</th>
+                            <th class="ps-4 py-3">Pojazd</th>
+                            <th>Rejestracja / VIN</th>
                             <th>Status</th>
+                            <th>Przebieg</th>
                             <th class="text-end pe-4">Akcje</th>
                         </tr>
                     </thead>
@@ -30,38 +34,47 @@
                         {
                             <tr>
                                 <td class="ps-4">
-                                    <div class="fw-bold text-dark">@item.Make @item.Model</div>
-                                    <small class="text-muted">@item.FuelType</small>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-10 text-primary rounded p-2 me-3">
+                                            <i class="bi bi-car-front-fill fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">@item.Make @item.Model</div>
+                                            <div class="text-muted small">@item.ProductionYear • @item.FuelType</div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td><span class="badge bg-light text-dark border">@item.LicensePlate</span></td>
-                                <td class="text-muted small">@item.VIN</td>
-                                <td>@item.ProductionYear</td>
+                                <td>
+                                    <div class="fw-bold">@item.LicensePlate</div>
+                                    <div class="text-muted small font-monospace">@item.VIN</div>
+                                </td>
                                 <td>
                                     @switch (item.Status)
                                     {
                                         case Fleet_Managment_Production.Models.VehicleStatus.Available:
-                                            <span class="badge bg-success">Dostępny</span>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3">Dostępny</span>
                                             break;
                                         case Fleet_Managment_Production.Models.VehicleStatus.InUse:
-                                            <span class="badge bg-primary">W użyciu</span>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-3">W trasie</span>
                                             break;
                                         case Fleet_Managment_Production.Models.VehicleStatus.InMaintenance:
-                                            <span class="badge bg-warning text-dark">W serwisie</span>
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3">Serwis</span>
                                             break;
                                         default:
-                                            <span class="badge bg-secondary">@item.Status</span>
+                                            <span class="badge bg-secondary rounded-pill">@item.Status</span>
                                             break;
                                     }
                                 </td>
+                                <td>@item.CurrentKm km</td>
                                 <td class="text-end pe-4">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a asp-action="Edit" asp-route-id="@item.VehicleId" class="btn btn-outline-secondary" title="Edytuj">
+                                    <div class="btn-group">
+                                        <a asp-action="Details" asp-route-id="@item.VehicleId" class="btn btn-sm btn-outline-secondary" title="Szczegóły">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.VehicleId" class="btn btn-sm btn-outline-secondary" title="Edytuj">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <a asp-action="Details" asp-route-id="@item.VehicleId" class="btn btn-outline-info" title="Szczegóły">
-                                            <i class="bi bi-info-circle"></i>
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@item.VehicleId" class="btn btn-outline-danger" title="Usuń">
+                                        <a asp-action="Delete" asp-route-id="@item.VehicleId" class="btn btn-sm btn-outline-danger" title="Usuń">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                     </div>

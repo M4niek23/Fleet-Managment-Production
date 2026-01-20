@@ -2,98 +2,161 @@
 @model Vehicle
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Dodaj nowy pojazd";
 }
 
-<h1>Nowy pojazd</h1>
+<div class="container-fluid py-4">
 
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Nowy pojazd</h2>
+            <p class="text-muted mb-0">Wypełnij formularz, aby dodać samochód do floty.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Powrót do listy
+        </a>
+    </div>
 
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group mb-1">
-                <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<VehicleStatus>()"></select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-1">
-                <label asp-for="Make" class="control-label"></label>
-                <input asp-for="Make" class="form-control" />
-                <span asp-validation-for="Make" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-1">
-                <label asp-for="Model" class="control-label"></label>
-                <input asp-for="Model" class="form-control" />
-                <span asp-validation-for="Model" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-1">
-                <label asp-for="FuelType" class="control-label"></label>
-                <select asp-for="FuelType" class="form-control" asp-items="Html.GetEnumSelectList<FuelType>()">
-                    <option value="">Wybierz typ paliwa</option>
-                </select>
-                <span asp-validation-for="FuelType" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-1">
-                <label asp-for="ProductionYear" class="control-label"></label>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-car-front-fill me-2"></i>Dane pojazdu</h5>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                <select asp-for="ProductionYear" class="form-control">
-                    <option value="">Wybierz rok produkcji</option>
+                <div class="row g-3">
 
-                    @{
-                        int currentYear = DateTime.Now.Year;
+                    <div class="col-12 text-muted text-uppercase small fw-bold mt-4 mb-2 border-bottom pb-1">
+                        Informacje podstawowe
+                    </div>
 
-                        for (int year = currentYear; year >= 1950; year--)
-                        {
-                            <option value="@year">@year</option>
-                        }
-                    }
-                </select>
+                    <div class="col-md-6">
+                        <label asp-for="Make" class="form-label fw-bold">Marka</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-car-front"></i></span>
+                            <input asp-for="Make" class="form-control" placeholder="np. Toyota" />
+                        </div>
+                        <span asp-validation-for="Make" class="text-danger small"></span>
+                    </div>
 
-                <span asp-validation-for="ProductionYear" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-1">
-                <label asp-for="LicensePlate" class="control-label"></label>
-                <input asp-for="LicensePlate" class="form-control" />
-                <span asp-validation-for="LicensePlate" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-1">
-                <label asp-for="VIN" class="control-label"></label>
-                <input asp-for="VIN" class="form-control" />
-                <span asp-validation-for="VIN" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-1">
-                <label asp-for="CurrentKm" class="control-label"></label>
-                <input asp-for="CurrentKm" class="form-control" />
-                <span asp-validation-for="CurrentKm" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-1">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId">
-                    <option value="">-- wybierz użytkownika --</option>
-                </select>
-                <span asp-validation-for="UserId" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-1">
-                <label asp-for="DriverId" class="control-label">Przypisz Kierowcę</label>
-                <select asp-for="DriverId" class="form-control" asp-items="ViewBag.DriverId">
-                    <option value="">-- Brak kierowcy --</option>
-                </select>
-                <span asp-validation-for="DriverId" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-1">
-                <input type="submit" value="Dodaj" class="btn btn-primary" />
-            </div>
-        </form>
+                    <div class="col-md-6">
+                        <label asp-for="Model" class="form-label fw-bold">Model</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-gear"></i></span>
+                            <input asp-for="Model" class="form-control" placeholder="np. Corolla" />
+                        </div>
+                        <span asp-validation-for="Model" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ProductionYear" class="form-label fw-bold">Rok produkcji</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-calendar-event"></i></span>
+                            <select asp-for="ProductionYear" class="form-select">
+                                <option value="">-- Wybierz rok --</option>
+                                @{
+                                    int currentYear = DateTime.Now.Year;
+                                    for (int year = currentYear; year >= 1990; year--)
+                                    {
+                                        <option value="@year">@year</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="ProductionYear" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="FuelType" class="form-label fw-bold">Rodzaj paliwa</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-fuel-pump"></i></span>
+                            <select asp-for="FuelType" class="form-select" asp-items="Html.GetEnumSelectList<FuelType>()">
+                                <option value="">-- Wybierz paliwo --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="FuelType" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 text-muted text-uppercase small fw-bold mt-5 mb-2 border-bottom pb-1">
+                        Identyfikacja i Stan
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LicensePlate" class="form-label fw-bold">Nr Rejestracyjny</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-card-text"></i></span>
+                            <input asp-for="LicensePlate" class="form-control" placeholder="np. KR 12345" />
+                        </div>
+                        <span asp-validation-for="LicensePlate" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="VIN" class="form-label fw-bold">Numer VIN</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-upc-scan"></i></span>
+                            <input asp-for="VIN" class="form-control" placeholder="17 znaków" />
+                        </div>
+                        <span asp-validation-for="VIN" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="CurrentKm" class="form-label fw-bold">Aktualny przebieg (km)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-speedometer2"></i></span>
+                            <input asp-for="CurrentKm" class="form-control" placeholder="0" />
+                        </div>
+                        <span asp-validation-for="CurrentKm" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Status" class="form-label fw-bold">Status pojazdu</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-info-circle"></i></span>
+                            <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<VehicleStatus>()"></select>
+                        </div>
+                        <span asp-validation-for="Status" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 text-muted text-uppercase small fw-bold mt-5 mb-2 border-bottom pb-1">
+                        Przypisania
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="DriverId" class="form-label fw-bold">Główny Kierowca</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
+                            <select asp-for="DriverId" class="form-select" asp-items="ViewBag.DriverId">
+                                <option value="">-- Brak przypisanego kierowcy --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="UserId" class="form-label fw-bold">Użytkownik Systemu (Opiekun)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-person-fill-lock"></i></span>
+                            <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId">
+                                <option value="">-- Brak opiekuna --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-5 d-flex justify-content-end">
+                        <a asp-action="Index" class="btn btn-light border me-2">Anuluj</a>
+                        <button type="submit" class="btn btn-primary px-5 shadow-sm">
+                            <i class="bi bi-check-lg me-2"></i>Dodaj Pojazd
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index" class="btn btn-primary mb-2">Powrót do listy</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

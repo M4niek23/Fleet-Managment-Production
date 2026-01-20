@@ -4,57 +4,123 @@
     ViewData["Title"] = "Edycja Kierowcy";
 }
 
-<h1>Edytuj Kierowcę</h1>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+<div class="container-fluid py-4">
 
-            <div class="form-group mb-3">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="Pesel" class="control-label"></label>
-                <input asp-for="Pesel" class="form-control" />
-                <span asp-validation-for="Pesel" class="text-danger"></span>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Edycja Kierowcy</h2>
+            <p class="text-muted mb-0">Zaktualizuj dane pracownika lub zmień uprawnienia.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Powrót do listy
+        </a>
+    </div>
 
-            <div class="card p-3 mb-3 bg-light">
-                <label asp-for="UserId" class="control-label fw-bold">Konto Systemowe</label>
-                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId">
-                    <option value="">-- Brak --</option>
-                </select>
-            </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-pencil-square me-2"></i>Formularz edycji</h5>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="LicenseCategory" class="control-label"></label>
-                <select asp-for="LicenseCategory" class="form-control" asp-items="Html.GetEnumSelectList<Fleet_Managment_Production.Models.LicenseCategory>()"></select>
-                <span asp-validation-for="LicenseCategory" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="PhoneNumber" class="control-label"></label>
-                <input asp-for="PhoneNumber" class="form-control" />
-                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-            </div>
+                <input type="hidden" asp-for="Id" />
 
-            <div class="form-group">
-                <input type="submit" value="Zapisz" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
-            </div>
-        </form>
+                <div class="row g-3">
+
+                    <div class="col-12 text-muted text-uppercase small fw-bold mt-2 mb-2 border-bottom pb-1">
+                        Dane Identyfikacyjne
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="FirstName" class="form-label fw-bold">Imię</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                            <input asp-for="FirstName" class="form-control" />
+                        </div>
+                        <span asp-validation-for="FirstName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LastName" class="form-label fw-bold">Nazwisko</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-person-fill"></i></span>
+                            <input asp-for="LastName" class="form-control" />
+                        </div>
+                        <span asp-validation-for="LastName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Pesel" class="form-label fw-bold">PESEL</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-person-vcard"></i></span>
+                            <input asp-for="Pesel" class="form-control" maxlength="11" />
+                        </div>
+                        <span asp-validation-for="Pesel" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 text-muted text-uppercase small fw-bold mt-4 mb-2 border-bottom pb-1">
+                        Uprawnienia i Kontakt
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label fw-bold">Adres Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                            <input asp-for="Email" class="form-control" />
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="PhoneNumber" class="form-label fw-bold">Numer telefonu</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                        </div>
+                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LicenseCategory" class="form-label fw-bold">Kategoria Prawa Jazdy</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-card-heading"></i></span>
+                            <select asp-for="LicenseCategory" class="form-select" asp-items="Html.GetEnumSelectList<Fleet_Managment_Production.Models.LicenseCategory>()"></select>
+                        </div>
+                        <span asp-validation-for="LicenseCategory" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 text-muted text-uppercase small fw-bold mt-4 mb-2 border-bottom pb-1">
+                        Dostęp do systemu
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="p-3 bg-light border rounded">
+                            <label asp-for="UserId" class="form-label fw-bold mb-2">Powiąż z kontem użytkownika (Login)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-person-lock"></i></span>
+                                <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId">
+                                    <option value="">-- Brak konta systemowego (Tylko ewidencja) --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4 d-flex justify-content-end">
+                        <a asp-action="Index" class="btn btn-light border me-2">Anuluj</a>
+                        <button type="submit" class="btn btn-primary px-5 shadow-sm">
+                            <i class="bi bi-save me-2"></i>Zapisz zmiany
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,63 +1,109 @@
 ﻿@model Fleet_Managment_Production.Models.Inspection
 
 @{
-    ViewData["Title"] = "Dodaj przegląd";
+    ViewData["Title"] = "Nowy Przegląd";
 }
 
-<h1>Dodaj przegląd</h1>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <div asp-validation-summary="All" class="text-danger"></div>
-        <form asp-action="Create">
+<div class="container-fluid py-4">
 
-            <div class="form-group mb-3">
-                <label asp-for="VehicleId" class="control-label">Pojazd</label>
-                <select asp-for="VehicleId" class="form-control" asp-items="ViewBag.VehicleList">
-                    <option value="">-- Wybierz pojazd --</option>
-                </select>
-                <span asp-validation-for="VehicleId" class="text-danger"></span>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Dodaj Przegląd</h2>
+            <p class="text-muted mb-0">Zarejestruj badanie techniczne, serwis lub naprawę.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Powrót do listy
+        </a>
+    </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="InspectionDate" class="control-label"></label>
-                <input asp-for="InspectionDate" class="form-control" />
-                <span asp-validation-for="InspectionDate" class="text-danger"></span>
-            </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-tools me-2"></i>Szczegóły badania</h5>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Mileage" class="control-label"></label>
-                <input asp-for="Mileage" class="form-control" />
-                <span asp-validation-for="Mileage" class="text-danger"></span>
-            </div>
+                <div class="row g-3">
 
-            <div class="form-group mb-3">
-                <label asp-for="Cost" class="control-label"></label>
-                <input asp-for="Cost" class="form-control" />
-                <span asp-validation-for="Cost" class="text-danger"></span>
-            </div>
+                    <div class="col-12 text-muted text-uppercase small fw-bold mt-2 mb-2 border-bottom pb-1">
+                        Dane operacyjne
+                    </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="IsResultPositive" class="control-label"></label>
-                <select asp-for="IsResultPositive" class="form-control">
-                    <option value="">Oczekujący</option>
-                    <option value="true">Pozytywny</option>
-                    <option value="false">Negatywny</option>
-                </select>
-                <span asp-validation-for="IsResultPositive" class="text-danger"></span>
-            </div>
+                    <div class="col-md-6">
+                        <label asp-for="VehicleId" class="form-label fw-bold">Pojazd</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-car-front"></i></span>
+                            <select asp-for="VehicleId" class="form-select" asp-items="ViewBag.VehicleList">
+                                <option value="">-- Wybierz pojazd --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="VehicleId" class="text-danger small"></span>
+                    </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Description" class="control-label"></label>
-                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
+                    <div class="col-md-6">
+                        <label asp-for="InspectionDate" class="form-label fw-bold">Data przeglądu</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-calendar-event"></i></span>
+                            <input asp-for="InspectionDate" class="form-control" type="date" />
+                        </div>
+                        <span asp-validation-for="InspectionDate" class="text-danger small"></span>
+                    </div>
 
-            <div class="form-group">
-                <input type="submit" value="Utwórz" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
-            </div>
-        </form>
+                    <div class="col-md-6">
+                        <label asp-for="Mileage" class="form-label fw-bold">Przebieg (km)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-speedometer2"></i></span>
+                            <input asp-for="Mileage" class="form-control" placeholder="np. 150000" />
+                        </div>
+                        <span asp-validation-for="Mileage" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Cost" class="form-label fw-bold">Koszt (PLN)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-currency-exchange"></i></span>
+                            <input asp-for="Cost" class="form-control" placeholder="0.00" />
+                        </div>
+                        <span asp-validation-for="Cost" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 text-muted text-uppercase small fw-bold mt-4 mb-2 border-bottom pb-1">
+                        Rezultat i Uwagi
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="IsResultPositive" class="form-label fw-bold">Wynik badania</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-clipboard-check"></i></span>
+                            <select asp-for="IsResultPositive" class="form-select">
+                                <option value="">-- Oczekujący / W trakcie --</option>
+                                <option value="true" class="text-success fw-bold">Pozytywny (Zaliczony)</option>
+                                <option value="false" class="text-danger fw-bold">Negatywny (Usterka)</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="IsResultPositive" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label fw-bold">Opis / Zalecenia</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-file-text"></i></span>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Wpisz szczegóły naprawy lub uwagi diagnosty..."></textarea>
+                        </div>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 mt-4 d-flex justify-content-end">
+                        <a asp-action="Index" class="btn btn-light border me-2">Anuluj</a>
+                        <button type="submit" class="btn btn-primary px-5 shadow-sm">
+                            <i class="bi bi-check-lg me-2"></i>Utwórz Przegląd
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

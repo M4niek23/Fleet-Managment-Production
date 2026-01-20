@@ -1,88 +1,148 @@
-﻿@using Fleet_Managment_Production.Models;
-@model Insurance
+﻿@model Fleet_Managment_Production.Models.Insurance
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Szczegóły Polisy - " + Model.PolicyNumber;
+
+    var isExpired = Model.ExpiryDate < DateTime.Today;
+    var daysLeft = (Model.ExpiryDate - DateTime.Today).Days;
 }
 
-<h1>Details</h1>
+<div class="container-fluid py-4">
 
-<div>
-    <h4>Insurance</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.PolicyNumber)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.PolicyNumber)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.InsurareName)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.InsurareName)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.StartDate)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.StartDate)
-        </dd>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="@(isExpired ? "bg-secondary" : "bg-success") bg-opacity-10 text-@(isExpired ? "secondary" : "success") rounded-circle p-4 me-4 d-none d-sm-block">
+                            <i class="bi bi-shield-check fs-1"></i>
+                        </div>
+                        <div>
+                            <h2 class="fw-bold mb-1">Polisa: @Model.PolicyNumber</h2>
+                            <div class="text-muted fs-5">@Model.InsurareName</div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        @if (isExpired)
+                        {
+                            <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">Wygasła</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success fs-6 px-3 py-2 rounded-pill mb-1">Aktywna</span>
+                            <div class="text-success small fw-bold">Pozostało dni: @daysLeft</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ExpiryDate)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ExpiryDate)
-        </dd>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-muted"><i class="bi bi-info-circle me-2"></i>Informacje podstawowe</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-muted">Pojazd</span>
+                            @if (Model.Vehicle != null)
+                            {
+                                <a asp-controller="Vehicles" asp-action="Details" asp-route-id="@Model.VehicleId" class="fw-bold text-decoration-none text-dark">
+                                    @Model.Vehicle.LicensePlate <i class="bi bi-box-arrow-up-right ms-1 small text-muted"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-danger">Brak przypisanego pojazdu</span>
+                            }
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-muted">Ważna od</span>
+                            <span class="fw-bold">@Model.StartDate.ToShortDateString()</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-muted">Ważna do</span>
+                            <span class="fw-bold @(isExpired ? "text-danger" : "text-success")">
+                                @Model.ExpiryDate.ToShortDateString()
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-muted">Koszt polisy</span>
+                            <span class="fw-bold text-dark fs-5">@Model.Cost.ToString("C")</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Cost)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Cost)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.HasOc)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.HasOc)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.AcScope)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.AcScope)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.HasAssistance)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.HasAssistance)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.HasNNW)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.HasNNW)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.IsCurrent)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.IsCurrent)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Vehicle)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Vehicle.LicensePlate)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-muted"><i class="bi bi-ui-checks me-2"></i>Zakres ochrony</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center p-3 border rounded bg-light">
+                                <i class="bi @(Model.HasOc ? "bi-check-circle-fill text-success" : "bi-x-circle-fill text-muted") fs-3 me-3"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">Ubezpieczenie OC</h6>
+                                    <small class="text-muted">Obowiązkowe ubezpieczenie odpowiedzialności cywilnej.</small>
+                                </div>
+                            </div>
+                        </div>
 
-    <a asp-action="Index" asp-route-id="@Model.VehicleId">Back to List</a>
+                        <div class="col-12">
+                            <div class="d-flex align-items-center p-3 border rounded @(Model.AcScope != Fleet_Managment_Production.Models.AcScope.None ? "bg-light" : "")">
+                                @if (Model.AcScope != Fleet_Managment_Production.Models.AcScope.None)
+                                {
+                                    <i class="bi bi-check-circle-fill text-success fs-3 me-3"></i>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">Autocasco (AC)</h6>
+                                        <span class="badge bg-info text-dark mt-1">Zakres: @Model.AcScope</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-dash-circle text-muted fs-3 me-3"></i>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-muted">Autocasco (AC)</h6>
+                                        <small class="text-muted">Brak wykupionego pakietu.</small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="d-flex align-items-center p-3 border rounded h-100">
+                                <i class="bi @(Model.HasAssistance ? "bi-check-circle-fill text-success" : "bi-x-circle text-muted") fs-4 me-2"></i>
+                                <span class="@(Model.HasAssistance ? "fw-bold" : "text-muted")">Assistance</span>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="d-flex align-items-center p-3 border rounded h-100">
+                                <i class="bi @(Model.HasNNW ? "bi-check-circle-fill text-success" : "bi-x-circle text-muted") fs-4 me-2"></i>
+                                <span class="@(Model.HasNNW ? "fw-bold" : "text-muted")">NNW</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary shadow-sm me-2">
+                <i class="bi bi-pencil-square me-2"></i>Edytuj Polisę
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Powrót do listy
+            </a>
+        </div>
+    </div>
 </div>
