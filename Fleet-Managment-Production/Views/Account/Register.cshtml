@@ -1,42 +1,86 @@
-﻿﻿@using Fleet_Managment_Production.ViewModels;
+﻿@using Fleet_Managment_Production.ViewModels;
 @model RegisterViewModel;
 
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Rejestracja";
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 
-<div class="account-container">
-    <div class="account-box">
-        <h2 class="text-center mb-4">Rejestracja</h2>
-        <form asp-action="Register" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="mb-3">
-                <label asp-for="Name" class="form-label">Nazwa użytkownika</label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+        <div class="col-md-8 col-lg-5">
+
+            <div class="text-center mb-4">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-3">
+                    <i class="bi bi-person-plus-fill fs-1"></i>
+                </div>
+                <h2 class="fw-bold text-dark">Dołącz do Fleet<span class="text-primary">Manager</span></h2>
+                <p class="text-muted">Utwórz nowe konto, aby zarządzać swoją flotą.</p>
             </div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label">Email</label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4 p-sm-5">
+
+                    <form asp-action="Register" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-bold small text-uppercase text-muted">Nazwa użytkownika</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                                <input asp-for="Name" class="form-control border-start-0 bg-light" placeholder="np. Jan Kowalski" />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold small text-uppercase text-muted">Adres Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                                <input asp-for="Email" class="form-control border-start-0 bg-light" placeholder="nazwa@firma.pl" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-bold small text-uppercase text-muted">Hasło</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                                <input asp-for="Password" class="form-control border-start-0 bg-light" type="password" placeholder="••••••••" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="ConfirmPassword" class="form-label fw-bold small text-uppercase text-muted">Potwierdź hasło</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-shield-check text-muted"></i></span>
+                                <input asp-for="ConfirmPassword" class="form-control border-start-0 bg-light" type="password" placeholder="••••••••" />
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm fw-bold">
+                                Zarejestruj się <i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <span class="text-muted small">Masz już konto?</span>
+                            <a asp-controller="Account" asp-action="Login" class="fw-bold text-decoration-none">Zaloguj się</a>
+                        </div>
+                    </form>
+
+                </div>
             </div>
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label">Hasło</label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+
+            <div class="text-center mt-4 text-muted small opacity-50">
+                &copy; @DateTime.Now.Year Fleet Manager System
             </div>
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label">Potwierdź hasło</label>
-                <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-            <input type="submit" value="Zarejestruj się" class="btn btn-success w-100 p-2" />
-            <p class="text-center mt-2">
-                Masz już konto? <a asp-controller="Account" asp-action="Login" class="text-decoration-none">Zaloguj się</a>
-            </p>
-        </form>
+
+        </div>
     </div>
 </div>
 

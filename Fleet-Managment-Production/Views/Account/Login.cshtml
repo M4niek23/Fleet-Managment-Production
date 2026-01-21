@@ -1,44 +1,78 @@
-﻿﻿@using Fleet_Managment_Production.ViewModels;
+﻿@using Fleet_Managment_Production.ViewModels;
 @model LoginViewModel;
 
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Logowanie";
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 
-<div class="account-container">
-    <div class="account-box">
-        <h2 class="text-center mb-4">Panel logowania</h2>
-        <form asp-action="Login" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label">Email</label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+        <div class="col-md-6 col-lg-4">
+
+            <div class="text-center mb-4">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-3">
+                    <i class="bi bi-truck fs-1"></i>
+                </div>
+                <h2 class="fw-bold text-dark">Fleet<span class="text-primary">Manager</span></h2>
+                <p class="text-muted">Witaj ponownie! Zaloguj się do systemu.</p>
             </div>
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label">Hasło</label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4 p-sm-5">
+
+                    <form asp-action="Login" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold small text-uppercase text-muted">Adres Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                                <input asp-for="Email" class="form-control border-start-0 bg-light" placeholder="nazwa@firma.pl" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label asp-for="Password" class="form-label fw-bold small text-uppercase text-muted">Hasło</label>
+                                <a asp-controller="Account" asp-action="VerifyEmail" class="small text-decoration-none text-primary">Zapomniałeś hasła?</a>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                                <input asp-for="Password" class="form-control border-start-0 bg-light" placeholder="••••••••" type="password" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4 form-check">
+                            <input asp-for="RememberMe" class="form-check-input" />
+                            <label class="form-check-label text-muted" asp-for="RememberMe">
+                                Zapamiętaj mnie
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm fw-bold">
+                                Zaloguj się <i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <span class="text-muted small">Nie masz jeszcze konta?</span>
+                            <a asp-controller="Account" asp-action="Register" class="fw-bold text-decoration-none">Zarejestruj się</a>
+                        </div>
+                    </form>
+
+                </div>
             </div>
-            <div class="float-end">
-                <a asp-controller="Account" asp-action="VerifyEmail" class="text-decoration-none">
-                    Zapomniałeś hasła?
-                </a>
+
+            <div class="text-center mt-4 text-muted small opacity-50">
+                &copy; @DateTime.Now.Year Fleet Manager System
             </div>
-            <div class="form-check mb-3">
-                <label class="form-check-label">Zapamiętaj mnie
-                    <input asp-for="RememberMe" class="form-check-input" />
-                    @Html.DisplayNameFor(a => a)
-                </label>
-            </div>
-            <input type="submit" value="Login" class="btn btn-success w-100 p-2" />
-            <p class="text-center mt-2">
-                Nie masz konta?<a asp-controller="Account" asp-action="Register" class="text-decoration-none"> Zarestruj się</a>
-            </p>
-           
-        </form>
+
+        </div>
     </div>
 </div>
 
