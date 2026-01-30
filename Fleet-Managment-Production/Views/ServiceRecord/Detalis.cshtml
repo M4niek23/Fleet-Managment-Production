@@ -1,0 +1,33 @@
+﻿@model Fleet_Managment_Production.Models.ServiceRecord
+
+<div class="container mt-4">
+    <div class="card border-info shadow">
+        <div class="card-header bg-info text-white d-flex justify-content-between">
+            <h4 class="mb-0">Karta Naprawy: @Model.Vehicle.LicensePlate</h4>
+            <span>ID Zlecenia: #@Model.Id</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-6 border-end">
+                    <h5>Informacje o pojeździe</h5>
+                    <p><strong>Model:</strong> @Model.Vehicle.Model</p>
+                    <p><strong>Przebieg:</strong> @Model.Vehicle.CurrentKm km</p>
+                </div>
+                <div class="col-sm-6">
+                    <h5>Szczegóły techniczne</h5>
+                    <p><strong>Data usterki:</strong> @Model.FaultDate.ToLongDateString()</p>
+                    <p><strong>Koszt całkowity:</strong> <span class="text-danger fw-bold">@Model.RepairCost.ToString("C")</span></p>
+                </div>
+            </div>
+            <hr />
+            <h5>Opis usterki:</h5>
+            <div class="p-3 bg-light rounded">
+                @Model.FaultDescription
+            </div>
+        </div>
+        <div class="card-footer">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edytuj dane</a>
+            <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
+        </div>
+    </div>
+</div>

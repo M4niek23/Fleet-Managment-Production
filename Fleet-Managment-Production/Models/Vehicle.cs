@@ -34,10 +34,7 @@ namespace Fleet_Managment_Production.Models
         InMaintenance,
 
         [Display(Name = "Sprzedany")]
-        Sold,
-
-        [Display(Name = "Wycofany")]
-        Decommissioned
+        Sold
     }
 
     [Index(nameof(VIN), IsUnique = true)]
@@ -71,7 +68,7 @@ namespace Fleet_Managment_Production.Models
 
 
         [StringLength(17, MinimumLength = 17)]
-        [RegularExpression(@"^[A-HJ-NPR-Z0-9]{17}$")] // bez I,O,Q
+        [RegularExpression(@"^[A-HJ-NPR-Z0-9]{17}$")]
         public string? VIN { get; set; }
 
 

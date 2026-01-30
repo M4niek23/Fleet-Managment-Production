@@ -1,0 +1,55 @@
+﻿@model Fleet_Managment_Production.Models.ServiceRecord
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Zgłoszenie nowej usterki</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="VehicleId" class="form-label">Wybierz Pojazd (Tylko status 'W serwisie')</label>
+                            <select asp-for="VehicleId" class="form-select" asp-items="ViewBag.VehicleId">
+                                <option value="">-- Wybierz numer rejestracyjny --</option>
+                            </select>
+                            <span asp-validation-for="VehicleId" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FaultDate" class="form-label">Data wystąpienia</label>
+                                <input asp-for="FaultDate" class="form-control" type="date" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PlannedCompletionDate" class="form-label">Planowany koniec</label>
+                                <input asp-for="PlannedCompletionDate" class="form-control" type="date" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RepairCost" class="form-label">Szacowany koszt</label>
+                            <div class="input-group">
+                                <span class="input-group-text">PLN</span>
+                                <input asp-for="RepairCost" class="form-control" step="0.01" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="FaultDescription" class="form-label">Opis awarii</label>
+                            <textarea asp-for="FaultDescription" class="form-control" rows="4" placeholder="Opisz co dokładnie się stało..."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Zapisz zgłoszenie</button>
+                            <a asp-controller="Vehicles" asp-action="Index" class="btn btn-light">Powrót do floty</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

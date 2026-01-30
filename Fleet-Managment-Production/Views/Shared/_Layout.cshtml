@@ -175,6 +175,10 @@
                     <i class="bi bi-wallet2"></i> Koszty
                 </a>
 
+                <a class="nav-link @(currentController == "ServiceRecords" ? "active" : "")" asp-controller="ServiceRecords" asp-action="Index">
+                    <i class="bi bi-key"></i> Serwis
+                </a>
+
                 @if (User.IsInRole("Admin"))
                 {
                     <div class="px-3 mb-2 mt-4">
@@ -193,7 +197,7 @@
         </aside>
 
 
-        <div class="d-flex flex-column flex-grow-1">
+        <div class="d-flex flex-column flex-grow-1"> 
 
             <header>
                 <nav class="navbar navbar-expand navbar-light bg-white sticky-top px-4 py-2">
@@ -231,6 +235,8 @@
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Vehicles" asp-action="Index">Pojazdy</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Trips" asp-action="Index">Trasy</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Drivers" asp-action="Index">Kierowcy</a>
+                <a class="nav-link py-3 border-bottom text-dark" asp-controller="ServiceRecord" asp-action="Index">Serwis</a>
+
             </nav>
         </div>
     </div>

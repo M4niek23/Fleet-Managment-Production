@@ -27,7 +27,7 @@ namespace Fleet_Managment_Production.Models
         public string Opis { get; set; } = null!;
 
         [Required(ErrorMessage = "Kwota jest wymagana")]
-        [Column(TypeName = "decimal(18, 2)")] // Ważne dla kwot pieniężnych
+        [Column(TypeName = "decimal(18, 2)")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Kwota musi być dodatnia")]
         [Display(Name = "Kwota")]
         public decimal Kwota { get; set; }

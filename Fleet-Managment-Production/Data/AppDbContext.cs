@@ -15,6 +15,7 @@ namespace Fleet_Managment_Production.Data
         public DbSet<Cost> Costs { get; set; }
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<Trip> Trips { get; set; }
+        public DbSet<ServiceRecord> ServiceRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBilder)
         {
@@ -62,6 +63,12 @@ namespace Fleet_Managment_Production.Data
                 .HasOne(t => t.Vehicle)
                 .WithMany(v => v.Trips) // <-- POPRAWKA: Wskazujemy listę Trips w pojeździe
                 .HasForeignKey(t => t.VehicleId)
+                .OnDelete(DeleteBehavior.Cascade);
+            //Konfiguracja relacji Vehicle do ServiceRecord
+            modelBilder.Entity<ServiceRecord>()
+                .HasOne(s => s.Vehicle)
+                .WithMany()
+                .HasForeignKey(s => s.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -1,0 +1,19 @@
+﻿@model Fleet_Managment_Production.Models.ServiceRecord
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="alert alert-warning shadow">
+                <h2 class="text-danger"><i class="bi bi-exclamation-triangle"></i> Czy na pewno?</h2>
+                <p>Zamierzasz usunąć wpis o naprawie dla pojazdu <strong>@Model.Vehicle.LicensePlate</strong> z dnia @Model.FaultDate.ToShortDateString().</p>
+                <p class="text-muted">Tej operacji nie można cofnąć.</p>
+
+                <form asp-action="Delete" class="mt-4">
+                    <input type="hidden" asp-for="Id" />
+                    <button type="submit" class="btn btn-danger btn-lg me-2">Tak, usuń trwale</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg">Anuluj</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
