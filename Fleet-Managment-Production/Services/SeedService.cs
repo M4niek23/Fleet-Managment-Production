@@ -19,26 +19,26 @@ namespace Fleet_Managment_Production.Services
             try
             {
                 // Ensure the database is ready
-                logger.LogInformation("Ensuring the database is created.");
+                logger.LogInformation("Sprawdzanie, czy baza danych istnieje.");
                 await context.Database.EnsureCreatedAsync();
 
                 // Add roles
-                logger.LogInformation("Seeding roles.");
+                logger.LogInformation("Rozpoczynanie inicjowania ról.");
                 await AddRoleAsync(roleManager, "Admin");
                 await AddRoleAsync(roleManager, "User");
 
                 // Add Roles
-                logger.LogInformation("Seeding additional roles for admin assigment");
+                logger.LogInformation("Przypisywanie dodatkowych ról do zadań administracyjnych");
                 await AddRoleAsync(roleManager, "Manager");
                 await AddRoleAsync(roleManager, "Moderator");
                 // Add admin user
-                logger.LogInformation("Seeding admin user.");
-                var adminEmail = "admin@codehub.com";
+                logger.LogInformation("Dodawanie administratora.");
+                var adminEmail = "admin@fleet.com";
                 if (await userManager.FindByEmailAsync(adminEmail) == null)
                 {
                     var adminUser = new Users
                     {
-                        FullName = "Code Hub",
+                        FullName = "Admin FleetManager",
                         UserName = adminEmail,
                         NormalizedUserName = adminEmail.ToUpper(),
                         Email = adminEmail,
@@ -50,18 +50,18 @@ namespace Fleet_Managment_Production.Services
                     var result = await userManager.CreateAsync(adminUser, "Admin@123");
                     if (result.Succeeded)
                     {
-                        logger.LogInformation("Assigning Admin role to the admin user.");
+                        logger.LogInformation("Przypisanie roli administratora do użytkownika admin.");
                         await userManager.AddToRoleAsync(adminUser, "Admin");
                     }
                     else
                     {
-                        logger.LogError("Failed to create admin user: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
+                        logger.LogError("Nie udało się utworzyć użytkownika administratora: {Błąd}", string.Join(", ", result.Errors.Select(e => e.Description)));
                     }
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while seeding the database.");
+                logger.LogError(ex, "Wystąpił błąd podczas indeksowania bazy danych.");
 
             }
 
@@ -74,7 +74,7 @@ namespace Fleet_Managment_Production.Services
                 var result = await roleManager.CreateAsync(new IdentityRole(roleName));
                 if (!result.Succeeded)
                 {
-                    throw new Exception($"Failed to create role '{roleName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    throw new Exception($"Nie udało się utworzyć roli '{roleName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
                 }
             }
         }
