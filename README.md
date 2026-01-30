@@ -41,7 +41,7 @@ jeżeli ta nie istnieje. Nie musisz ręcznie uruchamiać migracji przy pierwszym
 
 Po uruchomieniu aplikacji system automatycznie utworzy konto administratora, jeśli jeszcze nie istnieje w bazie danych. Skorzystaj z poniższych danych, aby się zalogować:
  
- 1. Admin: admin@fleet.com
+ 1. Login: admin@fleet.com
  2. Hasło: Admin@123 
 
 Uwaga: Konto posiada przypisaną rolę Admin.
