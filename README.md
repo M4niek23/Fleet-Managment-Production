@@ -20,7 +20,7 @@ Domyślna konfiguracja wskazuje na użycie lokalnej instancji bazy danych (**Loc
    "ConnectionStrings": {
      "Default": "Server=(localdb)\\MSSQLLocalDB;Database=Nowa_Baza;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=true"
    }
-   ```json
+   ```
 3. Jeżeli używasz pełnej wersji SQL Server, zmień ten ciąg znaków na odpowiedni dla Twojej instalacji. Jeżeli uzywasz Visual Studio z domyślnymi ustawieniami, domyślna konfiguracja powinna zadziałać bez zmian.
 
 **Automatyczne tworzenie bazy**
@@ -40,10 +40,10 @@ jeżeli ta nie istnieje. Nie musisz ręcznie uruchamiać migracji przy pierwszym
 ## 4. Domyślne dane logowania
 
 Po uruchomieniu aplikacji system automatycznie utworzy konto administratora, jeśli jeszcze nie istnieje w bazie danych. Skorzystaj z poniższych danych, aby się zalogować:
-** Admin: admin@codehub.com **
-** Hasło: Admin@123 ***
+* ** Admin: admin@fleet.com
+* ** Hasło: Admin@123 
 
-** Uwaga: Konto posiada przypisaną rolę Admin. **
+* **Uwaga: Konto posiada przypisaną rolę Admin.
 
 ## 5. Dodatkowe informacje
 
