@@ -4,22 +4,22 @@ namespace Fleet_Managment_Production.ViewModels
 {
     public class RegisterViewModel
     {
-        [Required(ErrorMessage = "Name is required.")]
+        [Required(ErrorMessage = "Nazwa jest wymagana.")]
         public string Name { get; set; }
 
-        [Required(ErrorMessage = "Email is required.")]
+        [Required(ErrorMessage = "Email jest wymagany.")]
         [EmailAddress]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Password is required.")]
-        [StringLength(40, MinimumLength = 8, ErrorMessage = "The {0} must be at {2} and at max {1} characters long.")]
+        [Required(ErrorMessage = "Hasło jest wymagane.")]
+        [StringLength(40, MinimumLength = 8, ErrorMessage = "{0} musi znajdować się w {2} i mieć maksymalnie {1} znaków.")]
         [DataType(DataType.Password)]
-        [Compare("ConfirmPassword", ErrorMessage = "Password does not match.")]
+        [Compare("ConfirmPassword", ErrorMessage = "Hasła do siebie nie pasują.")]
         public string Password { get; set; }
 
-        [Required(ErrorMessage = "Confirm Password is required.")]
+        [Required(ErrorMessage = "Potwierdzenie nowego hasła jest wymagane.")]
         [DataType(DataType.Password)]
-        [Display(Name = "Confirm Password")]
+        [Display(Name = "Potwierdź hasło")]
         public string ConfirmPassword { get; set; }
 
     }

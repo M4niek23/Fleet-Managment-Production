@@ -4,20 +4,20 @@ namespace Fleet_Managment_Production.ViewModels
 {
     public class ChangePasswordViewModel
     {
-        [Required(ErrorMessage = "Email is required.")]
+        [Required(ErrorMessage = "Email jest wymagany.")]
         [EmailAddress]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Password is required.")]
-        [StringLength(40, MinimumLength = 8, ErrorMessage = "The {0} must be at {2} and at max {1} characters long.")]
+        [Required(ErrorMessage = "Hasła jest wymagane.")]
+        [StringLength(40, MinimumLength = 8, ErrorMessage = "{0} musi znajdować się w {2} i mieć maksymalnie {1} znaków.")]
         [DataType(DataType.Password)]
-        [Display(Name = "New Password")]
-        [Compare("ConfirmNewPassword", ErrorMessage = "Password does not match.")]
+        [Display(Name = "Nowe hasło")]
+        [Compare("ConfirmNewPassword", ErrorMessage = "Hasła do siebie nie pasują.")]
         public string NewPassword { get; set; }
 
-        [Required(ErrorMessage = "Confirm Password is required.")]
+        [Required(ErrorMessage = "Nowe hasło jest wymagane.")]
         [DataType(DataType.Password)]
-        [Display(Name = "Confirm New Password")]
+        [Display(Name = "Potwierdź nowe hasło.")]
         public string ConfirmNewPassword { get; set; }
     }
 }

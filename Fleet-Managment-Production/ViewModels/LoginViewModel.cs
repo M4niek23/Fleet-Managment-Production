@@ -4,15 +4,15 @@ namespace Fleet_Managment_Production.ViewModels
 {
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "Email is required.")]
+        [Required(ErrorMessage = "Email jest wymagany.")]
         [EmailAddress]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Password is required.")]
+        [Required(ErrorMessage = "Hasło jest wymagane.")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        [Display(Name = "Remember me?")]
+        [Display(Name = "Zapamiętaj")]
         public bool RememberMe { get; set; }
     }
 }
