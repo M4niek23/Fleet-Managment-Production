@@ -1,0 +1,58 @@
+﻿@model IEnumerable<Fleet_Managment_Production.Models.Service>
+
+@{
+    ViewData["Title"] = "Serwis";
+}
+
+<div class="container-fluid shadow-sm p-3 mb-5 bg-white rounded">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1><i class="bi bi-wrench-adjustable text-primary"></i>Hitoria Serwisowa</h1>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Dodaj
+        </a>
+    </div>
+
+    <table class="table table-hover mt-3">
+        <thead class="table-light">
+            <tr>
+                <th>Pojazd</th>
+                <th>Opis</th>
+                <th>Data przyjęcia</th>
+                <th>Planowane zakończenie</th>
+                <th>Status</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <strong>@item.Vehicle?.Make @item.Vehicle?.Model</strong><br />
+                        <small class="text-muted">@item.Vehicle?.LicensePlate</small>
+                    </td>
+                    <td>@item.Description</td>
+                    <td>@item.EntryDate.ToShortDateString()</td>
+                    <td>@item.PlannedEndDate?.ToShortDateString()</td>
+                    <td>
+                        @if (item.ActualEndDate.HasValue)
+                        {
+                            <span class="badge bg-success">Zakończono</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">W serwisie</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edytuj</a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Szczegóły</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Usuń</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

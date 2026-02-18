@@ -1,0 +1,68 @@
+﻿@model Fleet_Managment_Production.Models.Service
+
+@{
+    ViewData["Title"] = "Edytuj Serwis";
+}
+
+<div class="container shadow p-4 mb-5 bg-white rounded border-start border-primary border-5">
+    <h4>Edycja / Zakończenie serwisu</h4>
+    <hr />
+    <form asp-action="Edit">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="VehicleId" />
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label class="control-label fw-bold">Pojazd</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-car-front"></i></span>
+                        @* Wyświetlamy markę, model i tablicę pobraną przez .Include *@
+                        <input class="form-control bg-light"
+                               value="@Model.Vehicle?.Make @Model.Vehicle?.Model (@Model.Vehicle?.LicensePlate)"
+                               disabled />
+                    </div>
+                    @* Ukryte pole przesyła VehicleId do kontrolera przy zapisie *@
+                    <input type="hidden" asp-for="VehicleId" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label asp-for="Cost" class="control-label"></label>
+                    <input asp-for="Cost" class="form-control" type="number" step="0.01" />
+                    <span asp-validation-for="Cost" class="text-danger"></span>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label asp-for="EntryDate" class="control-label"></label>
+                        <input asp-for="EntryDate" class="form-control" type="date" />
+                    </div>
+                    <div class="col">
+                        <label asp-for="ActualEndDate" class="control-label text-success fw-bold">Data rzeczywistego zakończenia</label>
+                        <input asp-for="ActualEndDate" class="form-control border-success" type="date" />
+                        <small class="text-muted">Wpisanie daty zmieni status pojazdu na 'Dostępny'</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mt-3 text-end">
+            <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Zapisz zmiany</button>
+            <a asp-action="Index" class="btn btn-secondary">Powrót</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

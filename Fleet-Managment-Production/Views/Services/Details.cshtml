@@ -1,0 +1,52 @@
+﻿@model Fleet_Managment_Production.Models.Service
+
+@{
+    ViewData["Title"] = "Szczegóły Serwisu";
+}
+
+<div class="container mt-4 shadow-sm p-4 bg-white rounded">
+    <div class="row">
+        <div class="col-8">
+            <h3><i class="bi bi-info-circle text-info"></i> Szczegóły operacji serwisowej</h3>
+        </div>
+        <div class="col-4 text-end">
+            @if (!Model.ActualEndDate.HasValue)
+            {
+                <span class="badge bg-warning text-dark p-2">STATUS: W TRAKCIE</span>
+            }
+            else
+            {
+                <span class="badge bg-success p-2">STATUS: ZAKOŃCZONO</span>
+            }
+        </div>
+    </div>
+    <hr />
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <dl class="row">
+                <dt class="col-sm-4 text-muted">Opis:</dt>
+                <dd class="col-sm-8 fw-bold">@Model.Description</dd>
+
+                <dt class="col-sm-4 text-muted">Data rozpoczęcia:</dt>
+                <dd class="col-sm-8">@Model.EntryDate.ToLongDateString()</dd>
+
+                <dt class="col-sm-4 text-muted">Data zakończenia:</dt>
+                <dd class="col-sm-8 text-success">@(Model.ActualEndDate?.ToLongDateString() ?? "Nadal w serwisie")</dd>
+
+                <dt class="col-sm-4 text-muted">Koszt całkowity:</dt>
+                <dd class="col-sm-8 h5">@Model.Cost.ToString("C")</dd>
+            </dl>
+        </div>
+        <div class="col-md-6 border-start">
+            <h5>Dane pojazdu</h5>
+            <p><strong>Pojazd:</strong> @Model.Vehicle?.Make @Model.Vehicle?.Model</p>
+            <p><strong>Rejestracja:</strong> @Model.Vehicle?.LicensePlate</p>
+            <p><strong>VIN:</strong> @Model.Vehicle?.VIN</p>
+            <p><strong>Aktualny przebieg:</strong> @Model.Vehicle?.CurrentKm km</p>
+        </div>
+    </div>
+    <div class="mt-4 border-top pt-3">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edytuj</a>
+        <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
+    </div>
+</div>

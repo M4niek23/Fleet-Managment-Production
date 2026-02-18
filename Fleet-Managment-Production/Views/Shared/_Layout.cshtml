@@ -174,6 +174,9 @@
                 <a class="nav-link @(currentController == "Costs" ? "active" : "")" asp-controller="Costs" asp-action="Index">
                     <i class="bi bi-wallet2"></i> Koszty
                 </a>
+                <a class="nav-link @(currentController == "Services" ? "active" : "")" asp-controller="Services" asp-action="Index">
+                    <i class="bi bi-wrench-adjustable"></i> Serwis
+                </a>
 
                 @if (User.IsInRole("Admin"))
                 {
@@ -231,6 +234,7 @@
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Vehicles" asp-action="Index">Pojazdy</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Trips" asp-action="Index">Trasy</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Drivers" asp-action="Index">Kierowcy</a>
+                <a class="nav-link py-3 border-bottom text-dark" asp-controller="Services" asp-action="Index">Serwis</a>
             </nav>
         </div>
     </div>

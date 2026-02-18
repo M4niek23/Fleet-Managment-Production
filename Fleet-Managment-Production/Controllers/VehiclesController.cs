@@ -40,6 +40,7 @@ namespace Fleet_Managment_Production.Controllers
                 .Include(v => v.Inspections)                      // Pobierz przeglądy
                 .Include(v => v.Insurances)                       // Pobierz ubezpieczenia
                 .Include(v => v.Costs)                            // Pobierz koszty
+                .Include(v => v.Services)                           // Pobierz Serwis
                 .FirstOrDefaultAsync(m => m.VehicleId == id);
 
             if (vehicle == null) return NotFound();
@@ -49,6 +50,7 @@ namespace Fleet_Managment_Production.Controllers
             vehicle.Inspections = vehicle.Inspections.OrderByDescending(i => i.InspectionDate).ToList();
             vehicle.Insurances = vehicle.Insurances.OrderByDescending(i => i.ExpiryDate).ToList();
             vehicle.Costs = vehicle.Costs.OrderByDescending(c => c.Data).ToList();
+            vehicle.Services = vehicle.Services.OrderByDescending(s => s.ActualEndDate).ToList();
 
             return View(vehicle);
         }
@@ -90,8 +92,8 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
-
-            var vehicle = await _context.Vehicles.FindAsync(id);
+            var hasActiveService = await _context.Services.AnyAsync(s => s.VehicleId == id && s.ActualEndDate == null); var vehicle = await _context.Vehicles.FindAsync(id);
+            ViewBag.IsStatusLocked = hasActiveService;
             if (vehicle == null) return NotFound();
 
             PopulateUsersDropdown(vehicle.UserId);
@@ -106,6 +108,22 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id != vehicle.VehicleId) return NotFound();
 
+            var currenVehilce = await _context.Vehicles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(v => v.VehicleId == id);
+            if (currenVehilce == null) return NotFound();
+            if (currenVehilce.Status != vehicle.Status)
+            {
+                bool hasActiveService = await _context.Services
+                    .AnyAsync(s => s.VehicleId == id && s.ActualEndDate == null);
+                if (hasActiveService)
+                {
+                    ModelState.AddModelError("Status", "Nie można zmienić statusu pojazdu, dopóki serwis nie zostanie zakończony (brak daty zakończenia w modul Serwis).");
+                    PopulateUsersDropdown(vehicle.UserId);
+                    PopulateDriversDropdown(vehicle.DriverId);
+                    return View(vehicle);
+                }
+            }
             if (ModelState.IsValid)
             {
                 try

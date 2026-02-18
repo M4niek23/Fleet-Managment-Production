@@ -1,0 +1,34 @@
+﻿@model Fleet_Managment_Production.Models.Service
+
+@{
+    ViewData["Title"] = "Usuń Serwis";
+}
+
+<div class="container mt-5">
+    <div class="card border-danger mx-auto" style="max-width: 600px;">
+        <div class="card-header bg-danger text-white">
+            <h5 class="card-title mb-0">Czy na pewno chcesz usunąć ten wpis?</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Usunięcie wpisu serwisowego nie zmieni statusu pojazdu.</p>
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-4">Pojazd:</dt>
+                <dd class="col-sm-8">@Model.Vehicle?.Make @Model.Vehicle?.Model</dd>
+
+                <dt class="col-sm-4">Data:</dt>
+                <dd class="col-sm-8">@Model.EntryDate.ToShortDateString()</dd>
+
+                <dt class="col-sm-4">Opis:</dt>
+                <dd class="col-sm-8 text-truncate">@Model.Description</dd>
+            </dl>
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-danger">Tak, usuń wpis</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Anuluj</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

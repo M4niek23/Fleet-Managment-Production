@@ -111,12 +111,37 @@
                         <span asp-validation-for="CurrentKm" class="text-danger small"></span>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-6 mb-3">
                         <label asp-for="Status" class="form-label fw-bold">Status pojazdu</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-info-circle"></i></span>
-                            <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<VehicleStatus>()"></select>
+                            <span class="input-group-text bg-light">
+                                @if (ViewBag.IsStatusLocked == true)
+                                {
+                                    <i class="bi bi-lock-fill text-danger"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-info-circle"></i>
+                                }
+                            </span>
+
+                            @if (ViewBag.IsStatusLocked == true)
+                            {
+                                <select asp-for="Status" class="form-select bg-light" asp-items="Html.GetEnumSelectList<VehicleStatus>()" disabled></select>
+                                <input type="hidden" asp-for="Status" />
+                            }
+                            else
+                            {
+                                <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<VehicleStatus>()"></select>
+                            }
                         </div>
+
+                        @if (ViewBag.IsStatusLocked == true)
+                        {
+                            <small class="text-danger fw-bold">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Status zablokowany: Trwa aktywny serwis.
+                            </small>
+                        }
                         <span asp-validation-for="Status" class="text-danger small"></span>
                     </div>
 

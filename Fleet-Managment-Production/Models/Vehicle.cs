@@ -35,9 +35,6 @@ namespace Fleet_Managment_Production.Models
 
         [Display(Name = "Sprzedany")]
         Sold,
-
-        [Display(Name = "Wycofany")]
-        Decommissioned
     }
 
     [Index(nameof(VIN), IsUnique = true)]
@@ -97,6 +94,7 @@ namespace Fleet_Managment_Production.Models
         public ICollection<Insurance> Insurances { get; set; } = new List<Insurance>();
         public ICollection<Cost> Costs { get; set; } = new List<Cost>();
         public ICollection<Trip> Trips { get; set; } = new List<Trip>();
+        public ICollection<Service> Services { get; set; } = new List<Service>();
 
     }
 }
