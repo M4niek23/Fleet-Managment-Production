@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fleet_Managment_Production.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260218203808_SerwisADD")]
-    partial class SerwisADD
+    [Migration("20260219220902_ServiceAdd")]
+    partial class ServiceAdd
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

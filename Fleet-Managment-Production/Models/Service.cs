@@ -5,6 +5,7 @@ namespace Fleet_Managment_Production.Models
 {
     public class Service
     {
+        [Key]
         public int Id { get; set; }
 
         [Required]

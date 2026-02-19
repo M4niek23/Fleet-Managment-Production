@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fleet_Managment_Production.Migrations
 {
     /// <inheritdoc />
-    public partial class SerwisADD : Migration
+    public partial class ServiceAdd : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
