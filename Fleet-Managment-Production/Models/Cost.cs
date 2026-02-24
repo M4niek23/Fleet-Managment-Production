@@ -3,44 +3,38 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fleet_Managment_Production.Models
 {
-    public enum CostType
-    {
-        Paliwo,
-        Naprawa,
-        Serwis,
-        Przegląd,
-        Ubezpieczenie,
-        Opłaty,
-        Inne
-    }
     public class Cost
     {
-        [Key]
         public int Id { get; set; }
 
-        [Required]
-        [Display(Name = "Typ kosztu")]
-        public CostType Type { get; set; }
+        [Display(Name = "Pojazd")]
+        public int VehicleId { get; set; }
+        public virtual Vehicle? Vehicle { get; set; }
 
-        [Required(ErrorMessage = "Opis jest wymagany")]
-        [StringLength(250)]
-        public string Opis { get; set; } = null!;
+        [Required(ErrorMessage = "Typ kosztu jest wymagany")]
+        [Display(Name = "Kategoria")]
+        public CostType Type { get; set; } // Tu teraz używamy Enuma
 
-        [Required(ErrorMessage = "Kwota jest wymagana")]
-        [Column(TypeName = "decimal(18, 2)")] // Ważne dla kwot pieniężnych
-        [Range(0.01, double.MaxValue, ErrorMessage = "Kwota musi być dodatnia")]
+        [Display(Name = "Opis")]
+        public string? Opis { get; set; }
+
         [Display(Name = "Kwota")]
+        [Column(TypeName = "decimal(18,2)")]
+        [Range(0.01, 1000000, ErrorMessage = "Kwota musi być większa od 0")]
         public decimal Kwota { get; set; }
 
-        [Required]
+        [Display(Name = "Data")]
         [DataType(DataType.Date)]
-        [Display(Name = "Data poniesienia kosztu")]
-        public DateTime Data { get; set; } = DateTime.Now;
+        public DateTime Data { get; set; }
 
-        public int VehicleId { get; set; }
+        // --- DANE PALIWOWE ---
+        [Display(Name = "Ilość Paliwa (L)")]
+        public double? Liters { get; set; }
 
-        [ForeignKey(nameof(VehicleId))]
-        public Vehicle? Vehicle { get; set; }
+        [Display(Name = "Przebieg (km)")]
+        public int? CurrentOdometer { get; set; }
 
+        [Display(Name = "Tankowanie do pełna")]
+        public bool IsFullTank { get; set; } = false;
     }
 }

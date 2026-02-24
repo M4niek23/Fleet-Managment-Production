@@ -25,7 +25,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             var appDbContext = _context.Vehicles
                 .Include(v => v.User)
-                .Include(v => v.Driver); // Jest OK
+                .Include(v => v.Driver);
             return View(await appDbContext.ToListAsync());
         }
 
@@ -35,17 +35,45 @@ namespace Fleet_Managment_Production.Controllers
             if (id == null) return NotFound();
 
             var vehicle = await _context.Vehicles
-                // Dołączamy powiązane dane (Relacje)
-                .Include(v => v.Trips).ThenInclude(t => t.Driver) // Pobierz trasy wraz z kierowcami
-                .Include(v => v.Inspections)                      // Pobierz przeglądy
-                .Include(v => v.Insurances)                       // Pobierz ubezpieczenia
-                .Include(v => v.Costs)                            // Pobierz koszty
-                .Include(v => v.Services)                           // Pobierz Serwis
+                .Include(v => v.Trips).ThenInclude(t => t.Driver)
+                .Include(v => v.Inspections)
+                .Include(v => v.Insurances)
+                .Include(v => v.Costs)
+                .Include(v => v.Services)
+                .Include(v => v.Driver)
                 .FirstOrDefaultAsync(m => m.VehicleId == id);
 
             if (vehicle == null) return NotFound();
 
-            // Sortujemy listy, aby najnowsze wpisy były na górze
+            // --- LOGIKA OBLICZANIA ŚREDNIEGO SPALANIA ---
+            double avgConsumption = 0;
+            // Pobieramy tylko koszty typu Paliwo, które mają wpisane litry i przebieg
+            var fuelCosts = vehicle.Costs
+                .Where(c => c.Type == CostType.Paliwo && c.Liters.HasValue && c.CurrentOdometer.HasValue)
+                .OrderBy(c => c.CurrentOdometer)
+                .ToList();
+
+            if (fuelCosts.Count >= 2)
+            {
+                var firstEntry = fuelCosts.First();
+                var lastEntry = fuelCosts.Last();
+
+                // Dystans całkowity od pierwszego do ostatniego tankowania w systemie
+                int totalDistance = lastEntry.CurrentOdometer.Value - firstEntry.CurrentOdometer.Value;
+
+                // Sumujemy litry z wszystkich tankowań oprócz pierwszego 
+                // (bo pierwsze tankowanie tylko wyznacza nam stan licznika początkowy)
+                double totalLiters = fuelCosts.Skip(1).Sum(c => c.Liters.Value);
+
+                if (totalDistance > 0)
+                {
+                    avgConsumption = (totalLiters / totalDistance) * 100;
+                }
+            }
+            ViewBag.AvgConsumption = avgConsumption;
+            // --------------------------------------------
+
+            // Sortowanie list dla widoku
             vehicle.Trips = vehicle.Trips.OrderByDescending(t => t.StartDate).ToList();
             vehicle.Inspections = vehicle.Inspections.OrderByDescending(i => i.InspectionDate).ToList();
             vehicle.Insurances = vehicle.Insurances.OrderByDescending(i => i.ExpiryDate).ToList();
@@ -59,7 +87,7 @@ namespace Fleet_Managment_Production.Controllers
         public IActionResult Create()
         {
             PopulateUsersDropdown();
-            PopulateDriversDropdown(); 
+            PopulateDriversDropdown();
             return View();
         }
 
@@ -79,12 +107,11 @@ namespace Fleet_Managment_Production.Controllers
 
                 _context.Vehicles.Add(vehicle);
                 await _context.SaveChangesAsync();
-
                 return RedirectToAction(nameof(Index));
             }
 
             PopulateUsersDropdown(vehicle.UserId);
-            PopulateDriversDropdown(vehicle.DriverId); 
+            PopulateDriversDropdown(vehicle.DriverId);
             return View(vehicle);
         }
 
@@ -92,9 +119,12 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
-            var hasActiveService = await _context.Services.AnyAsync(s => s.VehicleId == id && s.ActualEndDate == null); var vehicle = await _context.Vehicles.FindAsync(id);
-            ViewBag.IsStatusLocked = hasActiveService;
+
+            var vehicle = await _context.Vehicles.FindAsync(id);
             if (vehicle == null) return NotFound();
+
+            var hasActiveService = await _context.Services.AnyAsync(s => s.VehicleId == id && s.ActualEndDate == null);
+            ViewBag.IsStatusLocked = hasActiveService;
 
             PopulateUsersDropdown(vehicle.UserId);
             PopulateDriversDropdown(vehicle.DriverId);
@@ -108,22 +138,27 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id != vehicle.VehicleId) return NotFound();
 
-            var currenVehilce = await _context.Vehicles
+            var currentVehicle = await _context.Vehicles
                 .AsNoTracking()
                 .FirstOrDefaultAsync(v => v.VehicleId == id);
-            if (currenVehilce == null) return NotFound();
-            if (currenVehilce.Status != vehicle.Status)
+
+            if (currentVehicle == null) return NotFound();
+
+            // Blokada zmiany statusu przy aktywnym serwisie
+            if (currentVehicle.Status != vehicle.Status)
             {
                 bool hasActiveService = await _context.Services
                     .AnyAsync(s => s.VehicleId == id && s.ActualEndDate == null);
+
                 if (hasActiveService)
                 {
-                    ModelState.AddModelError("Status", "Nie można zmienić statusu pojazdu, dopóki serwis nie zostanie zakończony (brak daty zakończenia w modul Serwis).");
+                    ModelState.AddModelError("Status", "Nie można zmienić statusu pojazdu, dopóki serwis nie zostanie zakończony.");
                     PopulateUsersDropdown(vehicle.UserId);
                     PopulateDriversDropdown(vehicle.DriverId);
                     return View(vehicle);
                 }
             }
+
             if (ModelState.IsValid)
             {
                 try
@@ -140,7 +175,7 @@ namespace Fleet_Managment_Production.Controllers
             }
 
             PopulateUsersDropdown(vehicle.UserId);
-            PopulateDriversDropdown(vehicle.DriverId); 
+            PopulateDriversDropdown(vehicle.DriverId);
             return View(vehicle);
         }
 
@@ -151,7 +186,7 @@ namespace Fleet_Managment_Production.Controllers
 
             var vehicle = await _context.Vehicles
                 .Include(v => v.User)
-                .Include(v => v.Driver) 
+                .Include(v => v.Driver)
                 .FirstOrDefaultAsync(m => m.VehicleId == id);
 
             if (vehicle == null) return NotFound();
@@ -179,7 +214,6 @@ namespace Fleet_Managment_Production.Controllers
             return _context.Vehicles.Any(e => e.VehicleId == id);
         }
 
-
         private void PopulateUsersDropdown(object selectedUser = null)
         {
             var usersQuery = _userManager.Users
@@ -187,17 +221,7 @@ namespace Fleet_Managment_Production.Controllers
                 .OrderBy(u => u.DisplayName)
                 .ToList();
 
-            if (usersQuery.Count == 0)
-            {
-                ViewBag.UserId = new SelectList(new[]
-                {
-                    new { Id = "", DisplayName = "Brak dostępnych użytkowników" }
-                }, "Id", "DisplayName", selectedUser);
-            }
-            else
-            {
-                ViewBag.UserId = new SelectList(usersQuery, "Id", "DisplayName", selectedUser);
-            }
+            ViewBag.UserId = new SelectList(usersQuery, "Id", "DisplayName", selectedUser);
         }
 
         private void PopulateDriversDropdown(object selectedDriver = null)

@@ -1,8 +1,10 @@
 ﻿@model IEnumerable<Fleet_Managment_Production.Models.Cost>
+@using Fleet_Managment_Production.Models
 
 @{
     ViewData["Title"] = "Rejestr Kosztów";
-    var totalSum = Model.Sum(x => x.Kwota);
+    // Zabezpieczenie przed błędem na pustej bazie
+    var totalSum = Model != null && Model.Any() ? Model.Sum(x => x.Kwota) : 0;
 }
 
 <div class="container-fluid py-4">
@@ -16,7 +18,7 @@
                 <small class="text-muted d-block text-uppercase" style="font-size:0.7rem;">Suma wydatków</small>
                 <span class="fw-bold text-danger fs-5">@totalSum.ToString("C")</span>
             </div>
-            <a asp-action="Create" class="btn btn-danger shadow-sm">
+            <a asp-action="Create" class="btn btn-primary shadow-sm">
                 <i class="bi bi-plus-lg me-2"></i>Dodaj Koszt
             </a>
         </div>
@@ -31,7 +33,7 @@
                             <th class="ps-4 py-3">Data</th>
                             <th>Pojazd</th>
                             <th>Kategoria</th>
-                            <th>Opis</th>
+                            <th>Szczegóły / Opis</th>
                             <th class="text-end pe-4">Kwota</th>
                             <th class="text-end pe-4">Akcje</th>
                         </tr>
@@ -44,23 +46,66 @@
                                 <td>
                                     @if (item.Vehicle != null)
                                     {
-                                        <a asp-controller="Vehicles" asp-action="Details" asp-route-id="@item.VehicleId" class="text-decoration-none fw-bold text-dark">
-                                            @item.Vehicle.LicensePlate
-                                        </a>
-                                        <div class="small text-muted">@item.Vehicle.Make @item.Vehicle.Model</div>
+                                        <div class="fw-bold text-dark">@item.Vehicle.Make @item.Vehicle.Model</div>
+                                        <div class="small text-muted">@item.Vehicle.LicensePlate</div>
                                     }
                                     else
                                     {
                                         <span class="text-muted">-</span>
                                     }
                                 </td>
-                                <td><span class="badge bg-light text-dark border">@item.Type</span></td>
-                                <td>@item.Opis</td>
+                                <td>
+                                    @if (item.Type == CostType.Paliwo)
+                                    {
+                                        <span class="badge bg-warning text-dark border border-warning">
+                                            <i class="bi bi-fuel-pump me-1"></i> Paliwo
+                                        </span>
+                                    }
+                                    else if (item.Type == CostType.Serwis || item.Type == CostType.Przegląd)
+                                    {
+                                        <span class="badge bg-info text-dark border border-info">
+                                            <i class="bi bi-tools me-1"></i> @item.Type
+                                        </span>
+                                    }
+                                    else if (item.Type == CostType.Ubezpieczenie)
+                                    {
+                                        <span class="badge bg-success border border-success">
+                                            <i class="bi bi-shield-check me-1"></i> @item.Type
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark border">@item.Type</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Type == CostType.Paliwo)
+                                    {
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if (item.Liters != null)
+                                            {
+                                                <span class="fw-bold text-dark">@item.Liters L</span>
+                                                @if (item.IsFullTank)
+                                                {
+                                                    <span class="badge bg-success" style="font-size: 0.6rem;">PEŁNY</span>
+                                                }
+                                            }
+                                        </div>
+                                        @if (item.CurrentOdometer != null)
+                                        {
+                                            <div class="small text-muted"><i class="bi bi-speedometer2 me-1"></i> @item.CurrentOdometer km</div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">@item.Opis</span>
+                                    }
+                                </td>
                                 <td class="text-end pe-4 fw-bold text-danger">@item.Kwota.ToString("C")</td>
                                 <td class="text-end pe-4">
                                     <div class="btn-group">
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Edytuj"><i class="bi bi-pencil"></i></a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń"><i class="bi bi-trash"></i></a>
                                     </div>
                                 </td>
                             </tr>

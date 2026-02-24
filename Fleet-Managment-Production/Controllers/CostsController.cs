@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Linq; // Ważne dla metod LINQ
 
 namespace Fleet_Managment_Production.Controllers
 {
@@ -17,7 +18,7 @@ namespace Fleet_Managment_Production.Controllers
             _context = context;
         }
 
-        //GET: Costs
+        // GET: Costs
         public async Task<IActionResult> Index()
         {
             var appDbContext = _context.Costs.Include(c => c.Vehicle);
@@ -35,6 +36,7 @@ namespace Fleet_Managment_Production.Controllers
             var cost = await _context.Costs
                 .Include(c => c.Vehicle)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (cost == null)
             {
                 return NotFound();
@@ -42,39 +44,33 @@ namespace Fleet_Managment_Production.Controllers
 
             return View(cost);
         }
+
         // GET: Costs/Create
-        public IActionResult Create(int? vehicleId)
+        public IActionResult Create()
         {
-            PopulateVehiclesDropdown(vehicleId);
-            PopulateManualCostTypesDropdown();
+            // Używamy tych samych metod pomocniczych co w Edit dla spójności
+            PopulateVehiclesDropdown();
+            // Możesz użyć PopulateManualCostTypesDropdown() jeśli chcesz wykluczyć automatyczne typy, 
+            // lub poniższego kodu, jeśli chcesz wszystkie:
+            ViewData["CostType"] = new SelectList(Enum.GetValues(typeof(CostType)));
 
-            var model = new Cost();
-            if (vehicleId.HasValue)
-            {
-                model.VehicleId = vehicleId.Value;
-            }
-
-            return View(model);
+            return View();
         }
+
         // POST: Costs/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Type,Opis,Kwota,Data,VehicleId")] Cost cost)
+        // Tu miałeś wszystko dobrze (Liters, CurrentOdometer są w Bind)
+        public async Task<IActionResult> Create([Bind("Id,VehicleId,Type,Opis,Kwota,Data,Liters,CurrentOdometer,IsFullTank")] Cost cost)
         {
-            if (cost.Type == CostType.Przegląd || cost.Type == CostType.Ubezpieczenie)
-            {
-                ModelState.AddModelError("Type", "Nie można ręcznie dodać kosztu typu 'Przegląd' lub 'Ubezpieczenie'.");
-            }
-
             if (ModelState.IsValid)
             {
                 _context.Add(cost);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-
             PopulateVehiclesDropdown(cost.VehicleId);
-            PopulateManualCostTypesDropdown(cost.Type);
+            ViewData["CostType"] = new SelectList(Enum.GetValues(typeof(CostType)), cost.Type);
             return View(cost);
         }
 
@@ -92,6 +88,7 @@ namespace Fleet_Managment_Production.Controllers
                 return NotFound();
             }
 
+            // Blokada edycji kosztów systemowych
             if (cost.Type == CostType.Przegląd || cost.Type == CostType.Ubezpieczenie)
             {
                 TempData["ErrorMessage"] = "Nie można edytować kosztów wygenerowanych automatycznie.";
@@ -99,22 +96,29 @@ namespace Fleet_Managment_Production.Controllers
             }
 
             PopulateVehiclesDropdown(cost.VehicleId);
-            PopulateManualCostTypesDropdown(cost.Type);
+            PopulateManualCostTypesDropdown(cost.Type); // Używamy helpera, żeby wykluczyć typy systemowe z listy
             return View(cost);
         }
 
         // POST: Costs/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Type,Opis,Kwota,Data,VehicleId")] Cost cost)
+        // UWAGA: Dodałem brakujące pola paliwowe do Bind! (Liters, CurrentOdometer, IsFullTank)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,VehicleId,Type,Opis,Kwota,Data,Liters,CurrentOdometer,IsFullTank")] Cost cost)
         {
             if (id != cost.Id)
             {
                 return NotFound();
             }
 
-            var originalCost = await _context.Costs.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
-            if (originalCost.Type == CostType.Przegląd || originalCost.Type == CostType.Ubezpieczenie)
+            // Sprawdzamy czy nie próbujemy edytować kosztu systemowego (security check)
+            var originalCostType = await _context.Costs
+                .AsNoTracking()
+                .Where(c => c.Id == id)
+                .Select(c => c.Type)
+                .FirstOrDefaultAsync();
+
+            if (originalCostType == CostType.Przegląd || originalCostType == CostType.Ubezpieczenie)
             {
                 TempData["ErrorMessage"] = "Nie można edytować kosztów wygenerowanych automatycznie.";
                 return RedirectToAction(nameof(Index));
@@ -140,6 +144,7 @@ namespace Fleet_Managment_Production.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             PopulateVehiclesDropdown(cost.VehicleId);
             PopulateManualCostTypesDropdown(cost.Type);
             return View(cost);
@@ -156,6 +161,7 @@ namespace Fleet_Managment_Production.Controllers
             var cost = await _context.Costs
                 .Include(c => c.Vehicle)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (cost == null)
             {
                 return NotFound();
@@ -197,24 +203,28 @@ namespace Fleet_Managment_Production.Controllers
             return _context.Costs.Any(e => e.Id == id);
         }
 
-
+        // Metoda pomocnicza do ładowania listy pojazdów
         private void PopulateVehiclesDropdown(object selectedVehicle = null)
         {
             var vehiclesQuery = _context.Vehicles
-                                .OrderBy(v => v.LicensePlate)
-                                .Select(v => new {
-                                    v.VehicleId,
-                                    DisplayText = v.LicensePlate ?? $"{v.Make} {v.Model}" 
-                                });
-            ViewData["VehicleId"] = new SelectList(vehiclesQuery, "VehicleId", "DisplayText", selectedVehicle);
+                .OrderBy(v => v.LicensePlate) // Sortowanie po tablicy
+                .Select(v => new {
+                    // TU BYŁ BŁĄD: Zmieniamy v.Id na v.VehicleId
+                    Id = v.VehicleId,
+                    // TU BYŁ BŁĄD: Zmieniamy v.Brand na v.Make i RegistrationNumber na LicensePlate
+                    DisplayText = v.LicensePlate ?? $"{v.Make} {v.Model} (Brak rej.)"
+                });
+
+            ViewData["VehicleId"] = new SelectList(vehiclesQuery, "Id", "DisplayText", selectedVehicle);
         }
 
+        // Metoda pomocnicza do ładowania typów kosztów (bez systemowych)
         private void PopulateManualCostTypesDropdown(object selectedType = null)
         {
             var manualTypes = Enum.GetValues(typeof(CostType))
                 .Cast<CostType>()
-                .Where(t => t != CostType.Przegląd && t != CostType.Ubezpieczenie)
-                .Select(t => new { Value = (int)t, Text = t.ToString() });
+                .Where(t => t != CostType.Przegląd && t != CostType.Ubezpieczenie) // Wykluczamy automatyczne
+                .Select(t => new { Value = t, Text = t.ToString() });
 
             ViewData["CostType"] = new SelectList(manualTypes, "Value", "Text", selectedType);
         }

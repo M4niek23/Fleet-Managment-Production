@@ -3,14 +3,17 @@
 @{
     ViewData["Title"] = "Karta Pojazdu - " + Model.LicensePlate;
 
-    // Obliczamy sumę kosztów (używając poprawnej nazwy 'Kwota')
+    // Obliczamy sumę kosztów
     var totalCost = Model.Costs?.Sum(c => c.Kwota) ?? 0;
+
+    // Pobieramy średnie spalanie z ViewBag (przekazane z kontrolera)
+    double avgConsumption = ViewBag.AvgConsumption ?? 0;
 }
 
 <div class="container-fluid py-4">
 
     <div class="row mb-4">
-        <div class="col-md-8 mb-3 mb-md-0">
+        <div class="col-md-7 mb-3 mb-md-0">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-4 me-4 d-none d-sm-block">
@@ -47,23 +50,38 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-5">
             <div class="card shadow-sm border-0 h-100 bg-white">
                 <div class="card-body">
-                    <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem;">Podsumowanie</h6>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span>Przebieg:</span>
-                        <span class="fw-bold fs-5">@Model.CurrentKm km</span>
+                    <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem;">Statystyki i Akcje</h6>
+                    <div class="row text-center mb-3">
+                        <div class="col-6 border-end">
+                            <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Przebieg</small>
+                            <span class="fw-bold fs-5">@Model.CurrentKm km</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Śr. Spalanie</small>
+                            @if (avgConsumption > 0)
+                            {
+                                <span class="fw-bold fs-5 text-warning">@avgConsumption.ToString("F1") <small class="fs-6">L/100km</small></span>
+                            }
+                            else
+                            {
+                                <span class="fw-bold fs-5 text-muted">--</span>
+                            }
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span>Łączne koszty:</span>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+                        <span class="text-muted">Łączne koszty:</span>
                         <span class="fw-bold fs-5 text-danger">@totalCost.ToString("C")</span>
                     </div>
+
                     <div class="d-grid gap-2">
-                        <a asp-action="Edit" asp-route-id="@Model.VehicleId" class="btn btn-primary shadow-sm">
+                        <a asp-action="Edit" asp-route-id="@Model.VehicleId" class="btn btn-primary shadow-sm btn-sm">
                             <i class="bi bi-pencil-square me-2"></i>Edytuj pojazd
                         </a>
-                        <a asp-action="Index" class="btn btn-outline-secondary">
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-arrow-left me-2"></i>Powrót do listy
                         </a>
                     </div>
@@ -92,7 +110,7 @@
                 </li>
                 <li class="nav-item">
                     <button class="nav-link fw-bold" id="costs-tab" data-bs-toggle="tab" data-bs-target="#costs" type="button">
-                        <i class="bi bi-wallet2 me-2"></i>Koszty
+                        <i class="bi bi-wallet2 me-2"></i>Koszty i Paliwo
                     </button>
                 </li>
             </ul>
@@ -143,7 +161,6 @@
                                 <tr>
                                     <th class="ps-4">Data</th>
                                     <th>Przebieg</th>
-                                    <th>Opis</th>
                                     <th>Wynik</th>
                                     <th>Następny</th>
                                 </tr>
@@ -156,7 +173,6 @@
                                         <tr>
                                             <td class="ps-4">@insp.InspectionDate.ToShortDateString()</td>
                                             <td>@(insp.Mileage?.ToString() ?? "-") km</td>
-                                            <td>@insp.Description</td>
                                             <td>
                                                 @if (insp.IsResultPositive == true)
                                                 {
@@ -173,7 +189,7 @@
                                 }
                                 else
                                 {
-                                    <tr><td colspan="5" class="text-center py-4 text-muted">Brak historii przeglądów.</td></tr>
+                                    <tr><td colspan="4" class="text-center py-4 text-muted">Brak historii przeglądów.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -186,7 +202,6 @@
                             <thead class="table-light">
                                 <tr>
                                     <th class="ps-4">Polisa</th>
-                                    <th>Ważna od</th>
                                     <th>Ważna do</th>
                                     <th>Status</th>
                                 </tr>
@@ -199,7 +214,6 @@
                                         var isExpired = ins.ExpiryDate < DateTime.Today;
                                         <tr>
                                             <td class="ps-4">@ins.PolicyNumber <span class="text-muted small">(@ins.InsurareName)</span></td>
-                                            <td>@ins.StartDate.ToShortDateString()</td>
                                             <td class="@(isExpired ? "text-danger fw-bold" : "text-success")">
                                                 @ins.ExpiryDate.ToShortDateString()
                                             </td>
@@ -218,7 +232,7 @@
                                 }
                                 else
                                 {
-                                    <tr><td colspan="4" class="text-center py-4 text-muted">Brak historii ubezpieczeń.</td></tr>
+                                    <tr><td colspan="3" class="text-center py-4 text-muted">Brak ubezpieczeń.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -232,7 +246,7 @@
                                 <tr>
                                     <th class="ps-4">Data</th>
                                     <th>Kategoria</th>
-                                    <th>Opis</th>
+                                    <th>Szczegóły (L / km)</th>
                                     <th class="text-end pe-4">Kwota</th>
                                 </tr>
                             </thead>
@@ -243,8 +257,27 @@
                                     {
                                         <tr>
                                             <td class="ps-4">@cost.Data.ToShortDateString()</td>
-                                            <td><span class="badge bg-light text-dark border">@cost.Type</span></td>
-                                            <td>@cost.Opis</td>
+                                            <td>
+                                                @if (cost.Type == Fleet_Managment_Production.Models.CostType.Paliwo)
+                                                {
+                                                    <span class="badge bg-warning text-dark border border-warning"><i class="bi bi-fuel-pump me-1"></i> Paliwo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-light text-dark border">@cost.Type</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (cost.Type == Fleet_Managment_Production.Models.CostType.Paliwo && cost.Liters.HasValue)
+                                                {
+                                                    <div class="fw-bold">@cost.Liters L @(cost.IsFullTank ? "(Pełny)" : "")</div>
+                                                    <div class="small text-muted"><i class="bi bi-speedometer2"></i> @cost.CurrentOdometer km</div>
+                                                }
+                                                else
+                                                {
+                                                    @cost.Opis
+                                                }
+                                            </td>
                                             <td class="text-end pe-4 fw-bold">@cost.Kwota.ToString("C")</td>
                                         </tr>
                                     }
