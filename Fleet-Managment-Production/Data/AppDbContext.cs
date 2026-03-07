@@ -16,55 +16,55 @@ namespace Fleet_Managment_Production.Data
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<Trip> Trips { get; set; }
         public DbSet<Service> Services { get; set; }
-        protected override void OnModelCreating(ModelBuilder modelBilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBilder);
+            base.OnModelCreating(modelBuilder);
 
             // Konfiguracja Users do Vehicles
-            modelBilder.Entity<Users>()
+            modelBuilder.Entity<Users>()
             .HasMany(u => u.Vehicles)
             .WithOne(v => v.User)
             .HasForeignKey(v => v.UserId)
             .OnDelete(DeleteBehavior.SetNull);
 
-            modelBilder.Entity<Vehicle>().ToTable("Vehicles");
-            modelBilder.Entity<Insurance>().ToTable("Insurances");
-            modelBilder.Entity<Vehicle>().HasKey(v => v.VehicleId);
-            modelBilder.Entity<Cost>().ToTable("Costs");
+            modelBuilder.Entity<Vehicle>().ToTable("Vehicles");
+            modelBuilder.Entity<Insurance>().ToTable("Insurances");
+            modelBuilder.Entity<Vehicle>().HasKey(v => v.VehicleId);
+            modelBuilder.Entity<Cost>().ToTable("Costs");
 
             //Konfiguracja Vehicles do Inspection
-            modelBilder.Entity<Inspection>()
+            modelBuilder.Entity<Inspection>()
                 .HasOne(i => i.Vehicle)
                 .WithMany(v => v.Inspections)
                 .HasForeignKey(i => i.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             //Konfiguracja relacji Vehicle do Koszty (jeden do wielu)
-            modelBilder.Entity<Cost>()
+            modelBuilder.Entity<Cost>()
                 .HasOne(c => c.Vehicle)
                 .WithMany(v => v.Costs)
                 .HasForeignKey(c => c.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
             //Konfiguracja relacji Driver do Vehicle (jeden do wielu)
-            modelBilder.Entity<Driver>()
+            modelBuilder.Entity<Driver>()
                 .HasMany(v => v.Vehicles)
                 .WithOne(d => d.Driver)
                 .HasForeignKey(v => v.DriverId)
                 .OnDelete(DeleteBehavior.SetNull);
             // Konfiguracja relacji Vehicle do Trip
-            modelBilder.Entity<Trip>()
+            modelBuilder.Entity<Trip>()
                 .HasOne(t => t.Driver)
                 .WithMany(d => d.Trips)
                 .HasForeignKey(t => t.DriverId)
                 .OnDelete(DeleteBehavior.Restrict);
             //Konfiguracja relacji Driver do Trip
-            modelBilder.Entity<Trip>()
+            modelBuilder.Entity<Trip>()
                 .HasOne(t => t.Vehicle)
                 .WithMany(v => v.Trips) // <-- POPRAWKA: Wskazujemy listę Trips w pojeździe
                 .HasForeignKey(t => t.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
             //Konfiguracja relacji Vehicle do Service
-            modelBilder.Entity<Service>()
+            modelBuilder.Entity<Service>()
                 .HasOne(s => s.Vehicle)
                 .WithMany(v => v.Services)
                 .HasForeignKey(s => s.VehicleId)
