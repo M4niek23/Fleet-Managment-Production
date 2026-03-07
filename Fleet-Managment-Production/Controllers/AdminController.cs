@@ -26,7 +26,8 @@ namespace Fleet_Managment_Production.Controllers
             var users = await _userManager.Users.ToListAsync();
             return View(users);
         }
-
+ 
+       
 
         [HttpGet]
         public async Task<IActionResult> ManageRoles(string userId)

@@ -1,0 +1,112 @@
+﻿@model Fleet_Managment_Production.ViewModels.MyAccountViewModel
+
+@{
+    ViewData["Title"] = "Mój Profil";
+}
+
+<div class="container mt-4">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center mt-3">
+                    <img src="https://ui-avatars.com/api/?name=@Model.FullName&background=0D8ABC&color=fff&size=128" alt="Avatar" class="rounded-circle mb-3 shadow-sm" />
+                    <h4 class="card-title fw-bold">@Model.FullName</h4>
+                    <p class="text-muted mb-1">@Model.Email</p>
+                    <p class="text-muted mb-3"><i class="bi bi-telephone"></i> @Model.PhoneNumber</p>
+
+                    <div class="mt-2 mb-4">
+                        @foreach (var role in Model.Roles)
+                        {
+                            <span class="badge bg-primary">Uprawnienia: @role</span>
+                        }
+                        @if (!Model.Roles.Any())
+                        {
+                            <span class="badge bg-secondary">Brak ról</span>
+                        }
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-center border-0 pb-3">
+                    <a asp-action="ChangePassword" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-key"></i> Zmień hasło
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-bold py-1">Podsumowanie Twojej Floty</h5>
+                </div>
+                <div class="card-body bg-light">
+                    <div class="row">
+
+                        <div class="col-sm-4 mb-3">
+                            <div class="card text-white bg-primary h-100">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title text-uppercase text-white-50">Wszystkie Pojazdy</h6>
+                                    <h2 class="display-6 fw-bold mb-0">@Model.TotalVehiclesCount</h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4 mb-3">
+                            <div class="card text-white bg-success h-100">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title text-uppercase text-white-50">W trasie</h6>
+                                    <h2 class="display-6 fw-bold mb-0">@Model.VehiclesInUseCount</h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4 mb-3">
+                            <div class="card text-white bg-warning h-100">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title text-uppercase text-dark">W serwisie</h6>
+                                    <h2 class="display-6 fw-bold text-dark mb-0">@Model.VehiclesInMaintenanceCount</h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 mb-3">
+                            <div class="card bg-white shadow-sm h-100 border-0 border-start border-info border-4">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted mb-1">Całkowity dystans z tras</h6>
+                                    <h3 class="fw-bold text-info mb-0">@Model.TotalDistanceDriven km</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 mb-3">
+                            <div class="card bg-white shadow-sm h-100 border-0 border-start border-danger border-4">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted mb-1">Wygenerowane koszty</h6>
+                                    <h3 class="fw-bold text-danger mb-0">@Model.TotalCosts.ToString("C")</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (Model.ActiveServicesCount > 0)
+                        {
+                            <div class="col-12 mt-2">
+                                <div class="alert alert-warning border-0 shadow-sm">
+                                    <i class="bi bi-tools me-2"></i>
+                                    Masz obecnie <strong>@Model.ActiveServicesCount</strong> pojazd(y) w trakcie aktywnego serwisu.
+                                    <a asp-controller="Services" asp-action="Index" class="alert-link">Przejdź do serwisów</a>.
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

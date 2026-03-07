@@ -18,7 +18,7 @@ namespace Fleet_Managment_Production.ViewModels
         [Required]
         [DataType(DataType.Password)]
         [Compare("NewPassword", ErrorMessage = "Hasła nie są zgodne.")]
-        public string ConfirmNewPassword { get; set; } = string.Empty;
+        public string ConfirmPassword { get; set; } = string.Empty;
 
     }
 }

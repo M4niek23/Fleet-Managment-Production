@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Fleet_Managment_Production.Data;
+using Fleet_Managment_Production.Models;
+using Fleet_Managment_Production.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Fleet_Managment_Production.ViewModels;
-using Fleet_Managment_Production.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fleet_Managment_Production.Controllers
 {
@@ -159,7 +161,7 @@ namespace Fleet_Managment_Production.Controllers
             if (result.Succeeded)
             {
                 ViewBag.Message = "Hasło zmienione pomyślnie. Za 5 sekund nastąpi przekierowanie...";
-                return View("ResetPasswordConfirmation"); 
+                return View("ResetPasswordConfirmation");
             }
 
             foreach (var error in result.Errors)
@@ -177,5 +179,89 @@ namespace Fleet_Managment_Production.Controllers
             await signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> MyAccount([FromServices] AppDbContext context)
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("Nie znaleziono użytkownika.");
+            }
+           
+            var roles = await userManager.GetRolesAsync(user);
+            var totalVehicles = await context.Vehicles.CountAsync(v => v.UserId == user.Id);
+            var inUseVehicles = await context.Vehicles.CountAsync(v => v.UserId == user.Id && v.Status == VehicleStatus.InUse);
+            var inMaintenanceVehicles = await context.Vehicles.CountAsync(v => v.UserId == user.Id && v.Status == VehicleStatus.InMaintenance);
+
+            var totalCosts = await context.Costs
+                .Where(c => c.Vehicle.UserId == user.Id)
+                .SumAsync(c => c.Kwota);
+
+            var totalDistance = await context.Trips
+                .Where(t => t.Vehicle.UserId == user.Id && t.EndOdometer != null && t.EndOdometer > t.StartOdometer)
+                .SumAsync(t => t.EndOdometer.Value - t.StartOdometer);
+
+            var activeServices = await context.Services
+                .Where(s => s.Vehicle.UserId == user.Id && s.ActualEndDate == null)
+                .CountAsync();
+
+            var model = new MyAccountViewModel
+            {
+                FullName = user.FullName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber ?? "Brak",
+                Roles = roles,
+                TotalVehiclesCount = totalVehicles,
+                VehiclesInUseCount = inUseVehicles,
+                VehiclesInMaintenanceCount = inMaintenanceVehicles,
+                TotalCosts = totalCosts,
+                TotalDistanceDriven = totalDistance,
+                ActiveServicesCount = activeServices
+            };
+
+            return View(model);
+        }
+        [Authorize]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("Nie znaleziono użytkownika.");
+            }
+            var isPasswordCorrect = await userManager.CheckPasswordAsync(user, model.CurrentPassword);
+          
+            if (!isPasswordCorrect)
+            {
+            ModelState.AddModelError(nameof(model.CurrentPassword), "Obecne hasło jest nieprawidłowe.");
+            return View(model);
+            }
+            var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (result.Succeeded)
+            {
+                await signInManager.RefreshSignInAsync(user);
+                ModelState.AddModelError(nameof(model.NewPassword), "Hasło zostało zmienione");
+                return View();
+            }
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View(model);
+        }
+
     }
 }

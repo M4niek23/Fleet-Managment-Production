@@ -128,6 +128,10 @@
                     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
                     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
                 }
+               
+                <a class="nav-link @(currentController == "Account" && currentAction == "MyAccount" ? "active" : "")" asp-controller="Account" asp-action="MyAccount">
+                    <i class="bi bi-speedometer2"></i> Moje konto
+                </a>
 
                 <div class="px-3 mb-2 mt-2">
                     <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Pulpit</small>
@@ -181,7 +185,7 @@
                 @if (User.IsInRole("Admin"))
                 {
                     <div class="px-3 mb-2 mt-4">
-                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Admin</small>
+                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Administrator</small>
                     </div>
                     <a class="nav-link @(currentController == "Admin" ? "active" : "")" asp-controller="Admin" asp-action="Index">
                         <i class="bi bi-shield-lock-fill"></i> Role i Uprawnienia
@@ -230,6 +234,7 @@
         </div>
         <div class="offcanvas-body p-0">
             <nav class="nav flex-column p-3">
+                <a class="nav-link py-3 border-bottom text-dark" asp-controller="Home" asp-action="Index">Moje konto</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Home" asp-action="Index">Dashboard</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Vehicles" asp-action="Index">Pojazdy</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Trips" asp-action="Index">Trasy</a>
