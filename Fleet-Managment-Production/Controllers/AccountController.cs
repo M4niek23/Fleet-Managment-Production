@@ -36,7 +36,7 @@ namespace Fleet_Managment_Production.Controllers
                 return View(model);
             }
 
-            var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+            var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
 
             if (result.Succeeded)
             {
@@ -44,7 +44,7 @@ namespace Fleet_Managment_Production.Controllers
 
                 if (user == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Nieprawidłowa próba logowania.");
+                    ModelState.AddModelError(string.Empty,"Nieprawidłowa próba logowania.");
                     return View(model);
                 }
 
@@ -60,8 +60,13 @@ namespace Fleet_Managment_Production.Controllers
 
                 return RedirectToAction("Index", "Home");
             }
+            if(result.IsLockedOut)
+            {
+                ModelState.AddModelError(string.Empty, "Konto zostało zablokowane z powodu zbyt wielu nieudanych prób logowania. Spróbuj ponownie później.");
+                return View(model);
+            }
 
-            ModelState.AddModelError(string.Empty, "Nieprawidłowa próba logowania.");
+            ModelState.AddModelError(string.Empty, "Nieprawidłowy e-mail lub hasło");
             return View(model);
         }
         [HttpGet]

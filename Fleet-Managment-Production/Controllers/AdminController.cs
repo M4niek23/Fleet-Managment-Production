@@ -26,8 +26,26 @@ namespace Fleet_Managment_Production.Controllers
             var users = await _userManager.Users.ToListAsync();
             return View(users);
         }
- 
-       
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnlockUser(string id)
+        {
+           if (string.IsNullOrEmpty(id))
+            {
+                return NotFound("Nie podano ID użytkownika.");
+            }
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound("Nie znaleziono użytkownika.");
+            }
+            await _userManager.SetLockoutEndDateAsync(user, null);
+            await _userManager.ResetAccessFailedCountAsync(user);
+            TempData["SuccessMessage"] = $"Konto użytkownika {user.Email} zostało pomyślnie odblokowane.";
+
+            return RedirectToAction(nameof(Index));
+        }
 
         [HttpGet]
         public async Task<IActionResult> ManageRoles(string userId)

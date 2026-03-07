@@ -11,6 +11,7 @@
             <th>Nick</th>
             <th>Email</th>
             <th>Akcja</th>
+            <th>Status konta</th>
         </tr>
     </thead>
     <tbody>
@@ -24,6 +25,24 @@
                         Zarządzaj
                     </a>
                 </td>
+                <td>
+                    @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+                    {
+                        <form asp-controller="Admin" asp-action="UnlockUser" method="post" class="d-inline ms-1">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Czy na pewno chcesz odblokować to konto?');">
+                                <i class="bi bi-unlock-fill"></i> Odblokuj
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Aktywne</span>
+                    }
+
+
+                </td>
+
             </tr>
         }
     </tbody>
