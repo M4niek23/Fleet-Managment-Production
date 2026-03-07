@@ -42,7 +42,7 @@ namespace Fleet_Managment_Production.Controllers
 
                 if (user == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid Login Attempt.");
+                    ModelState.AddModelError(string.Empty, "Nieprawidłowa próba logowania.");
                     return View(model);
                 }
 
@@ -59,7 +59,7 @@ namespace Fleet_Managment_Production.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid Login Attempt.");
+            ModelState.AddModelError(string.Empty, "Nieprawidłowa próba logowania.");
             return View(model);
         }
         [HttpGet]
@@ -119,32 +119,35 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> VerifyEmail(VerifyEmailViewModel model)
         {
-            if(!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) return View(model);
+
             var user = await userManager.FindByEmailAsync(model.Email);
-            
             if (user == null)
             {
-                return RedirectToAction("Login", "Account");
+                ModelState.AddModelError(string.Empty, "Nie znaleziono użytkownika o podanym adresie email.");
+                return View(model);
             }
 
-            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
 
-            return RedirectToAction("ResetPassword", "Account", new { token = token, email = user.Email });
+            var encodedToken = Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(token));
+
+            return RedirectToAction("ResetPassword", "Account", new { token = encodedToken, email = user.Email });
         }
 
         [HttpGet]
         public IActionResult ResetPassword(string token, string email)
         {
-            if (token == null || email == null)
-            {
-                return RedirectToAction("Login");
-            }
-            return View(new ChangePasswordViewModel { Token = token, Email = email });
+            if (token == null || email == null) return RedirectToAction("Login");
+
+            var decodedToken = System.Text.Encoding.UTF8.GetString(Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlDecode(token));
+
+            return View(new ResetPasswordViewModel { Token = decodedToken, Email = email });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(ChangePasswordViewModel model)
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
 
@@ -152,20 +155,21 @@ namespace Fleet_Managment_Production.Controllers
             if (user == null) return RedirectToAction("Login", "Account");
 
             var result = await userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
-            
+
             if (result.Succeeded)
             {
-                return RedirectToAction("Login", "Account");
+                ViewBag.Message = "Hasło zmienione pomyślnie. Za 5 sekund nastąpi przekierowanie...";
+                return View("ResetPasswordConfirmation"); 
             }
-            
+
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
+
             return View(model);
+
         }
-
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
