@@ -2,7 +2,7 @@
 using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
 using Microsoft.AspNetCore.Identity;
-
+using Microsoft.Extensions.Configuration;
 
 namespace Fleet_Managment_Production.Services
 {
@@ -15,6 +15,7 @@ namespace Fleet_Managment_Production.Services
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Users>>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<SeedService>>();
+            var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
             try
             {
@@ -33,7 +34,8 @@ namespace Fleet_Managment_Production.Services
                 await AddRoleAsync(roleManager, "Moderator");
                 // Add admin user
                 logger.LogInformation("Dodawanie administratora.");
-                var adminEmail = "admin@fleet.com";
+                var adminEmail = config["AdminSettings:Email"] ?? "admin@fleet.com";
+                var adminPassword = config["AdminSettings:Password"] ?? "Admin@123";
                 if (await userManager.FindByEmailAsync(adminEmail) == null)
                 {
                     var adminUser = new Users
@@ -47,7 +49,7 @@ namespace Fleet_Managment_Production.Services
                         SecurityStamp = Guid.NewGuid().ToString()
                     };
 
-                    var result = await userManager.CreateAsync(adminUser, "Admin@123");
+                    var result = await userManager.CreateAsync(adminUser, adminPassword);
                     if (result.Succeeded)
                     {
                         logger.LogInformation("Przypisanie roli administratora do użytkownika admin.");

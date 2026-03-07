@@ -8,6 +8,9 @@ namespace Fleet_Managment_Production.ViewModels
         [EmailAddress]
         public string Email { get; set; }
 
+        [Required]
+        public string Token { get; set; }
+
         [Required(ErrorMessage = "Hasła jest wymagane.")]
         [StringLength(40, MinimumLength = 8, ErrorMessage = "{0} musi znajdować się w {2} i mieć maksymalnie {1} znaków.")]
         [DataType(DataType.Password)]

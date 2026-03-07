@@ -119,68 +119,52 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> VerifyEmail(VerifyEmailViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var user = await userManager.FindByNameAsync(model.Email);
-
+            if(!ModelState.IsValid) return View(model);
+            var user = await userManager.FindByEmailAsync(model.Email);
+            
             if (user == null)
             {
-                ModelState.AddModelError("", "User not found!");
-                return View(model);
+                return RedirectToAction("Login", "Account");
             }
-            else
-            {
-                return RedirectToAction("ChangePassword", "Account", new { username = user.UserName });
-            }
+
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            return RedirectToAction("ResetPassword", "Account", new { token = token, email = user.Email });
         }
 
         [HttpGet]
-        public IActionResult ChangePassword(string username)
+        public IActionResult ResetPassword(string token, string email)
         {
-            if (string.IsNullOrEmpty(username))
+            if (token == null || email == null)
             {
-                return RedirectToAction("VerifyEmail", "Account");
+                return RedirectToAction("Login");
             }
-
-            return View(new ChangePasswordViewModel { Email = username });
+            return View(new ChangePasswordViewModel { Token = token, Email = email });
         }
 
         [HttpPost]
-        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ChangePasswordViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                ModelState.AddModelError("", "Something went wrong");
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
-            var user = await userManager.FindByNameAsync(model.Email);
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user == null) return RedirectToAction("Login", "Account");
 
-            if (user == null)
-            {
-                ModelState.AddModelError("", "User not found!");
-                return View(model);
-            }
-
-            var result = await userManager.RemovePasswordAsync(user);
+            var result = await userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+            
             if (result.Succeeded)
             {
-                result = await userManager.AddPasswordAsync(user, model.NewPassword);
                 return RedirectToAction("Login", "Account");
             }
-            else
+            
+            foreach (var error in result.Errors)
             {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
-
-                return View(model);
+                ModelState.AddModelError(string.Empty, error.Description);
             }
+            return View(model);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
