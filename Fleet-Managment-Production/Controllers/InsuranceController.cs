@@ -17,40 +17,46 @@ namespace Fleet_Managment_Production.Controllers
 
         public async Task<IActionResult> Index(int? id)
         {
-
-            if (!_context.Vehicles.Any())
+            // Sprawdzamy czy są jakiekolwiek pojazdy
+            var vehicles = await _context.Vehicles.ToListAsync();
+            if (!vehicles.Any())
             {
                 return View("NoVehicles");
             }
 
+            // Tworzymy listę pojazdów do filtra (ViewBag.VehicleList)
+            var vehicleSelectList = vehicles.Select(v => new {
+                v.VehicleId,
+                DisplayText = v.LicensePlate ?? $"{v.Make} {v.Model}"
+            });
+            ViewBag.VehicleList = new SelectList(vehicleSelectList, "VehicleId", "DisplayText", id);
 
-            if (id == null)
+            // Bazowe zapytanie ubezpieczeń - od razu dołączamy dane pojazdu (Include)
+            IQueryable<Insurance> insurancesQuery = _context.Insurances.Include(i => i.Vehicle);
+
+            // Jeśli id zostało przekazane -> filtrujemy dla konkretnego pojazdu
+            if (id.HasValue)
             {
+                insurancesQuery = insurancesQuery.Where(i => i.VehicleId == id.Value);
 
-                var firstVehicle = await _context.Vehicles.FirstOrDefaultAsync();
-                if (firstVehicle == null)
-                    return View("NoVehicles");
-
-                return RedirectToAction(nameof(Index), new { id = firstVehicle.VehicleId });
+                var selectedVehicle = vehicles.FirstOrDefault(v => v.VehicleId == id.Value);
+                ViewBag.VehicleRegistration = selectedVehicle?.LicensePlate ?? "Brak Rejestracji";
+                ViewBag.VehicleId = id.Value;
+            }
+            else
+            {
+                // Jeśli id jest null -> wyświetlamy wszystkie
+                ViewBag.VehicleRegistration = "Wszystkie pojazdy";
+                ViewBag.VehicleId = null; // Przekazujemy null, żeby przycisk "Dodaj" nie wymuszał pojazdu
             }
 
-            var vehicle = await _context.Vehicles
-                .Include(v => v.Insurances)
-                .FirstOrDefaultAsync(m => m.VehicleId == id);
-
-            if (vehicle == null)
-            {
-                return View("NoVehicles");
-            }
-
-            ViewBag.VehicleId = id;
-            ViewBag.VehicleRegistration = vehicle.LicensePlate ?? "Brak Rejestracji";
-
-            var insurances = vehicle.Insurances
+            // Sortujemy i pobieramy dane
+            var insurances = await insurancesQuery
                 .OrderByDescending(i => i.IsCurrent)
-                .ThenByDescending(i => i.ExpiryDate);
+                .ThenByDescending(i => i.ExpiryDate)
+                .ToListAsync();
 
-            return View(insurances.ToList());
+            return View(insurances);
         }
 
 

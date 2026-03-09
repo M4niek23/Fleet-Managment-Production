@@ -1,26 +1,37 @@
-﻿@model IEnumerable<Fleet_Managment_Production.Models.Cost>
+﻿@model IEnumerable<Fleet_Managment_Production.Models.Insurance>
 @using Fleet_Managment_Production.Models
 
 @{
-    ViewData["Title"] = "Rejestr Kosztów";
-    // Obliczamy sumę tylko jeśli są jakieś dane, żeby uniknąć błędów na pustej bazie
-    var totalSum = Model != null && Model.Any() ? Model.Sum(x => x.Kwota) : 0;
+    ViewData["Title"] = "Ubezpieczenia";
+    var totalSum = Model != null && Model.Any() ? Model.Sum(x => x.Cost) : 0;
 }
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Koszty</h2>
-            <p class="text-muted mb-0">Ewidencja wydatków floty.</p>
+            <h2 class="fw-bold mb-1">Ubezpieczenia</h2>
+            <p class="text-muted mb-0">Polisy ubezpieczeniowe dla: <strong>@ViewBag.VehicleRegistration</strong></p>
         </div>
         <div class="d-flex align-items-center gap-3">
             <div class="bg-white px-3 py-2 rounded shadow-sm border">
-                <small class="text-muted d-block text-uppercase" style="font-size:0.7rem;">Suma wydatków</small>
+                <small class="text-muted d-block text-uppercase" style="font-size:0.7rem;">Suma ubezpieczeń</small>
                 <span class="fw-bold text-danger fs-5">@totalSum.ToString("C")</span>
             </div>
-            <a asp-action="Create" class="btn btn-primary shadow-sm">
-                <i class="bi bi-plus-lg me-2"></i>Dodaj Koszt
+
+            <a asp-action="Create" asp-route-vehicleId="@ViewBag.VehicleId" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>Dodaj Ubezpieczenie
             </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body py-3">
+            <form method="get" asp-action="Index" class="d-flex align-items-center gap-3">
+                <label for="id" class="fw-bold mb-0 text-secondary"><i class="bi bi-funnel me-1"></i> Filtruj pojazd:</label>
+                <select name="id" class="form-select w-auto shadow-sm border-0" asp-items="@ViewBag.VehicleList" onchange="this.form.submit()">
+                    <option value="">Wszystkie pojazdy</option>
+                </select>
+            </form>
         </div>
     </div>
 
@@ -30,11 +41,13 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="ps-4 py-3">Data</th>
+                            <th class="ps-4 py-3">Ważne od</th>
+                            <th>Ważne do</th>
                             <th>Pojazd</th>
-                            <th>Kategoria</th>
-                            <th>Szczegóły / Opis</th>
-                            <th class="text-end pe-4">Kwota</th>
+                            <th>Ubezpieczyciel</th>
+                            <th>Nr Polisy</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Koszt</th>
                             <th class="text-end pe-4">Akcje</th>
                         </tr>
                     </thead>
@@ -42,7 +55,8 @@
                         @foreach (var item in Model)
                         {
                             <tr>
-                                <td class="ps-4">@item.Data.ToShortDateString()</td>
+                                <td class="ps-4">@item.StartDate.ToShortDateString()</td>
+                                <td>@item.ExpiryDate.ToShortDateString()</td>
                                 <td>
                                     @if (item.Vehicle != null)
                                     {
@@ -54,58 +68,31 @@
                                         <span class="text-muted">-</span>
                                     }
                                 </td>
+                                <td><span class="fw-bold text-dark">@item.InsurareName</span></td>
+                                <td>@item.PolicyNumber</td>
                                 <td>
-                                    @if (item.Type == CostType.Paliwo)
-                                    {
-                                        <span class="badge bg-warning text-dark border border-warning">
-                                            <i class="bi bi-fuel-pump me-1"></i> Paliwo
-                                        </span>
-                                    }
-                                    else if (item.Type == CostType.Serwis || item.Type == CostType.Przegląd)
-                                    {
-                                        <span class="badge bg-info text-dark border border-info">
-                                            <i class="bi bi-tools me-1"></i> @item.Type
-                                        </span>
-                                    }
-                                    else if (item.Type == CostType.Ubezpieczenie)
+                                    @if (item.IsCurrent)
                                     {
                                         <span class="badge bg-success border border-success">
-                                            <i class="bi bi-shield-check me-1"></i> @item.Type
+                                            <i class="bi bi-check-circle me-1"></i> Aktualne
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-light text-dark border">@item.Type</span>
+                                        <span class="badge bg-secondary border border-secondary">
+                                            Nieaktualne
+                                        </span>
                                     }
                                 </td>
-                                <td>
-                                    @if (item.Type == CostType.Paliwo)
-                                    {
-                                        <div class="d-flex align-items-center gap-2">
-                                            @if (item.Liters != null)
-                                            {
-                                                <span class="fw-bold text-dark">@item.Liters L</span>
-                                                @if (item.IsFullTank)
-                                                {
-                                                    <span class="badge bg-success" style="font-size: 0.6rem;">PEŁNY</span>
-                                                }
-                                            }
-                                        </div>
-                                        @if (item.CurrentOdometer != null)
-                                        {
-                                            <div class="small text-muted"><i class="bi bi-speedometer2 me-1"></i> @item.CurrentOdometer km</div>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">@item.Opis</span>
-                                    }
-                                </td>
-                                <td class="text-end pe-4 fw-bold text-danger">@item.Kwota.ToString("C")</td>
+                                <td class="text-end pe-4 fw-bold text-danger">@item.Cost.ToString("C")</td>
                                 <td class="text-end pe-4">
                                     <div class="btn-group">
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Edytuj"><i class="bi bi-pencil"></i></a>
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń"><i class="bi bi-trash"></i></a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Edytuj">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
