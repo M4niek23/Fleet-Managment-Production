@@ -9,10 +9,8 @@ html {
 }
 
 html, body {
-    height: 100vh;
     margin: 0;
     padding: 0;
-    overflow: hidden;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
@@ -20,7 +18,6 @@ html, body {
 }
 
 .app-wrap {
-    height: calc(100vh - 60px);
     display: flex;
     position: relative;
     width: 100%;
@@ -28,10 +25,7 @@ html, body {
 
 .content {
     width: 100%;
-    height: calc(100vh - 90px);
-    overflow-y: auto;
     overflow-x: hidden;
-    padding-bottom: 20px;
 }
 
     .content::-webkit-scrollbar {
