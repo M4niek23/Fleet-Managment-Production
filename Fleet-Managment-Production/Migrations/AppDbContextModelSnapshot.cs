@@ -103,7 +103,7 @@ namespace Fleet_Managment_Production.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Drivers");
+                    b.ToTable("Drivers", (string)null);
                 });
 
             modelBuilder.Entity("Fleet_Managment_Production.Models.Inspection", b =>
@@ -142,7 +142,7 @@ namespace Fleet_Managment_Production.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Inspections");
+                    b.ToTable("Inspections", (string)null);
                 });
 
             modelBuilder.Entity("Fleet_Managment_Production.Models.Insurance", b =>
@@ -226,7 +226,7 @@ namespace Fleet_Managment_Production.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Services");
+                    b.ToTable("Services", (string)null);
                 });
 
             modelBuilder.Entity("Fleet_Managment_Production.Models.Trip", b =>
@@ -290,7 +290,7 @@ namespace Fleet_Managment_Production.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Trips");
+                    b.ToTable("Trips", (string)null);
                 });
 
             modelBuilder.Entity("Fleet_Managment_Production.Models.Users", b =>

@@ -2,6 +2,7 @@
 using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Fleet_Managment_Production.Services
@@ -21,7 +22,7 @@ namespace Fleet_Managment_Production.Services
             {
                 // Ensure the database is ready
                 logger.LogInformation("Sprawdzanie, czy baza danych istnieje.");
-                await context.Database.EnsureCreatedAsync();
+                await context.Database.MigrateAsync();
 
                 // Add roles
                 logger.LogInformation("Rozpoczynanie inicjowania ról.");

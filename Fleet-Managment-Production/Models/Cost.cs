@@ -13,7 +13,7 @@ namespace Fleet_Managment_Production.Models
 
         [Required(ErrorMessage = "Typ kosztu jest wymagany")]
         [Display(Name = "Kategoria")]
-        public CostType Type { get; set; } // Tu teraz używamy Enuma
+        public CostType Type { get; set; } 
 
         [Display(Name = "Opis")]
         public string? Opis { get; set; }

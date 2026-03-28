@@ -69,6 +69,9 @@ namespace Fleet_Managment_Production.Data
                 .WithMany(v => v.Services)
                 .HasForeignKey(s => s.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Service>()
+                .Property(s => s.Cost)
+                .HasPrecision(18, 2);
         }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

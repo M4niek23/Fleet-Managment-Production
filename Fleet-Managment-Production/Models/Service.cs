@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fleet_Managment_Production.Models
@@ -18,6 +19,7 @@ namespace Fleet_Managment_Production.Models
         public string Description { get; set; } = null!;
 
         [Display(Name = "Koszt"), Range(0, double.MaxValue)]
+        [Precision(18,2)]
         public decimal Cost { get; set; }
 
         [Display(Name = "Data przyjęcia"), DataType(DataType.Date)]
