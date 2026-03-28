@@ -21,12 +21,46 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Vehicles
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, int? vehicleId)
         {
-            var appDbContext = _context.Vehicles
+            ViewData["CurrentFilter"] = searchString;
+
+            var vehiclesQuery = _context.Vehicles
                 .Include(v => v.User)
-                .Include(v => v.Driver);
-            return View(await appDbContext.ToListAsync());
+                .Include(v => v.Driver)
+                .AsQueryable();
+            
+            if (vehicleId.HasValue)
+            {
+                vehiclesQuery = vehiclesQuery.Where(v => v.VehicleId == vehicleId.Value);
+
+            }
+            // Wyszukiwanie po Make, Model, LicensePlate, VIN (niezależnie od wielkości liter)
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var searchLower = searchString.ToLower();
+
+                vehiclesQuery = vehiclesQuery.Where(v =>
+                (v.Make != null && v.Make.ToLower().Contains(searchLower)) ||
+                (v.Model != null && v.Model.ToLower().Contains(searchLower)) ||
+                (v.LicensePlate != null && v.LicensePlate.ToLower().Contains(searchLower)) ||
+                (v.VIN != null && v.VIN.ToLower().Contains(searchLower))
+                );                  
+            }
+
+            var vehiclesList = await vehiclesQuery.ToListAsync();
+            // Tworzymy listę do SelectList, która będzie zawierać tekst kierowcy lub informacje o braku kierowcy
+            var allVehiclesForDropdown = await _context.Vehicles.Include(v => v.Driver).ToListAsync();
+            var vehiclesSelectList = allVehiclesForDropdown.Select(v => new
+            {
+                VehicleId = v.VehicleId,
+                DisplayText = v.Driver != null
+            ? $"{v.Driver.FirstName} {v.Driver.LastName}"
+            : $"[Brak kierowcy] {v.Make} {v.Model} ({v.LicensePlate})"
+            }).ToList();
+
+            ViewBag.VehicleList = new SelectList(vehiclesSelectList, "VehicleId", "DisplayText");
+            return View(vehiclesList);
         }
 
         // GET: Vehicles/Details/5

@@ -15,7 +15,28 @@
             <i class="bi bi-plus-lg me-2"></i>Dodaj Pojazd
         </a>
     </div>
+    <div class="row mb-4">
+        <div class="col-md-10">
+            <form asp-action="Index" method="get">
+                <div class="input-group shadow-sm">
+                    <!-- 1. Nowy filtr rozwijany (Dropdown) -->
+                    <select name="vehicleId" class="form-select" asp-items="ViewBag.VehicleList">
+                        <option value="">-- Wszyscy kierowcy / Wszystkie pojazdy --</option>
+                    </select>
+                    <br />
+                    <!-- 2. Wyszukiwarka tekstowa -->
+                    <span class="input-group-text bg-white border-end-0 border-start-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control border-start-0" placeholder="Szukaj po marce, rejestracji..." />
 
+                    <!-- 3. Przyciski -->
+                    <button type="submit" class="btn btn-primary px-4">Filtruj</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Wyczyść</a>
+                </div>
+            </form>
+        </div>
+    </div>
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -24,12 +45,24 @@
                         <tr>
                             <th class="ps-4 py-3">Pojazd</th>
                             <th>Rejestracja / VIN</th>
+                            <th>Kierowca</th>
                             <th>Status</th>
                             <th>Przebieg</th>
                             <th class="text-end pe-4">Akcje</th>
                         </tr>
                     </thead>
-                    <tbody>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <i class="bi bi-info-circle fs-4 d-block mb-2"></i>
+                                Nie znaleziono żadnych pojazdów pasujących do wyszukiwania.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
                         @foreach (var item in Model)
                         {
                             <tr>
@@ -39,15 +72,28 @@
                                             <i class="bi bi-car-front-fill fs-5"></i>
                                         </div>
                                         <div>
-                                            <div class="fw-bold">@item.Make @item.Model</div>
+                                            <div class="fw-bold text-dark">@item.Make @item.Model</div>
                                             <div class="text-muted small">@item.ProductionYear • @item.FuelType</div>
                                         </div>
                                     </div>
                                 </td>
+
                                 <td>
                                     <div class="fw-bold">@item.LicensePlate</div>
                                     <div class="text-muted small font-monospace">@item.VIN</div>
                                 </td>
+
+                                <td>
+                                    @if (item.Driver != null)
+                                    {
+                                        <div class="fw-bold">@item.Driver.FirstName @item.Driver.LastName</div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic small">Brak przypisanego</span>
+                                    }
+                                </td>
+
                                 <td>
                                     @switch (item.Status)
                                     {
@@ -65,7 +111,11 @@
                                             break;
                                     }
                                 </td>
-                                <td>@item.CurrentKm km</td>
+
+                                <td>
+                                    <span class="fw-semibold">@item.CurrentKm</span> <span class="text-muted small">km</span>
+                                </td>
+
                                 <td class="text-end pe-4">
                                     <div class="btn-group">
                                         <a asp-action="Details" asp-route-id="@item.VehicleId" class="btn btn-sm btn-outline-secondary" title="Szczegóły">
@@ -81,7 +131,8 @@
                                 </td>
                             </tr>
                         }
-                    </tbody>
+                    }
+                </tbody>
                 </table>
             </div>
         </div>
