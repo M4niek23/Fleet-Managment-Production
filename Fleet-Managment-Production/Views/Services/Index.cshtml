@@ -1,14 +1,19 @@
 ﻿@model IEnumerable<Fleet_Managment_Production.Models.Service>
 
 @{
-    ViewData["Title"] = "Serwis";
+    ViewData["Title"] = "Serwis i Naprawy";
 }
 
-<div class="container-fluid shadow-sm p-3 mb-5 bg-white rounded">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1><i class="bi bi-wrench-adjustable text-primary"></i>Hitoria Serwisowa</h1>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Dodaj
+<div class="container-fluid py-4">
+
+    <!-- Nagłówek i przycisk dodawania -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Serwis i Naprawy</h2>
+            <p class="text-muted mb-0">Zarządzaj historią serwisową, naprawami i przeglądami floty.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i>Dodaj Serwis
         </a>
     </div>
 

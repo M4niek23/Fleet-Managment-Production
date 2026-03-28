@@ -130,7 +130,7 @@
                 }
                
                 <a class="nav-link @(currentController == "Account" && currentAction == "MyAccount" ? "active" : "")" asp-controller="Account" asp-action="MyAccount">
-                    <i class="bi bi-speedometer2"></i> Moje konto
+                    <i class="bi bi-person-circle"></i> Moje konto
                 </a>
 
                 <div class="px-3 mb-2 mt-2">
@@ -156,13 +156,13 @@
                 <div class="collapse @(isFleetActive ? "show" : "")" id="fleetSubmenu">
                     <nav class="nav flex-column">
                         <a class="nav-link @(currentController == "Vehicles" ? "active" : "")" asp-controller="Vehicles" asp-action="Index">
-                            Pojazdy
+                            <i class="bi bi-car-front"></i>Pojazdy
                         </a>
                         <a class="nav-link @(currentController == "Insurance" ? "active" : "")" asp-controller="Insurance" asp-action="Index">
-                            Ubezpieczenia
+                            <i class="bi bi-shield"></i>Ubezpieczenia
                         </a>
                         <a class="nav-link @(currentController == "Inspections" ? "active" : "")" asp-controller="Inspections" asp-action="Index">
-                            Przeglądy
+                            <i class="bi bi-list-check"></i>Przeglądy
                         </a>
                     </nav>
                 </div>

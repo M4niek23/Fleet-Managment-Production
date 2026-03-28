@@ -35,7 +35,6 @@ namespace Fleet_Managment_Production.Controllers
                 vehiclesQuery = vehiclesQuery.Where(v => v.VehicleId == vehicleId.Value);
 
             }
-            // Wyszukiwanie po Make, Model, LicensePlate, VIN (niezależnie od wielkości liter)
             if (!string.IsNullOrEmpty(searchString))
             {
                 var searchLower = searchString.ToLower();
@@ -49,7 +48,6 @@ namespace Fleet_Managment_Production.Controllers
             }
 
             var vehiclesList = await vehiclesQuery.ToListAsync();
-            // Tworzymy listę do SelectList, która będzie zawierać tekst kierowcy lub informacje o braku kierowcy
             var allVehiclesForDropdown = await _context.Vehicles.Include(v => v.Driver).ToListAsync();
             var vehiclesSelectList = allVehiclesForDropdown.Select(v => new
             {
