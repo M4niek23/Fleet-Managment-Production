@@ -182,6 +182,10 @@
                 <a class="nav-link @(currentController == "Services" ? "active" : "")" asp-controller="Services" asp-action="Index">
                     <i class="bi bi-wrench-adjustable"></i> Serwis
                 </a>
+                <a class="nav-link @(currentController == "Reports" ? "active" : "")" asp-controller="Reports" asp-action="Index">
+                    <i class="bi bi-wrench-adjustable"></i> Raporty
+                </a>
+
 
                 @if (User.IsInRole("Admin"))
                 {
@@ -245,6 +249,8 @@
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Trips" asp-action="Index">Trasy</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Drivers" asp-action="Index">Kierowcy</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Services" asp-action="Index">Serwis</a>
+                <a class="nav-link py-3 border-bottom text-dark" asp-controller="Reports" asp-action="Index">Raporty</a>
+
             </nav>
         </div>
     </div>
