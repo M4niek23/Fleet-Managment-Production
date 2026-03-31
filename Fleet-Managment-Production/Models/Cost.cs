@@ -3,8 +3,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fleet_Managment_Production.Models
 {
+    public enum CostType
+    {
+        Paliwo,
+        Serwis,
+        Ubezpieczenie,
+        Przegląd,
+        Inne
+    };
     public class Cost
     {
+        [Key]
         public int Id { get; set; }
 
         [Display(Name = "Pojazd")]
@@ -16,6 +25,7 @@ namespace Fleet_Managment_Production.Models
         public CostType Type { get; set; } 
 
         [Display(Name = "Opis")]
+        
         public string? Opis { get; set; }
 
         [Display(Name = "Kwota")]
@@ -27,7 +37,6 @@ namespace Fleet_Managment_Production.Models
         [DataType(DataType.Date)]
         public DateTime Data { get; set; }
 
-        // --- DANE PALIWOWE ---
         [Display(Name = "Ilość Paliwa (L)")]
         public double? Liters { get; set; }
 
