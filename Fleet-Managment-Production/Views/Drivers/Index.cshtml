@@ -48,7 +48,20 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-white border border-secondary text-dark">Kat. @item.LicenseCategory</span>
+                                    @if (!string.IsNullOrEmpty(item.LicenseCategories))
+                                    {
+                                        var categories = item.LicenseCategories.Split(',');
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach (var cat in categories)
+                                            {
+                                                <span class="badge bg-white border border-secondary text-dark">Kat. @cat.Trim()</span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">-</span>
+                                    }
                                 </td>
                                 <td class="font-monospace text-muted">@item.Pesel</td>
                                 <td class="text-end pe-4">

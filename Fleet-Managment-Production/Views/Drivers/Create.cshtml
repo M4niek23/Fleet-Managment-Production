@@ -62,14 +62,10 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="LicenseCategory" class="form-label fw-bold">Kategoria Prawa Jazdy</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-card-heading"></i></span>
-                            <select asp-for="LicenseCategory" class="form-select" asp-items="Html.GetEnumSelectList<Fleet_Managment_Production.Models.LicenseCategory>()">
-                                <option value="">-- Wybierz kategorię --</option>
-                            </select>
-                        </div>
-                        <span asp-validation-for="LicenseCategory" class="text-danger small"></span>
+                        <label asp-for="SelectedCategories" class="form-label fw-bold">Kategorie Prawa Jazdy</label>
+                        <select asp-for="SelectedCategories" class="form-select" multiple="multiple" asp-items="Html.GetEnumSelectList<Fleet_Managment_Production.Models.LicenseCategory>()">
+                        </select>
+                        <span asp-validation-for="SelectedCategories" class="text-danger small mt-1 d-block"></span>
                     </div>
 
                     <div class="col-md-6">
@@ -115,4 +111,19 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#SelectedCategories').select2({
+                placeholder: "Kliknij, aby wybrać kategorie...",
+                allowClear: true,
+                width: '100%',
+                language: "pl" // Opcjonalnie, żeby podpowiedzi były po polsku
+            });
+        });
+    </script>
 }

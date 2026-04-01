@@ -20,9 +20,24 @@
                     <div>
                         <h2 class="fw-bold mb-1">@Model.FirstName @Model.LastName</h2>
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <span class="badge bg-white border border-dark text-dark">
-                                <i class="bi bi-card-heading me-1"></i>Kat. @Model.LicenseCategory
-                            </span>
+                            @if (!string.IsNullOrEmpty(Model.LicenseCategories))
+                            {
+                                var categories = Model.LicenseCategories.Split(',');
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach (var cat in categories)
+                                    {
+                                        <span class="badge bg-white border border-dark text-dark">
+                                            <i class="bi bi-card-heading me-1"></i>Kat. @cat.Trim()
+                                        </span>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-muted border">
+                                    <i class="bi bi-card-heading me-1"></i>Brak kategorii
+                                </span>
+                            }
                             <span class="text-muted">|</span>
                             <span class="text-muted font-monospace">@Model.Pesel</span>
                         </div>

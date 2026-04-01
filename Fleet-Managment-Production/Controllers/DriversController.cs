@@ -20,7 +20,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             var drivers = await _context.Drivers
                 .Include(d => d.Vehicles)
-                .Include(d => d.User) 
+                .Include(d => d.User)
                 .ToListAsync();
             return View(drivers);
         }
@@ -31,14 +31,13 @@ namespace Fleet_Managment_Production.Controllers
             if (id == null) return NotFound();
 
             var driver = await _context.Drivers
-                .Include(d => d.Vehicles)              // Pobierz przypisane auta
-                .Include(d => d.Trips)                 // Pobierz trasy
-                    .ThenInclude(t => t.Vehicle)       // ...i auta z tych tras
+                .Include(d => d.Vehicles)              
+                .Include(d => d.Trips)                
+                    .ThenInclude(t => t.Vehicle) 
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (driver == null) return NotFound();
 
-            // Sortowanie tras od najnowszych
             driver.Trips = driver.Trips.OrderByDescending(t => t.StartDate).ToList();
 
             return View(driver);
@@ -54,7 +53,7 @@ namespace Fleet_Managment_Production.Controllers
         // POST: Drivers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Pesel,LicenseCategory,PhoneNumber,UserId,Email")] Driver driver)
+        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Pesel,SelectedCategories,LicenseCategories,PhoneNumber,UserId,Email")] Driver driver)
         {
             if (!string.IsNullOrEmpty(driver.UserId))
             {
@@ -62,7 +61,11 @@ namespace Fleet_Managment_Production.Controllers
                 if (user != null) driver.Email = user.Email;
             }
 
-            ModelState.Remove("User"); 
+            ModelState.Remove("User");
+            if (driver.SelectedCategories != null && driver.SelectedCategories.Any())
+            {
+                driver.LicenseCategories = string.Join(", ", driver.SelectedCategories);
+            }
 
             if (ModelState.IsValid)
             {
@@ -88,6 +91,15 @@ namespace Fleet_Managment_Production.Controllers
 
             var driver = await _context.Drivers.FindAsync(id);
             if (driver == null) return NotFound();
+            if (!string.IsNullOrEmpty(driver.LicenseCategories))
+            {
+                driver.SelectedCategories = driver.LicenseCategories
+                    .Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(c => Enum.TryParse<LicenseCategory>(c, out var parsedEnum) ? parsedEnum : (LicenseCategory?)null)
+                    .Where(c => c.HasValue)
+                    .Select(c => c.Value)
+                    .ToList();
+            }
 
             ViewData["UserId"] = new SelectList(_context.Users, "Id", "Email", driver.UserId);
             return View(driver);
@@ -96,7 +108,7 @@ namespace Fleet_Managment_Production.Controllers
         // POST: Drivers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Pesel,LicenseCategory,PhoneNumber,UserId,Email")] Driver driver)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Pesel,SelectedCategories,LicenseCategories,PhoneNumber,UserId,Email")] Driver driver)
         {
             if (id != driver.Id) return NotFound();
 
@@ -107,6 +119,15 @@ namespace Fleet_Managment_Production.Controllers
             }
 
             ModelState.Remove("User");
+
+            if (driver.SelectedCategories != null && driver.SelectedCategories.Any())
+            {
+                driver.LicenseCategories = string.Join(", ", driver.SelectedCategories);
+            }
+            else
+            {
+                driver.LicenseCategories = null;
+            }
 
             if (ModelState.IsValid)
             {

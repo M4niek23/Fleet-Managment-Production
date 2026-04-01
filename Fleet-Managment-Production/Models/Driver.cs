@@ -23,6 +23,7 @@ namespace Fleet_Managment_Production.Models
         [Display(Name = "DE")] DE,
         [Display(Name = "T")] T
     }
+
     [Index(nameof(Pesel), IsUnique = true)]
     public class Driver
     {
@@ -41,8 +42,12 @@ namespace Fleet_Managment_Production.Models
         [Required, StringLength(11)]
         public string Pesel { get; set; } = null!;
 
-        [Display(Name = "Kategoria")]
-        public LicenseCategory LicenseCategory { get; set; }
+        [Display(Name = "Kategorie Prawa Jazdy")]
+        public string? LicenseCategories { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Kategorie Prawa Jazdy")]
+        public List<LicenseCategory> SelectedCategories { get; set; } = new List<LicenseCategory>();
 
         [Display(Name = "Telefon")]
         public string? PhoneNumber { get; set; }
