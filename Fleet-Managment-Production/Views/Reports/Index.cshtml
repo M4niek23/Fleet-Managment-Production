@@ -4,13 +4,43 @@
     ViewData["Title"] = "Raporty";
 }
 
+<style>
+    .card-fullscreen {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        overflow-y: auto !important;
+    }
+
+        .card-fullscreen .card-body {
+            height: calc(100vh - 65px);
+        }
+
+        .card-fullscreen canvas {
+            max-height: 100% !important;
+        }
+</style>
+
 <div class="container-fluid py-4">
-    <div class="mb-4">
-        <h2 class="fw-bold mb-1"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Raportowanie</h2>
-        <p class="text-muted mb-0">Generuj zestawienia kosztów, spalania i aktywności w Twojej flocie.</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Raportowanie</h2>
+            <p class="text-muted mb-0">Generuj zestawienia kosztów, spalania i aktywności w Twojej flocie.</p>
+        </div>
+        @if (Context.Request.Method == "POST")
+        {
+            <button onclick="window.print()" class="btn btn-outline-secondary bg-white shadow-sm d-none d-md-block">
+                <i class="bi bi-printer me-2"></i>Drukuj Raport
+            </button>
+        }
     </div>
 
-    <div class="card shadow-sm border-0 border-start border-primary border-4 mb-4">
+    <div class="card shadow-sm border-0 border-start border-primary border-4 mb-4 d-print-none">
         <div class="card-body p-4">
             <form asp-action="Index" method="post" class="row align-items-end">
                 <div class="col-md-4 mb-3 mb-md-0">
@@ -34,13 +64,77 @@
 
     @if (Context.Request.Method == "POST")
     {
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white p-3 border-bottom">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-table me-2 text-muted"></i>Wyniki wygenerowanego raportu</h5>
+        <div class="row mb-4">
+            @if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.TCO && Model.TcoData.Any())
+            {
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="card bg-danger text-white shadow-sm border-0 h-100">
+                        <div class="card-body p-4">
+                            <h6 class="text-uppercase fw-bold mb-2 opacity-75"><i class="bi bi-wallet2 me-2"></i>Łączny Koszt Floty</h6>
+                            <h2 class="mb-0 fw-bold">@Model.TcoData.Sum(x => x.TotalCost).ToString("C")</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-dark text-white shadow-sm border-0 h-100">
+                        <div class="card-body p-4">
+                            <h6 class="text-uppercase fw-bold mb-2 opacity-75"><i class="bi bi-car-front me-2"></i>Średni Koszt na Auto</h6>
+                            <h2 class="mb-0 fw-bold">@Model.TcoData.Average(x => x.TotalCost).ToString("C")</h2>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.Fuel && Model.FuelData.Any())
+            {
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="card bg-primary text-white shadow-sm border-0 h-100">
+                        <div class="card-body p-4">
+                            <h6 class="text-uppercase fw-bold mb-2 opacity-75"><i class="bi bi-fuel-pump me-2"></i>Łącznie Spalono (Litry)</h6>
+                            <h2 class="mb-0 fw-bold">@Model.FuelData.Sum(x => x.TotalLiters) l</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-dark text-white shadow-sm border-0 h-100">
+                        <div class="card-body p-4">
+                            <h6 class="text-uppercase fw-bold mb-2 opacity-75"><i class="bi bi-speedometer me-2"></i>Średnie Spalanie Floty</h6>
+                            <h2 class="mb-0 fw-bold">@Model.FuelData.Average(x => x.AverageConsumption).ToString("0.00") l/100km</h2>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if ((Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.TCO && Model.TcoData.Any()) ||
+       (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.Fuel && Model.FuelData.Any()) ||
+       (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.Service && Model.ServiceData.Any()) ||
+       (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.DriverActivity && Model.DriverActivityData.Any()))
+        {
+            <div class="card shadow-sm border-0 mb-4 bg-white" id="chartCard">
+                <div class="card-header bg-white p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-bar-chart-line me-2 text-primary"></i>Wizualizacja danych</h5>
+                    <button class="btn btn-sm btn-light border btn-toggle-fullscreen d-print-none" title="Powiększ/Pomniejsz">
+                        <i class="bi bi-arrows-fullscreen"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height:40vh; width:100%">
+                        <canvas id="reportChart"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="card-body p-0">
+        }
+
+        <div class="card shadow-sm border-0 bg-white" id="tableCard">
+            <div class="card-header bg-white p-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-table me-2 text-muted"></i>Szczegóły raportu</h5>
+                <button class="btn btn-sm btn-light border btn-toggle-fullscreen d-print-none" title="Powiększ/Pomniejsz">
+                    <i class="bi bi-arrows-fullscreen"></i>
+                </button>
+            </div>
+            <div class="card-body p-3">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table id="reportTable" class="table table-hover align-middle mb-0 w-100">
                         <thead class="bg-light">
                             <tr>
                                 @if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.TCO)
@@ -114,10 +208,6 @@
                                     <tr><td class="ps-4 fw-bold">@item.VehicleName (@item.LicensePlate)</td><td><span class="badge bg-warning text-dark">@item.AlertType</span></td><td>@item.ExpiryDate.ToShortDateString()</td><td class="fw-bold text-danger">@item.DaysLeft dni</td></tr>
                                 }
                             }
-                            else
-                            {
-                                <tr><td colspan="4" class="text-center py-4 text-muted"><i class="bi bi-info-circle me-2"></i>Brak danych do wyświetlenia dla podanych kryteriów.</td></tr>
-                            }
                         </tbody>
                     </table>
                 </div>
@@ -125,3 +215,119 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    @if (Context.Request.Method == "POST")
+    {
+        <script>
+            // Zmienna globalna dla wykresu (żeby można go było przeskalować)
+            var reportChartInstance = null;
+
+            $(document).ready(function() {
+                // 1. INICJALIZACJA SORTOWANIA TABELI (DataTables)
+                $('#reportTable').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pl.json', // Tłumaczenie na polski
+                    },
+                    paging: false,       // Wyłączamy strony (wszystko na jednym widoku)
+                    info: false,         // Wyłączamy tekst "Pokazano X wpisów"
+                    searching: true,     // Zostawiamy wyszukiwarkę (super bajer do raportów!)
+                    order: []            // Domyślnie brak sortowania przy starcie
+                });
+
+                // 2. OBSŁUGA PRZYCISKU FULLSCREEN (Powiększanie/Pomniejszanie)
+                $('.btn-toggle-fullscreen').on('click', function() {
+                    var $card = $(this).closest('.card');
+                    var $icon = $(this).find('i');
+
+                    $card.toggleClass('card-fullscreen');
+
+                    if ($card.hasClass('card-fullscreen')) {
+                        $icon.removeClass('bi-arrows-fullscreen').addClass('bi-fullscreen-exit');
+                    } else {
+                        $icon.removeClass('bi-fullscreen-exit').addClass('bi-arrows-fullscreen');
+                    }
+
+                    // Jeśli powiększony element to wykres, zmuś go do ponownego wyliczenia rozmiaru
+                    if (reportChartInstance != null) {
+                        setTimeout(function() { reportChartInstance.resize(); }, 50);
+                    }
+                });
+
+                // 3. GENEROWANIE WYKRESU
+                var ctx = document.getElementById('reportChart');
+                if (!ctx) return;
+
+                var chartLabels = [];
+                var chartData = [];
+                var chartLabelName = '';
+                var chartColor = 'rgba(13, 110, 253, 0.6)';
+
+            @if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.TCO && Model.TcoData != null && Model.TcoData.Any())
+            {
+                <text>
+                        chartLabels = @Html.Raw(Json.Serialize(Model.TcoData.Select(x => x.VehicleName)));
+                        chartData = @Html.Raw(Json.Serialize(Model.TcoData.Select(x => x.TotalCost)));
+                        chartLabelName = 'Całkowity Koszt (PLN)';
+                        chartColor = 'rgba(220, 53, 69, 0.7)';
+                </text>
+            }
+            else if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.Fuel && Model.FuelData != null && Model.FuelData.Any())
+            {
+                <text>
+                        chartLabels = @Html.Raw(Json.Serialize(Model.FuelData.Select(x => x.VehicleName)));
+                        chartData = @Html.Raw(Json.Serialize(Model.FuelData.Select(x => x.AverageConsumption)));
+                        chartLabelName = 'Średnie spalanie (l/100km)';
+                        chartColor = 'rgba(13, 110, 253, 0.7)';
+                </text>
+            }
+            else if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.Service && Model.ServiceData != null && Model.ServiceData.Any())
+            {
+                <text>
+                        chartLabels = @Html.Raw(Json.Serialize(Model.ServiceData.Select(x => x.VehicleName)));
+                        chartData = @Html.Raw(Json.Serialize(Model.ServiceData.Select(x => x.TotalServiceCost)));
+                        chartLabelName = 'Koszty napraw (PLN)';
+                        chartColor = 'rgba(255, 193, 7, 0.7)';
+                </text>
+            }
+            else if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.DriverActivity && Model.DriverActivityData != null && Model.DriverActivityData.Any())
+            {
+                <text>
+                        chartLabels = @Html.Raw(Json.Serialize(Model.DriverActivityData.Select(x => x.DriverName)));
+                        chartData = @Html.Raw(Json.Serialize(Model.DriverActivityData.Select(x => x.TotalDistance)));
+                        chartLabelName = 'Przejechany dystans (km)';
+                        chartColor = 'rgba(25, 135, 84, 0.7)';
+                </text>
+            }
+
+                if (chartLabels.length > 0) {
+                    reportChartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: chartLabelName,
+                                data: chartData,
+                                backgroundColor: chartColor,
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
+    }
+}
