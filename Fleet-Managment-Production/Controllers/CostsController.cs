@@ -48,10 +48,7 @@ namespace Fleet_Managment_Production.Controllers
         // GET: Costs/Create
         public IActionResult Create()
         {
-            // Używamy tych samych metod pomocniczych co w Edit dla spójności
             PopulateVehiclesDropdown();
-            // Możesz użyć PopulateManualCostTypesDropdown() jeśli chcesz wykluczyć automatyczne typy, 
-            // lub poniższego kodu, jeśli chcesz wszystkie:
             ViewData["CostType"] = new SelectList(Enum.GetValues(typeof(CostType)));
 
             return View();
