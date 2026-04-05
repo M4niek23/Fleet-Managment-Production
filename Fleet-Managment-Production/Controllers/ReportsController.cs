@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Fleet_Managment_Production.Data;
-using Fleet_Managment_Production.ViewModels;
+﻿using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
+using Fleet_Managment_Production.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fleet_Managment_Production.Controllers
 {
@@ -11,10 +12,12 @@ namespace Fleet_Managment_Production.Controllers
     public class ReportsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<Users> _userManager;
 
-        public ReportsController(AppDbContext context)
+        public ReportsController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: /Reports 

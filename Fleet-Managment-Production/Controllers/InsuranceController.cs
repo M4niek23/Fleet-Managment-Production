@@ -1,5 +1,6 @@
 ﻿using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +10,12 @@ namespace Fleet_Managment_Production.Controllers
     public class InsuranceController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<Users> _userManager;
 
-        public InsuranceController(AppDbContext context)
+        public InsuranceController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index(int? id, string searchString) // Zmiana 1: Dodanie parametru searchString

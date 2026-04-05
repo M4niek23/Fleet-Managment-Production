@@ -5,6 +5,7 @@ using Fleet_Managment_Production.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Fleet_Managment_Production.Models;
+using Microsoft.Build.Framework;
 
 namespace Fleet_Managment_Production.Controllers
 {
@@ -21,8 +22,10 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Vehicles
-        public async Task<IActionResult> Index(string searchString, int? vehicleId)
+        public async Task<IActionResult> Index(string searchString, int? vehicleId, int? page)
         {
+            int pageSize = 6;
+            int pageNumber = page ?? 1;
             var currentUserId = _userManager.GetUserId(User);
             ViewData["CurrentFilter"] = searchString;
 
@@ -37,55 +40,58 @@ namespace Fleet_Managment_Production.Controllers
                 if (driver != null)
                 {
                     vehiclesQuery = vehiclesQuery.Where(v => v.DriverId == driver.Id);
-                }else
+                }
+                else
                 {
                     vehiclesQuery = vehiclesQuery.Where(v => false);
                 }
             }
+
             if (vehicleId.HasValue)
             {
                 vehiclesQuery = vehiclesQuery.Where(v => v.VehicleId == vehicleId.Value);
-
             }
             if (!string.IsNullOrEmpty(searchString))
             {
                 var searchLower = searchString.ToLower();
-
                 vehiclesQuery = vehiclesQuery.Where(v =>
-                (v.Make != null && v.Make.ToLower().Contains(searchLower)) ||
-                (v.Model != null && v.Model.ToLower().Contains(searchLower)) ||
-                (v.LicensePlate != null && v.LicensePlate.ToLower().Contains(searchLower)) ||
-                (v.VIN != null && v.VIN.ToLower().Contains(searchLower)) ||
-                (v.Driver != null && v.Driver.FirstName.ToLower().Contains(searchLower)) ||
-                (v.Driver != null && v.Driver.LastName.ToLower().Contains(searchLower))
-                );                  
+                    (v.Make != null && v.Make.ToLower().Contains(searchLower)) ||
+                    (v.Model != null && v.Model.ToLower().Contains(searchLower)) ||
+                    (v.LicensePlate != null && v.LicensePlate.ToLower().Contains(searchLower)) ||
+                    (v.VIN != null && v.VIN.ToLower().Contains(searchLower))
+                );
             }
 
-            var vehiclesList = await vehiclesQuery.ToListAsync();
+            var totalItems = await vehiclesQuery.CountAsync();
+
+            var vehiclesList = await vehiclesQuery
+                .OrderBy(v => v.Make) 
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
             var dropdownQuery = _context.Vehicles.AsQueryable();
             if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
                 var driver = await _context.Drivers.FirstOrDefaultAsync(d => d.UserId == currentUserId);
-                if(driver != null)
-                {
-                    dropdownQuery = dropdownQuery.Where(v => v.DriverId == driver.Id);
-                }else
-                {
-                    dropdownQuery = dropdownQuery.Where(v => false);
-                }
-                
+                if (driver != null) dropdownQuery = dropdownQuery.Where(v => v.DriverId == driver.Id);
+                else dropdownQuery = dropdownQuery.Where(v => false);
             }
-            var allVehiclesForDropdown = await _context.Vehicles.Include(v => v.Driver).ToListAsync();
+
+            var allVehiclesForDropdown = await dropdownQuery.Include(v => v.Driver).ToListAsync();
             var vehiclesSelectList = allVehiclesForDropdown.Select(v => new
             {
                 VehicleId = v.VehicleId,
                 DisplayText = v.Driver != null
-            ? $"{v.Driver.FirstName} {v.Driver.LastName}"
-            : $"[Brak kierowcy] {v.Make} {v.Model} ({v.LicensePlate})"
+                    ? $"{v.Driver.FirstName} {v.Driver.LastName}"
+                    : $"[Brak kierowcy] {v.Make} {v.Model} ({v.LicensePlate})"
             }).ToList();
 
             ViewBag.VehicleList = new SelectList(vehiclesSelectList, "VehicleId", "DisplayText");
+
             return View(vehiclesList);
         }
 

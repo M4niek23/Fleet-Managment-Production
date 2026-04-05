@@ -1,6 +1,7 @@
 ﻿using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +12,11 @@ namespace Fleet_Managment_Production.Controllers
     public class CostsController : Controller
     {
         private readonly AppDbContext _context;
-
-        public CostsController(AppDbContext context)
+        private readonly UserManager<Users> _userManager;
+        public CostsController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Costs

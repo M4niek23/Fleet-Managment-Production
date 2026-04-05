@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Fleet_Managment_Production.Data;
+﻿using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fleet_Managment_Production.Controllers
 {
@@ -11,10 +12,11 @@ namespace Fleet_Managment_Production.Controllers
     public class DriversController : Controller
     {
         private readonly AppDbContext _context;
-
-        public DriversController(AppDbContext context)
+        private readonly UserManager<Users> _userManager;
+        public DriversController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Drivers

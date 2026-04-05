@@ -19,24 +19,37 @@
         }
     </div>
     <div class="row mb-4">
-        <div class="col-md-10">
-            <form asp-action="Index" method="get">
-                <div class="input-group shadow-sm">
-                    <select name="vehicleId" class="form-select" asp-items="ViewBag.VehicleList">
-                        <option value="">Wszyscy kierowcy</option>
-                    </select>
-                    <br />
-                    <span class="input-group-text bg-white border-end-0 border-start-0">
-                        <i class="bi bi-search text-muted"></i>
-                    </span>
-                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control border-start-0" placeholder="Szukaj po marce, rejestracji..." />
+    <div class="col-12">
+        <form asp-action="Index" method="get" class="card shadow-sm border-0">
+            <div class="card-body p-3">
+                <div class="row g-2">
+                    <div class="col-12 col-md-4">
+                        <select name="vehicleId" class="form-select" asp-items="ViewBag.VehicleList">
+                            <option value="">Wszyscy kierowcy</option>
+                        </select>
+                    </div>
 
-                    <button type="submit" class="btn btn-primary px-4">Filtruj</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Wyczyść</a>
+                    <div class="col-12 col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white text-muted border-end-0">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
+                                   class="form-control border-start-0" placeholder="Szukaj marki, rejestracji..." />
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-1 d-grid">
+                        <button type="submit" class="btn btn-primary">Filtruj</button>
+                    </div>
+                    <div class="col-6 col-md-2 d-grid">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Wyczyść</a>
+                    </div>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
+</div>
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -48,7 +61,7 @@
                             <th>Kierowca</th>
                             <th>Status</th>
                             <th>Przebieg</th>
-                            @if (User.IsInRole("Admin") && User.IsInRole("Manager"))
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                             {
                                 <th class="text-end pe-4">Akcje</th>
                             }
@@ -147,4 +160,34 @@
             </div>
         </div>
     </div>
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Nawigacja stronami" class="mt-4">
+            <ul class="pagination justify-content-center flex-wrap shadow-sm">
+                <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]">
+                        <i class="bi bi-chevron-left"></i> <span class="d-none d-sm-inline">Poprzednia</span>
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i"
+                           asp-route-searchString="@ViewData["CurrentFilter"]">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]">
+                        <span class="d-none d-sm-inline">Następna</span> <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
 </div>

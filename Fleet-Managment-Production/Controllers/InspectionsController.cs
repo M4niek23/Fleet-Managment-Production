@@ -1,8 +1,10 @@
 ﻿using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
 using Fleet_Managment_Production.ViewModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fleet_Managment_Production.Controllers
@@ -10,10 +12,12 @@ namespace Fleet_Managment_Production.Controllers
     public class InspectionsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<Users> _userManager;
 
-        public InspectionsController(AppDbContext context)
+        public InspectionsController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index(int? id)
