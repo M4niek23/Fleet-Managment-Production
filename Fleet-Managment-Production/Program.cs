@@ -45,24 +45,7 @@ var localizationOptions = new RequestLocalizationOptions
 };
 app.UseRequestLocalization(localizationOptions);
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<AppDbContext>();
-        var userManager = services.GetRequiredService<UserManager<Users>>();
-        await SeedService.SeedDatabase(services);
-        await TestDataSeeder.SeedTestDataAsync(context, userManager);
-        Console.WriteLine("Baza danych zosta³a zainicjalizowana i wype³niona danymi testowymi.");
-
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Wyst¹pi³ b³¹d podczas inicjalizacji bazy danych: {ex.Message}");
-    }
-}
-
+await SeedService.SeedDatabase(app.Services);
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
