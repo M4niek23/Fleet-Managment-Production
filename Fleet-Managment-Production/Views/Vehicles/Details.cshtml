@@ -4,7 +4,7 @@
     ViewData["Title"] = "Karta Pojazdu - " + Model.LicensePlate;
 
     // Obliczamy sumę kosztów
-    var totalCost = Model.Costs?.Sum(c => c.Kwota) ?? 0;
+    var totalCost = Model.Costs?.Sum(c => c.Amount) ?? 0;
 
     // Pobieramy średnie spalanie z ViewBag (przekazane z kontrolera)
     double avgConsumption = ViewBag.AvgConsumption ?? 0;
@@ -275,10 +275,10 @@
                                                 }
                                                 else
                                                 {
-                                                    @cost.Opis
+                                                    @cost.Description
                                                 }
                                             </td>
-                                            <td class="text-end pe-4 fw-bold">@cost.Kwota.ToString("C")</td>
+                                            <td class="text-end pe-4 fw-bold">@cost.Amount.ToString("C")</td>
                                         </tr>
                                     }
                                 }

@@ -21,14 +21,14 @@ namespace Fleet_Managment_Production.Models
         [ForeignKey("DriverId")]
         public virtual Driver? Driver { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Data rozpoczęcia jest wymagana.")]
         [Display(Name = "Data rozpoczęcia")]
         public DateTime StartDate { get; set; } = DateTime.Now;
 
         [Display(Name = "Data zakończenia")]
         public DateTime? EndTime { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Miejsce startu jest wymagane.")]
         [Display(Name = "Miejsce startu")]
         public string StartLocation { get; set; }
 

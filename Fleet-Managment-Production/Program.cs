@@ -28,7 +28,8 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
     options.Lockout.AllowedForNewUsers = true;
 })
     .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddErrorDescriber<PolishIdentityErrorDescriber>();
 
 var app = builder.Build();
 

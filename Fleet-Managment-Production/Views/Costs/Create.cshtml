@@ -91,12 +91,12 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="Kwota" class="form-label fw-bold">Kwota (PLN)</label>
+                        <label asp-for="Amount" class="form-label fw-bold">Kwota (PLN)</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="bi bi-cash-stack"></i></span>
-                            <input asp-for="Kwota" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                            <input asp-for="Amount" type="number" step="0.01" class="form-control" placeholder="0.00" />
                         </div>
-                        <span asp-validation-for="Kwota" class="text-danger small"></span>
+                        <span asp-validation-for="Amount" class="text-danger small"></span>
                     </div>
 
                     <div class="col-12 text-muted text-uppercase small fw-bold mt-4 mb-2 border-bottom pb-1">
@@ -104,12 +104,12 @@
                     </div>
 
                     <div class="col-12">
-                        <label asp-for="Opis" class="form-label fw-bold">Opis / Tytuł płatności</label>
+                        <label asp-for="Description" class="form-label fw-bold">Opis / Tytuł płatności</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="bi bi-pen"></i></span>
-                            <input asp-for="Opis" class="form-control" placeholder="np. Faktura VAT nr..." />
+                            <input asp-for="Description" class="form-control" placeholder="np. Faktura VAT nr..." />
                         </div>
-                        <span asp-validation-for="Opis" class="text-danger small"></span>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
                     </div>
 
                     <div class="col-12 mt-5 d-flex justify-content-end">

@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = "Rejestr Kosztów";
     // Zabezpieczenie przed błędem na pustej bazie
-    var totalSum = Model != null && Model.Any() ? Model.Sum(x => x.Kwota) : 0;
+    var totalSum = Model != null && Model.Any() ? Model.Sum(x => x.Amount) : 0;
 }
 
 <div class="container-fluid py-4">
@@ -98,10 +98,10 @@
                                     }
                                     else
                                     {
-                                        <span class="text-muted">@item.Opis</span>
+                                        <span class="text-muted">@item.Description</span>
                                     }
                                 </td>
-                                <td class="text-end pe-4 fw-bold text-danger">@item.Kwota.ToString("C")</td>
+                                <td class="text-end pe-4 fw-bold text-danger">@item.Amount.ToString("C")</td>
                                 <td class="text-end pe-4">
                                     <div class="btn-group">
                                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Edytuj"><i class="bi bi-pencil"></i></a>

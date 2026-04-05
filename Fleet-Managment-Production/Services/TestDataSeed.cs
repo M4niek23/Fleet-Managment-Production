@@ -162,8 +162,8 @@ namespace Fleet_Managment_Production.Services
             // 8. GENEROWANIE KOSZTÓW
             var costFaker = new Faker<Cost>(locale)
                 .RuleFor(c => c.Type, (f, c) => f.PickRandom(CostType.Paliwo, CostType.Inne))
-                .RuleFor(c => c.Opis, (f, c) => (string?)f.Lorem.Sentence())
-                .RuleFor(c => c.Kwota, (f, c) => f.Random.Decimal(50, 500))
+                .RuleFor(c => c.Description, (f, c) => (string?)f.Lorem.Sentence())
+                .RuleFor(c => c.Amount, (f, c) => f.Random.Decimal(50, 500))
                 .RuleFor(c => c.Data, (f, c) => f.Date.Past(1));
 
             var costs = costFaker.Generate(50);

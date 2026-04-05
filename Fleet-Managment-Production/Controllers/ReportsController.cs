@@ -72,7 +72,7 @@ namespace Fleet_Managment_Production.Controllers
                 LicensePlate = v.LicensePlate,
 
                 // Poprawiono: uzycie 'Kwota' zamiast 'Amount' oraz usunięto '?? 0'
-                FuelCost = v.Costs.Where(c => c.Type == CostType.Paliwo && c.Data >= model.StartDate && c.Data <= model.EndDate).Sum(c => c.Kwota),
+                FuelCost = v.Costs.Where(c => c.Type == CostType.Paliwo && c.Data >= model.StartDate && c.Data <= model.EndDate).Sum(c => c.Amount),
                 // Poprawiono: usunięto '?? 0' z s.Cost
                 ServiceCost = v.Services.Where(s => s.EntryDate >= model.StartDate && s.EntryDate <= model.EndDate).Sum(s => s.Cost)
             })

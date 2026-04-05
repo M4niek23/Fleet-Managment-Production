@@ -11,11 +11,11 @@ namespace Fleet_Managment_Production.ViewModels
         [Required]
         public string Token { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Hasło jest wymagane.")]
         [DataType(DataType.Password)]
         public string NewPassword { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Potwierdzenie hasła jest wymagane.")]
         [DataType(DataType.Password)]
         [Compare("NewPassword", ErrorMessage = "Hasła nie są zgodne.")]
         public string ConfirmPassword { get; set; } = string.Empty;

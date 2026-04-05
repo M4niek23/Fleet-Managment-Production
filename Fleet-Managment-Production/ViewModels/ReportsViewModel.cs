@@ -12,7 +12,7 @@ namespace Fleet_Managment_Production.ViewModels
         Service,
         [Display(Name = "Aktywność kierowców")]
         DriverActivity,
-        [Display(Name = "Alerty (Kończące się terminy)")] // Poprawiono brakujący nawias ")" na końcu
+        [Display(Name = "Alerty (Kończące się terminy)")] 
         Alerts
     }
 

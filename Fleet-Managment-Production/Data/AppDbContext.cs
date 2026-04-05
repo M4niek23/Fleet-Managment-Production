@@ -96,8 +96,8 @@ namespace Fleet_Managment_Production.Data
                     {
                         VehicleId = inspection.VehicleId,
                         Type = CostType.Przegląd,
-                        Opis = $"Przegląd: {inspection.Description ?? "Brak opisu"}",
-                        Kwota = inspection.Cost,
+                        Description = $"Przegląd: {inspection.Description ?? "Brak opisu"}",
+                        Amount = inspection.Cost,
                         Data = inspection.InspectionDate,
                     };
                     Costs.Add(cost);
@@ -110,8 +110,8 @@ namespace Fleet_Managment_Production.Data
                         { 
                             VehicleId = insurance.VehicleId.Value,
                             Type = CostType.Ubezpieczenie,
-                            Opis = $"Ubezpieczenie: {insurance.PolicyNumber} ({insurance.InsurareName})",
-                            Kwota = insurance.Cost,
+                            Description = $"Ubezpieczenie: {insurance.PolicyNumber} ({insurance.InsurareName})",
+                            Amount = insurance.Cost,
                             Data = insurance.StartDate
                         };
                         Costs.Add(cost);

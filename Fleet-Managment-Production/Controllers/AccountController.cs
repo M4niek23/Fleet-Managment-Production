@@ -205,7 +205,7 @@ namespace Fleet_Managment_Production.Controllers
 
             var totalCosts = await context.Costs
                 .Where(c => c.Vehicle.UserId == user.Id || (driverId != null && c.Vehicle.DriverId == driverId))
-                .SumAsync(c => c.Kwota);
+                .SumAsync(c => c.Amount);
             var totalDistance = await context.Trips
                 .Where(t => (t.Vehicle.UserId == user.Id || (driverId != null && t.Vehicle.DriverId == driverId))
                             && t.EndOdometer != null && t.EndOdometer > t.StartOdometer)

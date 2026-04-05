@@ -5,7 +5,7 @@ namespace Fleet_Managment_Production.ViewModels
     public class LoginViewModel
     {
         [Required(ErrorMessage = "Email jest wymagany.")]
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "Wpisany niepoprawny format E-Mail.")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Hasło jest wymagane.")]

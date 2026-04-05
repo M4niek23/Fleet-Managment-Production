@@ -25,7 +25,7 @@ namespace Fleet_Managment_Production.Models
         [Range(0, (double)decimal.MaxValue)]
         public decimal Cost { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Samochód jest wymagany.")]
         [Display(Name = "Pojazd")]
         public int VehicleId { get; set; }
 

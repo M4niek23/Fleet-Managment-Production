@@ -26,12 +26,12 @@ namespace Fleet_Managment_Production.Models
 
         [Display(Name = "Opis")]
         
-        public string? Opis { get; set; }
+        public string? Description { get; set; }
 
         [Display(Name = "Kwota")]
         [Column(TypeName = "decimal(18,2)")]
         [Range(0.01, 1000000, ErrorMessage = "Kwota musi być większa od 0")]
-        public decimal Kwota { get; set; }
+        public decimal Amount { get; set; }
 
         [Display(Name = "Data")]
         [DataType(DataType.Date)]
