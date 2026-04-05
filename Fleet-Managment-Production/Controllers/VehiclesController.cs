@@ -23,13 +23,25 @@ namespace Fleet_Managment_Production.Controllers
         // GET: Vehicles
         public async Task<IActionResult> Index(string searchString, int? vehicleId)
         {
+            var currentUserId = _userManager.GetUserId(User);
             ViewData["CurrentFilter"] = searchString;
 
             var vehiclesQuery = _context.Vehicles
                 .Include(v => v.User)
                 .Include(v => v.Driver)
                 .AsQueryable();
-            
+
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+            {
+                var driver = await _context.Drivers.FirstOrDefaultAsync(d => d.UserId == currentUserId);
+                if (driver != null)
+                {
+                    vehiclesQuery = vehiclesQuery.Where(v => v.DriverId == driver.Id);
+                }else
+                {
+                    vehiclesQuery = vehiclesQuery.Where(v => false);
+                }
+            }
             if (vehicleId.HasValue)
             {
                 vehiclesQuery = vehiclesQuery.Where(v => v.VehicleId == vehicleId.Value);
@@ -50,6 +62,20 @@ namespace Fleet_Managment_Production.Controllers
             }
 
             var vehiclesList = await vehiclesQuery.ToListAsync();
+
+            var dropdownQuery = _context.Vehicles.AsQueryable();
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+            {
+                var driver = await _context.Drivers.FirstOrDefaultAsync(d => d.UserId == currentUserId);
+                if(driver != null)
+                {
+                    dropdownQuery = dropdownQuery.Where(v => v.DriverId == driver.Id);
+                }else
+                {
+                    dropdownQuery = dropdownQuery.Where(v => false);
+                }
+                
+            }
             var allVehiclesForDropdown = await _context.Vehicles.Include(v => v.Driver).ToListAsync();
             var vehiclesSelectList = allVehiclesForDropdown.Select(v => new
             {

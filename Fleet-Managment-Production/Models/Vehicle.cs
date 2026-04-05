@@ -71,7 +71,7 @@ namespace Fleet_Managment_Production.Models
         [Display(Name = "Nr VIN")]
         [Required(ErrorMessage = "Numer VIN jest wymagany.")]
         [StringLength(17, MinimumLength = 17, ErrorMessage = "Nr VIN musi posiadać dokładnie 17 znaków.")]
-        [RegularExpression(@"^[A-HJ-NPR-Z0-9]{17}$", ErrorMessage = "Nieprawidłowy format nr VIN.")]
+        [RegularExpression(@"^[A-HJ-NPR-STUVWX-Z0-9]{17}$", ErrorMessage = "Nieprawidłowy format nr VIN.")]
         public string? VIN { get; set; }
 
         [Required(ErrorMessage = "Pole Aktualny przebieg jest wymagane.")]

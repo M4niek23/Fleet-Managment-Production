@@ -35,14 +35,14 @@ namespace Fleet_Managment_Production.Models
         public double? StartLatitude {get; set; }
         public double? StartLongitude {get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Miejsce docelowe jest wymagane.")]
         [Display(Name = "Miejsce docelowe")]
         public string EndLocation { get; set; }
 
         public double? EndLatitude {get; set; }
         public double? EndLongitude {get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Licznik początkowy jest wymagany.")]
         [Display(Name = "Licznik początkowy (km)")]
         public int StartOdometer { get; set; }
 

@@ -5,56 +5,98 @@
 @{
     ViewData["Title"] = "Panel Administratora";
 }
-<h2>@ViewData["Title"]</h2>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Nick</th>
-            <th>Email</th>
-            <th>Akcja</th>
-            <th>Status konta</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            var roles = await UserManager.GetRolesAsync(user);
-            var hasRoles = roles.Any(); 
+<div class="container mt-4">
+    
 
-            <tr>
-                <td>@user.UserName</td>
-                <td>@user.Email</td>
-                <td>
-                    <a class="btn btn-primary" asp-action="ManageRoles" asp-route-userId="@user.Id">
-                        Zarządzaj
-                    </a>
-                </td>
-                <td>
-                    @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
-                    {
-                        <form asp-controller="Admin" asp-action="UnlockUser" method="post" class="d-inline ms-1">
-                            <input type="hidden" name="id" value="@user.Id" />
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Czy na pewno chcesz odblokować to konto?');">
-                                <i class="bi bi-unlock-fill"></i> Odblokuj
-                            </button>
-                        </form>
-                    }
-                    else if (hasRoles)
-                    {
-                        <span class="badge bg-success">
-                            <i class="bi bi-check-circle me-1"></i> Aktywny
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-warning text-dark">
-                            <i class="bi bi-clock-history me-1"></i> Oczekujący na zatwierdzenie
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
+                               class="form-control border-start-0" placeholder="Szukaj po nazwie, emailu lub nicku..." />
+                    </div>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">Szukaj</button>
+                </div>
+            </form>
+            @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+            {
+                <div class="mt-2">
+                    <small class="text-muted">Wyniki dla: <strong>@ViewData["CurrentFilter"]</strong></small>
+                    <a asp-action="Index" class="text-decoration-none ms-2 small"><i class="bi bi-x-circle"></i> Wyczyść filtry</a>
+                </div>
+            }
+        </div>
+    </div>
 
-                        </span>
+    @* --- TABELA UŻYTKOWNIKÓW --- *@
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]" class="text-decoration-none text-dark">
+                                Nick / Imię i Nazwisko <i class="bi bi-arrow-down-up ms-1 small text-muted"></i>
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewData["EmailSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]" class="text-decoration-none text-dark">
+                                Email <i class="bi bi-arrow-down-up ms-1 small text-muted"></i>
+                            </a>
+                        </th>
+                        <th>Akcja</th>
+                        <th>Status konta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        var roles = await UserManager.GetRolesAsync(user);
+                        var hasRoles = roles.Any();
+
+                        <tr>
+                            <td class="fw-bold">@user.UserName <br /><small class="text-muted fw-normal">@user.FullName</small></td>
+                            <td>@user.Email</td>
+                            <td>
+                                <a class="btn btn-outline-primary btn-sm" asp-action="ManageRoles" asp-route-userId="@user.Id">
+                                    <i class="bi bi-gear-fill me-1"></i> Zarządzaj
+                                </a>
+                            </td>
+                            <td>
+                                @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+                                {
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-danger me-2">Zablokowany</span>
+                                        <form asp-controller="Admin" asp-action="UnlockUser" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            <button type="submit" class="btn btn-link btn-sm p-0 text-danger" onclick="return confirm('Czy na pewno chcesz odblokować to konto?');">
+                                                Odblokuj
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                                else if (hasRoles)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle me-1"></i> Aktywny
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-clock-history me-1"></i> Oczekujący
+                                    </span>
+                                }
+                            </td>
+                        </tr>
                     }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

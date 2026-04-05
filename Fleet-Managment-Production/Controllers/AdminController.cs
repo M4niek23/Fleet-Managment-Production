@@ -21,10 +21,31 @@ namespace Fleet_Managment_Production.Controllers
         }
 
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string sortOrder)
         {
-            var users = await _userManager.Users.ToListAsync();
-            return View(users);
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["EmailSortParm"] = sortOrder == "Email" ? "email_desc" : "Email";
+            ViewData["CurrentFilter"] = searchString;
+
+            var usersQuery = _userManager.Users.AsQueryable();
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var lowerSearch = searchString.ToLower();
+                usersQuery = usersQuery.Where(u =>
+                    (u.FullName != null && u.FullName.ToLower().Contains(lowerSearch)) ||
+                    (u.UserName != null && u.UserName.ToLower().Contains(lowerSearch)) ||
+                    (u.Email != null && u.Email.ToLower().Contains(lowerSearch))
+                );
+
+            }
+            usersQuery = sortOrder switch
+            {
+                "name_desc" => usersQuery.OrderByDescending(u => u.FullName),
+                "Email" => usersQuery.OrderBy(u => u.Email),
+                "email_desc" => usersQuery.OrderByDescending(u => u.Email),
+                _ => usersQuery.OrderBy(u => u.FullName),
+            };
+            return View(await usersQuery.ToListAsync());
         }
 
         [HttpPost]
