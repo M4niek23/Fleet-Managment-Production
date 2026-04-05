@@ -28,13 +28,14 @@ namespace Fleet_Managment_Production.Controllers
             int pageNumber = page ?? 1;
             var currentUserId = _userManager.GetUserId(User);
             ViewData["CurrentFilter"] = searchString;
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var vehiclesQuery = _context.Vehicles
                 .Include(v => v.User)
                 .Include(v => v.Driver)
                 .AsQueryable();
 
-            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+            if (!isAdminOrManager)
             {
                 var driver = await _context.Drivers.FirstOrDefaultAsync(d => d.UserId == currentUserId);
                 if (driver != null)
@@ -78,7 +79,7 @@ namespace Fleet_Managment_Production.Controllers
             ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
             var dropdownQuery = _context.Vehicles.AsQueryable();
-            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+            if (!isAdminOrManager)
             {
                 var driver = await _context.Drivers.FirstOrDefaultAsync(d => d.UserId == currentUserId);
                 if (driver != null) dropdownQuery = dropdownQuery.Where(v => v.DriverId == driver.Id);

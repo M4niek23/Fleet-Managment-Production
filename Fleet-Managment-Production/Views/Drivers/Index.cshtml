@@ -9,7 +9,10 @@
         <h2>Kierowcy</h2>
         <p class="text-muted">Baza pracowników i ich uprawnień.</p>
     </div>
-    <a asp-action="Create" class="btn btn-dark"><i class="bi bi-person-plus"></i> Dodaj Kierowcę</a>
+    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+    {
+        <a asp-action="Create" class="btn btn-dark"><i class="bi bi-person-plus"></i> Dodaj Kierowcę</a>
+    }
 </div>
 
 <form asp-action="Index" method="get" class="mb-4">
@@ -51,7 +54,10 @@
                 <th>Kontakt</th>
                 <th>Prawo Jazdy</th>
                 <th>PESEL</th>
-                <th class="text-end">Akcje</th>
+                @if(User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <th class="text-end">Akcje</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -93,9 +99,15 @@
                         </td>
                         <td>@item.Pesel</td>
                         <td class="text-end">
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-pencil"></i></a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                            {
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-pencil"></i></a>
+                            }
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                            }                        
                         </td>
                     </tr>
                 }

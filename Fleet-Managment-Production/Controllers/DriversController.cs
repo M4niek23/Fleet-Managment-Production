@@ -13,6 +13,7 @@ namespace Fleet_Managment_Production.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<Users> _userManager;
+
         public DriversController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
@@ -24,10 +25,20 @@ namespace Fleet_Managment_Production.Controllers
         {
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["CurrentFilter"] = searchString;
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
             var driversQuery = _context.Drivers
                 .Include(d => d.Vehicles)
                 .Include(d => d.User)
                 .AsQueryable();
+
+            if (!isAdminOrManager)
+            {
+                driversQuery = driversQuery.Where(d => d.UserId == currentUser.Id);
+            }
+
             if (!string.IsNullOrEmpty(searchString))
             {
                 var lowerSearch = searchString.ToLower();
@@ -38,11 +49,13 @@ namespace Fleet_Managment_Production.Controllers
                        (d.LastName + " " + d.FirstName).ToLower().Contains(lowerSearch)
                     );
             }
+
             driversQuery = sortOrder switch
             {
                 "name_desc" => driversQuery.OrderByDescending(d => d.LastName).ThenByDescending(d => d.FirstName),
                 _ => driversQuery.OrderBy(d => d.LastName).ThenBy(d => d.FirstName),
             };
+
             return View(await driversQuery.ToListAsync());
         }
 
@@ -51,16 +64,23 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id == null) return NotFound();
 
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
             var driver = await _context.Drivers
-                .Include(d => d.Vehicles)              
-                .Include(d => d.Trips)                
-                    .ThenInclude(t => t.Vehicle) 
+                .Include(d => d.Vehicles)
+                .Include(d => d.Trips)
+                    .ThenInclude(t => t.Vehicle)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (driver == null) return NotFound();
 
-            driver.Trips = driver.Trips.OrderByDescending(t => t.StartDate).ToList();
+            if (!isAdminOrManager && driver.UserId != currentUser.Id)
+            {
+                return Forbid();
+            }
 
+            driver.Trips = driver.Trips.OrderByDescending(t => t.StartDate).ToList();
             return View(driver);
         }
 
@@ -76,7 +96,15 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Pesel,SelectedCategories,LicenseCategories,PhoneNumber,UserId,Email")] Driver driver)
         {
-            if (!string.IsNullOrEmpty(driver.UserId))
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
+            if (!isAdminOrManager)
+            {
+                driver.UserId = currentUser.Id;
+                driver.Email = currentUser.Email;
+            }
+            else if (!string.IsNullOrEmpty(driver.UserId))
             {
                 var user = await _context.Users.FindAsync(driver.UserId);
                 if (user != null) driver.Email = user.Email;
@@ -110,8 +138,17 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id == null) return NotFound();
 
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
             var driver = await _context.Drivers.FindAsync(id);
             if (driver == null) return NotFound();
+
+            if (!isAdminOrManager && driver.UserId != currentUser.Id)
+            {
+                return Forbid();
+            }
+
             if (!string.IsNullOrEmpty(driver.LicenseCategories))
             {
                 driver.SelectedCategories = driver.LicenseCategories
@@ -132,6 +169,22 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Pesel,SelectedCategories,LicenseCategories,PhoneNumber,UserId,Email")] Driver driver)
         {
             if (id != driver.Id) return NotFound();
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
+            var existingDriver = await _context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
+            if (existingDriver == null) return NotFound();
+
+            if (!isAdminOrManager && existingDriver.UserId != currentUser.Id)
+            {
+                return Forbid();
+            }
+
+            if (!isAdminOrManager)
+            {
+                driver.UserId = existingDriver.UserId;
+            }
 
             if (!string.IsNullOrEmpty(driver.UserId))
             {
@@ -173,10 +226,19 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id == null) return NotFound();
 
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
             var driver = await _context.Drivers
                 .Include(d => d.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (driver == null) return NotFound();
+
+            if (!isAdminOrManager && driver.UserId != currentUser.Id)
+            {
+                return Forbid();
+            }
 
             return View(driver);
         }
@@ -186,9 +248,17 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
             var driver = await _context.Drivers.FindAsync(id);
             if (driver != null)
             {
+                if (!isAdminOrManager && driver.UserId != currentUser.Id)
+                {
+                    return Forbid();
+                }
+
                 _context.Drivers.Remove(driver);
                 await _context.SaveChangesAsync();
             }
