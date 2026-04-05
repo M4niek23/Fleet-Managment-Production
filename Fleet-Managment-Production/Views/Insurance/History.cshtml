@@ -1,0 +1,86 @@
+﻿@model IEnumerable<Fleet_Managment_Production.Models.Insurance>
+@using Fleet_Managment_Production.Models
+
+@{
+    ViewData["Title"] = "Historia Ubezpieczeń";
+    var totalSum = Model != null && Model.Any() ? Model.Sum(x => x.Cost) : 0;
+}
+
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a asp-action="Index">Ubezpieczenia</a></li>
+                <li class="breadcrumb-item active">Historia</li>
+            </ol>
+        </nav>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold mb-1">Historia Ubezpieczeń</h2>
+                <p class="text-muted mb-0">Archiwalne polisy dla: <strong>@(ViewBag.VehicleRegistration ?? "Pojazdu")</strong></p>
+            </div>
+            <div class="bg-white px-3 py-2 rounded shadow-sm border text-center">
+                <small class="text-muted d-block text-uppercase" style="font-size:0.7rem;">Suma kosztów historycznych</small>
+                <span class="fw-bold text-secondary fs-5">@totalSum.ToString("C")</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-muted">
+                        <tr>
+                            <th class="ps-4 py-3">Ważne od</th>
+                            <th>Ważne do</th>
+                            <th>Pojazd</th>
+                            <th>Ubezpieczyciel</th>
+                            <th>Nr Polisy</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Koszt</th>
+                            <th class="text-end pe-4">Szczegóły</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">Brak archiwalnych polis dla tego pojazdu.</td>
+                            </tr>
+                        }
+                        @foreach (var item in Model)
+                        {
+                            <tr class="opacity-75">
+                                <td class="ps-4 text-muted">@item.StartDate.ToShortDateString()</td>
+                                <td class="text-muted">@item.ExpiryDate.ToShortDateString()</td>
+                                <td>
+                                    <div class="fw-bold text-secondary">@item.Vehicle?.Make @item.Vehicle?.Model</div>
+                                    <div class="small text-muted">@item.Vehicle?.LicensePlate</div>
+                                </td>
+                                <td>@item.InsurareName</td>
+                                <td>@item.PolicyNumber</td>
+                                <td>
+                                    <span class="badge bg-light text-secondary border border-secondary px-3">
+                                        Nieaktualne
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">@item.Cost.ToString("C")</td>
+                                <td class="text-end pe-4">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-link text-info">
+                                        <i class="bi bi-file-earmark-text"></i> Zobacz
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-outline-primary shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i>Powrót do aktualnych
+        </a>
+    </div>
+</div>

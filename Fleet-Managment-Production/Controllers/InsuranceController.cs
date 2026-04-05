@@ -1,5 +1,6 @@
 ﻿using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fleet_Managment_Production.Controllers
 {
+    [Authorize]
     public class InsuranceController : Controller
     {
         private readonly AppDbContext _context;
@@ -18,36 +20,44 @@ namespace Fleet_Managment_Production.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index(int? id, string searchString) // Zmiana 1: Dodanie parametru searchString
+        // GET: Insurance
+        public async Task<IActionResult> Index(int? id, string searchString)
         {
             ViewData["CurrentFilter"] = searchString;
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
-            var vehicles = await _context.Vehicles.ToListAsync();
-            if (!vehicles.Any())
+            // 1. Filtrowanie pojazdów do listy rozwijanej
+            var vehiclesQuery = _context.Vehicles.AsQueryable();
+            if (!isAdminOrManager)
             {
-                return View("NoVehicles");
+                vehiclesQuery = vehiclesQuery.Where(v => v.Driver != null && v.Driver.UserId == currentUser.Id);
             }
 
-            var vehicleSelectList = vehicles.Select(v => new {
+            var vehicles = await vehiclesQuery.ToListAsync();
+            ViewBag.VehicleList = new SelectList(vehicles.Select(v => new {
                 v.VehicleId,
                 DisplayText = v.LicensePlate ?? $"{v.Make} {v.Model}"
-            });
-            ViewBag.VehicleList = new SelectList(vehicleSelectList, "VehicleId", "DisplayText", id);
+            }), "VehicleId", "DisplayText", id);
 
+            // 2. Bazowe zapytanie o ubezpieczenia
             IQueryable<Insurance> insurancesQuery = _context.Insurances.Include(i => i.Vehicle);
+
+            if (!isAdminOrManager)
+            {
+                insurancesQuery = insurancesQuery.Where(i => i.Vehicle.Driver.UserId == currentUser.Id);
+            }
 
             if (id.HasValue)
             {
                 insurancesQuery = insurancesQuery.Where(i => i.VehicleId == id.Value);
-
-                var selectedVehicle = vehicles.FirstOrDefault(v => v.VehicleId == id.Value);
-                ViewBag.VehicleRegistration = selectedVehicle?.LicensePlate ?? "Brak Rejestracji";
+                var selected = vehicles.FirstOrDefault(v => v.VehicleId == id.Value);
+                ViewBag.VehicleRegistration = selected?.LicensePlate ?? "Wybranego pojazdu";
                 ViewBag.VehicleId = id.Value;
             }
             else
             {
-                ViewBag.VehicleRegistration = "Wszystkie pojazdy";
-                ViewBag.VehicleId = null; 
+                ViewBag.VehicleRegistration = "Wszystkich pojazdów";
             }
 
             if (!string.IsNullOrEmpty(searchString))
@@ -55,198 +65,189 @@ namespace Fleet_Managment_Production.Controllers
                 var lowerSearch = searchString.ToLower();
                 insurancesQuery = insurancesQuery.Where(i =>
                     (i.PolicyNumber != null && i.PolicyNumber.ToLower().Contains(lowerSearch)) ||
-                    (i.InsurareName != null && i.InsurareName.ToLower().Contains(lowerSearch)) || // Zaktualizowano na InsurareName
-                    (i.Vehicle != null && i.Vehicle.Make != null && i.Vehicle.Make.ToLower().Contains(lowerSearch)) ||
-                    (i.Vehicle != null && i.Vehicle.Model != null && i.Vehicle.Model.ToLower().Contains(lowerSearch)) ||
-                    (i.Vehicle != null && i.Vehicle.LicensePlate != null && i.Vehicle.LicensePlate.ToLower().Contains(lowerSearch))
+                    (i.Vehicle.LicensePlate != null && i.Vehicle.LicensePlate.ToLower().Contains(lowerSearch))
                 );
             }
 
-            var insurances = await insurancesQuery
-                .OrderByDescending(i => i.IsCurrent)
-                .ThenByDescending(i => i.ExpiryDate)
-                .ToListAsync();
+            var allInsurances = await insurancesQuery.ToListAsync();
 
-            return View(insurances);
+            // 3. Podział na dwie listy do widoku
+            ViewBag.ActiveInsurances = allInsurances.Where(i => i.IsCurrent).OrderByDescending(i => i.ExpiryDate).ToList();
+            ViewBag.HistoryInsurances = allInsurances.Where(i => !i.IsCurrent).OrderByDescending(i => i.ExpiryDate).ToList();
+
+            return View();
         }
 
+        // GET: Insurance/History
+        public async Task<IActionResult> History(int? id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
+            IQueryable<Insurance> historyQuery = _context.Insurances
+                .Include(i => i.Vehicle)
+                .Where(i => !i.IsCurrent); // Tylko historyczne
+
+            if (!isAdminOrManager)
+            {
+                historyQuery = historyQuery.Where(i => i.Vehicle.Driver.UserId == currentUser.Id);
+            }
+
+            if (id.HasValue)
+            {
+                historyQuery = historyQuery.Where(i => i.VehicleId == id.Value);
+                var vehicle = await _context.Vehicles.FindAsync(id);
+                ViewBag.VehicleName = vehicle?.LicensePlate ?? "Pojazdu";
+            }
+
+            return View(await historyQuery.OrderByDescending(i => i.ExpiryDate).ToListAsync());
+        }
+
+        // GET: Insurance/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
+            var insurance = await _context.Insurances
+                .Include(i => i.Vehicle).ThenInclude(v => v.Driver)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (insurance == null) return NotFound();
+
+            if (!isAdminOrManager && insurance.Vehicle?.Driver?.UserId != currentUser.Id)
+                return Forbid();
+
+            return View(insurance);
+        }
+
+        // GET: Insurance/Create
         public async Task<IActionResult> Create(int? vehicleId)
         {
-            var vehicleList = await _context.Vehicles
-                                    .Select(v => new
-                                    {
-                                        v.VehicleId,
-                                        DisplayText = v.LicensePlate ?? (v.Make + " " + v.Model)
-                                    })
-                                    .ToListAsync();
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
-            ViewBag.VehicleList = new SelectList(vehicleList, "VehicleId", "DisplayText", vehicleId);
+            var vehiclesQuery = _context.Vehicles.AsQueryable();
+            if (!isAdminOrManager)
+                vehiclesQuery = vehiclesQuery.Where(v => v.Driver != null && v.Driver.UserId == currentUser.Id);
 
-            return View(new Insurance
-            {
-                StartDate = DateTime.Today,
-                ExpiryDate = DateTime.Today.AddYears(1),
-                IsCurrent = true
-            });
+            ViewBag.VehicleList = new SelectList(await vehiclesQuery.ToListAsync(), "VehicleId", "LicensePlate", vehicleId);
+            return View(new Insurance { StartDate = DateTime.Today, ExpiryDate = DateTime.Today.AddYears(1), IsCurrent = true });
         }
 
+        // POST: Insurance/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-                [Bind("PolicyNumber,InsurareName,StartDate,ExpiryDate,Cost,VehicleId,HasOc,HasAssistance,AcScope,IsCurrent,HasNNW")]
-            Insurance insurance)
+        public async Task<IActionResult> Create([Bind("PolicyNumber,InsurareName,StartDate,ExpiryDate,Cost,VehicleId,IsCurrent,HasOc,HasAssistance,AcScope,HasNNW")] Insurance insurance)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
+            var vehicle = await _context.Vehicles.Include(v => v.Driver).FirstOrDefaultAsync(v => v.VehicleId == insurance.VehicleId);
+            if (vehicle == null || (!isAdminOrManager && vehicle.Driver?.UserId != currentUser.Id))
+                return Forbid();
+
             ModelState.Remove("Vehicle");
             if (ModelState.IsValid)
             {
                 if (insurance.IsCurrent)
                 {
-                    var otherInsurances = await _context.Insurances
+                    // Deaktywacja poprzednich polis dla tego auta
+                    var activeInsurances = await _context.Insurances
                         .Where(i => i.VehicleId == insurance.VehicleId && i.IsCurrent)
                         .ToListAsync();
-
-                    foreach (var oldIns in otherInsurances)
-                    {
-                        oldIns.IsCurrent = false;
-                    }
+                    foreach (var active in activeInsurances) active.IsCurrent = false;
                 }
 
                 _context.Add(insurance);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index), new { id = insurance.VehicleId });
             }
-
-
-            var vehicleList = await _context.Vehicles
-                                    .Select(v => new
-                                    {
-                                        v.VehicleId,
-                                        DisplayText = v.LicensePlate ?? (v.Make + " " + v.Model)
-                                    })
-                                    .ToListAsync();
-
-            ViewBag.VehicleList = new SelectList(vehicleList, "VehicleId", "DisplayText", insurance.VehicleId);
-
-
             return View(insurance);
         }
 
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var insurance = await _context.Insurances
-                .Include(i => i.Vehicle)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (insurance == null)
-            {
-                return NotFound();
-            }
-            return View(insurance);
-        }
-
+        // GET: Insurance/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var insurance = await _context.Insurances.FindAsync(id);
-            if (insurance == null)
-            {
-                return NotFound();
-            }
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
-            var vehicleList = await _context.Vehicles
-                                    .Select(v => new
-                                    {
-                                        v.VehicleId,
-                                        DisplayText = v.LicensePlate ?? (v.Make + " " + v.Model)
-                                    })
-                                    .ToListAsync();
+            var insurance = await _context.Insurances
+                .Include(i => i.Vehicle).ThenInclude(v => v.Driver)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
-            ViewBag.VehicleList = new SelectList(vehicleList, "VehicleId", "DisplayText", insurance.VehicleId);
+            if (insurance == null) return NotFound();
 
+            if (!isAdminOrManager && insurance.Vehicle?.Driver?.UserId != currentUser.Id)
+                return Forbid();
+
+            var vehiclesQuery = _context.Vehicles.AsQueryable();
+            if (!isAdminOrManager)
+                vehiclesQuery = vehiclesQuery.Where(v => v.Driver != null && v.Driver.UserId == currentUser.Id);
+
+            ViewBag.VehicleList = new SelectList(await vehiclesQuery.ToListAsync(), "VehicleId", "LicensePlate", insurance.VehicleId);
             return View(insurance);
         }
+
+        // POST: Insurance/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,
-            [Bind("Id,PolicyNumber,InsurareName,StartDate,ExpiryDate,Cost,VehicleId,HasOc,HasAssistance,AcScope,IsCurrent,HasNNW")]
-            Insurance insurance)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,PolicyNumber,InsurareName,StartDate,ExpiryDate,Cost,VehicleId,IsCurrent,HasOc,HasAssistance,AcScope,HasNNW")] Insurance insurance)
         {
-            if (id != insurance.Id)
-            {
-                return NotFound();
-            }
+            if (id != insurance.Id) return NotFound();
 
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
+            var vehicle = await _context.Vehicles.Include(v => v.Driver).FirstOrDefaultAsync(v => v.VehicleId == insurance.VehicleId);
+            if (vehicle == null || (!isAdminOrManager && vehicle.Driver?.UserId != currentUser.Id))
+                return Forbid();
+
+            ModelState.Remove("Vehicle");
             if (ModelState.IsValid)
             {
                 try
                 {
                     if (insurance.IsCurrent)
                     {
-                        var otherInsurances = await _context.Insurances
-                            .Where(i => i.VehicleId == insurance.VehicleId && i.IsCurrent && i.Id != insurance.Id) // Wykluczamy samą siebie
+                        var others = await _context.Insurances
+                            .Where(i => i.VehicleId == insurance.VehicleId && i.IsCurrent && i.Id != insurance.Id)
                             .ToListAsync();
-
-                        foreach (var oldIns in otherInsurances)
-                        {
-                            oldIns.IsCurrent = false;
-                        }
+                        foreach (var o in others) o.IsCurrent = false;
                     }
-
                     _context.Update(insurance);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_context.Insurances.Any(e => e.Id == insurance.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!_context.Insurances.Any(e => e.Id == insurance.Id)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index), new { id = insurance.VehicleId });
             }
-
-            var vehicleList = await _context.Vehicles
-                                    .Select(v => new {
-                                        v.VehicleId,
-                                        DisplayText = v.LicensePlate ?? (v.Make + " " + v.Model)
-                                    })
-                                    .ToListAsync();
-
-            ViewBag.VehicleList = new SelectList(vehicleList, "VehicleId", "DisplayText", insurance.VehicleId);
-
             return View(insurance);
         }
 
         // GET: Insurance/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var insurance = await _context.Insurances
-                .Include(i => i.Vehicle)
+                .Include(i => i.Vehicle).ThenInclude(v => v.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (insurance == null)
-            {
-                return NotFound();
-            }
+            if (insurance == null) return NotFound();
+
+            if (!isAdminOrManager && insurance.Vehicle?.Driver?.UserId != currentUser.Id)
+                return Forbid();
 
             return View(insurance);
         }
@@ -256,18 +257,25 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var insurance = await _context.Insurances.FindAsync(id);
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
+            var insurance = await _context.Insurances
+                .Include(i => i.Vehicle).ThenInclude(v => v.Driver)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (insurance != null)
             {
+                if (!isAdminOrManager && insurance.Vehicle?.Driver?.UserId != currentUser.Id)
+                    return Forbid();
+
+                int? vehicleId = insurance.VehicleId;
                 _context.Insurances.Remove(insurance);
                 await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index), new { id = insurance.VehicleId });
+                return RedirectToAction(nameof(Index), new { id = vehicleId });
             }
 
-
-            return RedirectToAction("Index", "Vehicles");
+            return RedirectToAction(nameof(Index));
         }
-
     }
 }
