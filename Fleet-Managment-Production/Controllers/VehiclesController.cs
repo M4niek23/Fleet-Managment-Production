@@ -58,7 +58,11 @@ namespace Fleet_Managment_Production.Controllers
                     (v.Make != null && v.Make.ToLower().Contains(searchLower)) ||
                     (v.Model != null && v.Model.ToLower().Contains(searchLower)) ||
                     (v.LicensePlate != null && v.LicensePlate.ToLower().Contains(searchLower)) ||
-                    (v.VIN != null && v.VIN.ToLower().Contains(searchLower))
+                    (v.VIN != null && v.VIN.ToLower().Contains(searchLower)) ||
+                    (v.Driver != null && v.Driver.FirstName.ToLower().Contains(searchLower)) ||
+                    (v.Driver != null && v.Driver.LastName.ToLower().Contains(searchLower)) ||
+                    (v.Driver != null && (v.Driver.FirstName + " " + v.Driver.LastName).ToLower().Contains(searchLower)) ||
+                    (v.Driver != null && (v.Driver.LastName + " " + v.Driver.FirstName).ToLower().Contains(searchLower))
                 );
             }
 
