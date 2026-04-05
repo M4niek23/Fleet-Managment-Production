@@ -45,7 +45,22 @@ var localizationOptions = new RequestLocalizationOptions
 };
 app.UseRequestLocalization(localizationOptions);
 
-await SeedService.SeedDatabase(app.Services);
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        var userManager = services.GetRequiredService<UserManager<Users>>();
+        await SeedService.SeedDatabase(services);
+        await TestDataSeed.SeedTestDataAsync(context, userManager);
+        Console.WriteLine("Database seeding completed successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"An error occurred during database seeding: {ex.Message}");
+    }
+}
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

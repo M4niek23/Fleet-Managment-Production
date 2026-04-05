@@ -1,5 +1,7 @@
 ﻿@using Fleet_Managment_Production.Models;
 @model IEnumerable<Users>
+@using Microsoft.AspNetCore.Identity;
+@inject UserManager<Users> UserManager
 @{
     ViewData["Title"] = "Panel Administratora";
 }
@@ -17,6 +19,9 @@
     <tbody>
         @foreach (var user in Model)
         {
+            var roles = await UserManager.GetRolesAsync(user);
+            var hasRoles = roles.Any(); 
+
             <tr>
                 <td>@user.UserName</td>
                 <td>@user.Email</td>
@@ -35,14 +40,19 @@
                             </button>
                         </form>
                     }
+                    else if (hasRoles)
+                    {
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle me-1"></i> Aktywny
+                        </span>
+                    }
                     else
                     {
-                        <span class="badge bg-success">Aktywne</span>
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-clock-history me-1"></i> Oczekujący na zatwierdzenie
+                        </span>
                     }
-
-
                 </td>
-
             </tr>
         }
     </tbody>
