@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Fleet_Managment_Production.Controllers
 {
+    [Authorize]
     public class DriversController : Controller
     {
         private readonly AppDbContext _context;

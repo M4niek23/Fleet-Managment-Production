@@ -105,9 +105,7 @@ namespace Fleet_Managment_Production.Controllers
 
             if (vehicle == null) return NotFound();
 
-            // --- LOGIKA OBLICZANIA ŚREDNIEGO SPALANIA ---
             double avgConsumption = 0;
-            // Pobieramy tylko koszty typu Paliwo, które mają wpisane litry i przebieg
             var fuelCosts = vehicle.Costs
                 .Where(c => c.Type == CostType.Paliwo && c.Liters.HasValue && c.CurrentOdometer.HasValue)
                 .OrderBy(c => c.CurrentOdometer)
@@ -118,11 +116,8 @@ namespace Fleet_Managment_Production.Controllers
                 var firstEntry = fuelCosts.First();
                 var lastEntry = fuelCosts.Last();
 
-                // Dystans całkowity od pierwszego do ostatniego tankowania w systemie
                 int totalDistance = lastEntry.CurrentOdometer.Value - firstEntry.CurrentOdometer.Value;
 
-                // Sumujemy litry z wszystkich tankowań oprócz pierwszego 
-                // (bo pierwsze tankowanie tylko wyznacza nam stan licznika początkowy)
                 double totalLiters = fuelCosts.Skip(1).Sum(c => c.Liters.Value);
 
                 if (totalDistance > 0)
@@ -131,9 +126,7 @@ namespace Fleet_Managment_Production.Controllers
                 }
             }
             ViewBag.AvgConsumption = avgConsumption;
-            // --------------------------------------------
 
-            // Sortowanie list dla widoku
             vehicle.Trips = vehicle.Trips.OrderByDescending(t => t.StartDate).ToList();
             vehicle.Inspections = vehicle.Inspections.OrderByDescending(i => i.InspectionDate).ToList();
             vehicle.Insurances = vehicle.Insurances.OrderByDescending(i => i.ExpiryDate).ToList();
@@ -144,6 +137,7 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Vehicles/Create
+        [Authorize(Roles = "Admin,Manager")]
         public IActionResult Create()
         {
             PopulateUsersDropdown();
@@ -152,6 +146,7 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // POST: Vehicles/Create
+        [Authorize(Roles = "Admin,Manager")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId,DriverId")] Vehicle vehicle)
@@ -174,7 +169,7 @@ namespace Fleet_Managment_Production.Controllers
             PopulateDriversDropdown(vehicle.DriverId);
             return View(vehicle);
         }
-
+        [Authorize(Roles = "Admin,Manager")]
         // GET: Vehicles/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -190,7 +185,7 @@ namespace Fleet_Managment_Production.Controllers
             PopulateDriversDropdown(vehicle.DriverId);
             return View(vehicle);
         }
-
+        [Authorize(Roles = "Admin,Manager")]
         // POST: Vehicles/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -240,6 +235,7 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Vehicles/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -257,6 +253,7 @@ namespace Fleet_Managment_Production.Controllers
         // POST: Vehicles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var vehicle = await _context.Vehicles.FindAsync(id);

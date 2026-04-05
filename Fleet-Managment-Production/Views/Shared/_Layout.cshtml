@@ -182,10 +182,12 @@
                 <a class="nav-link @(currentController == "Services" ? "active" : "")" asp-controller="Services" asp-action="Index">
                     <i class="bi bi-wrench-adjustable"></i> Serwis
                 </a>
-                <a class="nav-link @(currentController == "Reports" ? "active" : "")" asp-controller="Reports" asp-action="Index">
-                    <i class="bi bi-book-fill"></i> Raporty
-                </a>
-
+                @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
+                {
+                    <a class="nav-link @(currentController == "Reports" ? "active" : "")" asp-controller="Reports" asp-action="Index">
+                        <i class="bi bi-book-fill"></i> Raporty
+                    </a>
+                }
 
                 @if (User.IsInRole("Admin"))
                 {
@@ -246,11 +248,15 @@
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Home" asp-action="Index">Moje konto</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Home" asp-action="Index">Dashboard</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Vehicles" asp-action="Index">Pojazdy</a>
+                <a class="nav-link py-3 border-bottom text-dark" asp-controller="Insurance" asp-action="Index">Ubezpieczenia</a>
+                <a class="nav-link py-3 border-bottom text-dark" asp-controller="Inspections" asp-action="Index">Przeglądy</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Trips" asp-action="Index">Trasy</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Drivers" asp-action="Index">Kierowcy</a>
                 <a class="nav-link py-3 border-bottom text-dark" asp-controller="Services" asp-action="Index">Serwis</a>
-                <a class="nav-link py-3 border-bottom text-dark" asp-controller="Reports" asp-action="Index">Raporty</a>
-
+                @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
+                {
+                    <a class="nav-link py-3 border-bottom text-dark" asp-controller="Reports" asp-action="Index">Raporty</a>
+                }
             </nav>
         </div>
     </div>

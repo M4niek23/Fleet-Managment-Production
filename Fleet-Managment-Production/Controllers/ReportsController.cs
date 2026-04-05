@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Fleet_Managment_Production.Controllers
 {
-    [Authorize]
+    [Authorize (Roles = "Admin,Manager")]
     public class ReportsController : Controller
     {
         private readonly AppDbContext _context;
