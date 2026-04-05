@@ -15,26 +15,24 @@ namespace Fleet_Managment_Production.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(int? id)
+        public async Task<IActionResult> Index(int? id, string searchString) // Zmiana 1: Dodanie parametru searchString
         {
-            // Sprawdzamy czy są jakiekolwiek pojazdy
+            ViewData["CurrentFilter"] = searchString;
+
             var vehicles = await _context.Vehicles.ToListAsync();
             if (!vehicles.Any())
             {
                 return View("NoVehicles");
             }
 
-            // Tworzymy listę pojazdów do filtra (ViewBag.VehicleList)
             var vehicleSelectList = vehicles.Select(v => new {
                 v.VehicleId,
                 DisplayText = v.LicensePlate ?? $"{v.Make} {v.Model}"
             });
             ViewBag.VehicleList = new SelectList(vehicleSelectList, "VehicleId", "DisplayText", id);
 
-            // Bazowe zapytanie ubezpieczeń - od razu dołączamy dane pojazdu (Include)
             IQueryable<Insurance> insurancesQuery = _context.Insurances.Include(i => i.Vehicle);
 
-            // Jeśli id zostało przekazane -> filtrujemy dla konkretnego pojazdu
             if (id.HasValue)
             {
                 insurancesQuery = insurancesQuery.Where(i => i.VehicleId == id.Value);
@@ -45,12 +43,22 @@ namespace Fleet_Managment_Production.Controllers
             }
             else
             {
-                // Jeśli id jest null -> wyświetlamy wszystkie
                 ViewBag.VehicleRegistration = "Wszystkie pojazdy";
-                ViewBag.VehicleId = null; // Przekazujemy null, żeby przycisk "Dodaj" nie wymuszał pojazdu
+                ViewBag.VehicleId = null; 
             }
 
-            // Sortujemy i pobieramy dane
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var lowerSearch = searchString.ToLower();
+                insurancesQuery = insurancesQuery.Where(i =>
+                    (i.PolicyNumber != null && i.PolicyNumber.ToLower().Contains(lowerSearch)) ||
+                    (i.InsurareName != null && i.InsurareName.ToLower().Contains(lowerSearch)) || // Zaktualizowano na InsurareName
+                    (i.Vehicle != null && i.Vehicle.Make != null && i.Vehicle.Make.ToLower().Contains(lowerSearch)) ||
+                    (i.Vehicle != null && i.Vehicle.Model != null && i.Vehicle.Model.ToLower().Contains(lowerSearch)) ||
+                    (i.Vehicle != null && i.Vehicle.LicensePlate != null && i.Vehicle.LicensePlate.ToLower().Contains(lowerSearch))
+                );
+            }
+
             var insurances = await insurancesQuery
                 .OrderByDescending(i => i.IsCurrent)
                 .ThenByDescending(i => i.ExpiryDate)
