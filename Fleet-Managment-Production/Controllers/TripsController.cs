@@ -24,8 +24,14 @@ namespace Fleet_Managment_Production.Controllers
         // GET: Trips
         public async Task<IActionResult> Index()
         {
-            var trips = _context.Trips.Include(t => t.Driver).Include(t => t.Vehicle);
-            return View(await trips.ToListAsync());
+            var tripsQuery = _context.Trips.Include(t => t.Driver).Include(t => t.Vehicle).AsQueryable();
+            var user = await _userManager.GetUserAsync(User);
+            var isUserAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            if (!isUserAdmin)
+            {
+                tripsQuery = tripsQuery.Where(t => t.Vehicle.UserId == user.Id);
+            }
+            return View(await tripsQuery.ToListAsync());
         }
 
         // GET: Trips/Details/5
@@ -198,7 +204,12 @@ namespace Fleet_Managment_Production.Controllers
 
         private void PrepareDropdowns(Trip? trip = null)
         {
-            ViewData["DriverId"] = new SelectList(_context.Drivers, "Id", "LastName", trip?.DriverId);
+            var driversList = _context.Drivers.Select(d => new
+            {
+                Id = d.Id,
+                FullName = d.FirstName + " " + d.LastName
+            }).ToList();
+            ViewData["DriverId"] = new SelectList(driversList, "Id", "FullName", trip?.DriverId);
             ViewData["VehicleId"] = new SelectList(_context.Vehicles.Select(v => new {
                 Id = v.VehicleId,
                 Description = $"{v.Make} {v.Model} ({v.LicensePlate})"

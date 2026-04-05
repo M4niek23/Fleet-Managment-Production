@@ -47,31 +47,34 @@ namespace Fleet_Managment_Production.Models
         public VehicleStatus Status { get; set; } = VehicleStatus.Available;
 
 
-        [Display(Name = "Marka"), Required, StringLength(50)]
+        [Display(Name = "Marka"), Required(ErrorMessage = "Pole Marka jest wymagane."), StringLength(50)]
         public string Make { get; set; } = null!;
 
-
-        [Required, StringLength(50)]
+        [Required(ErrorMessage = "Pole Model jest wymagane."), StringLength(50)]
         public string Model { get; set; } = null!;
 
-
+        [Required(ErrorMessage = "Pole Typ paliwa jest wymagane.")]
         [Display(Name = "Typ paliwa")]
         public FuelType FuelType { get; set; }
 
-
+        [Required(ErrorMessage = "Pole Rok produkcji jest wymagane.")]
         [Display(Name = "Rok produkcji"), Range(1886, 2100)]
         public int ProductionYear { get; set; }
 
 
-        [Display(Name = "Numer rejestracyjny"), StringLength(20)]
+        [Display(Name = "Numer rejestracyjny")]
+        [Required(ErrorMessage = "Numer rejestracyjny jest wymagany.")]
+        [StringLength(20)]
         public string? LicensePlate { get; set; }
 
 
-        [StringLength(17, MinimumLength = 17)]
-        [RegularExpression(@"^[A-HJ-NPR-Z0-9]{17}$")] // bez I,O,Q
+        [Display(Name = "Nr VIN")]
+        [Required(ErrorMessage = "Numer VIN jest wymagany.")]
+        [StringLength(17, MinimumLength = 17, ErrorMessage = "Nr VIN musi posiadać dokładnie 17 znaków.")]
+        [RegularExpression(@"^[A-HJ-NPR-Z0-9]{17}$", ErrorMessage = "Nieprawidłowy format nr VIN.")]
         public string? VIN { get; set; }
 
-
+        [Required(ErrorMessage = "Pole Aktualny przebieg jest wymagane.")]
         [Display(Name = "Aktualny przebieg (km)"), Range(0, int.MaxValue)]
         public int CurrentKm { get; set; }
 

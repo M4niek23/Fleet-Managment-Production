@@ -16,13 +16,30 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Drivers
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string sortOrder)
         {
-            var drivers = await _context.Drivers
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["CurrentFilter"] = searchString;
+            var driversQuery = _context.Drivers
                 .Include(d => d.Vehicles)
                 .Include(d => d.User)
-                .ToListAsync();
-            return View(drivers);
+                .AsQueryable();
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var lowerSearch = searchString.ToLower();
+                driversQuery = driversQuery.Where(d =>
+                       d.FirstName.ToLower().Contains(lowerSearch) ||
+                       d.LastName.ToLower().Contains(lowerSearch) ||
+                       (d.FirstName + " " + d.LastName).ToLower().Contains(lowerSearch) ||
+                       (d.LastName + " " + d.FirstName).ToLower().Contains(lowerSearch)
+                    );
+            }
+            driversQuery = sortOrder switch
+            {
+                "name_desc" => driversQuery.OrderByDescending(d => d.LastName).ThenByDescending(d => d.FirstName),
+                _ => driversQuery.OrderBy(d => d.LastName).ThenBy(d => d.FirstName),
+            };
+            return View(await driversQuery.ToListAsync());
         }
 
         // GET: Drivers/Details/5

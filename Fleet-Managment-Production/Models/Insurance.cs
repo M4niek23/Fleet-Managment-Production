@@ -19,6 +19,7 @@ namespace Fleet_Managment_Production.Models
         public int Id { get; set; }
         [Required(ErrorMessage = "Proszę podać numer polisy")]
         [Display(Name = "Numer Polisy")]
+        [RegularExpression(@"^[a-zA-Z0-9]+$", ErrorMessage = "Numer polisy może zawierać wyłącznie litery i cyfry, bez znaków specjalnych.")]
         public string PolicyNumber { get; set; }
 
         [Display(Name = "Ubezpieczyciel")]

@@ -193,22 +193,27 @@ namespace Fleet_Managment_Production.Controllers
             {
                 return NotFound("Nie znaleziono użytkownika.");
             }
-           
             var roles = await userManager.GetRolesAsync(user);
-            var totalVehicles = await context.Vehicles.CountAsync(v => v.UserId == user.Id);
-            var inUseVehicles = await context.Vehicles.CountAsync(v => v.UserId == user.Id && v.Status == VehicleStatus.InUse);
-            var inMaintenanceVehicles = await context.Vehicles.CountAsync(v => v.UserId == user.Id && v.Status == VehicleStatus.InMaintenance);
+            var driverRecord = await context.Drivers.FirstOrDefaultAsync(d => d.UserId == user.Id);
+            int? driverId = driverRecord?.Id;
+
+            var userVehiclesQuery = context.Vehicles.Where(v => v.UserId == user.Id || (driverId != null && v.DriverId == driverId));
+
+            var totalVehicles = await userVehiclesQuery.CountAsync();
+            var inUseVehicles = await userVehiclesQuery.CountAsync(v => v.Status == VehicleStatus.InUse);
+            var inMaintenanceVehicles = await userVehiclesQuery.CountAsync(v => v.Status == VehicleStatus.InMaintenance);
 
             var totalCosts = await context.Costs
-                .Where(c => c.Vehicle.UserId == user.Id)
+                .Where(c => c.Vehicle.UserId == user.Id || (driverId != null && c.Vehicle.DriverId == driverId))
                 .SumAsync(c => c.Kwota);
-
             var totalDistance = await context.Trips
-                .Where(t => t.Vehicle.UserId == user.Id && t.EndOdometer != null && t.EndOdometer > t.StartOdometer)
+                .Where(t => (t.Vehicle.UserId == user.Id || (driverId != null && t.Vehicle.DriverId == driverId))
+                            && t.EndOdometer != null && t.EndOdometer > t.StartOdometer)
                 .SumAsync(t => t.EndOdometer.Value - t.StartOdometer);
 
             var activeServices = await context.Services
-                .Where(s => s.Vehicle.UserId == user.Id && s.ActualEndDate == null)
+                .Where(s => (s.Vehicle.UserId == user.Id || (driverId != null && s.Vehicle.DriverId == driverId))
+                            && s.ActualEndDate == null)
                 .CountAsync();
 
             var model = new MyAccountViewModel
