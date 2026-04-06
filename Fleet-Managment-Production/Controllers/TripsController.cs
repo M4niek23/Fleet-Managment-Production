@@ -22,16 +22,33 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Trips
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? page)
         {
-            var tripsQuery = _context.Trips.Include(t => t.Driver).Include(t => t.Vehicle).AsQueryable();
-            var user = await _userManager.GetUserAsync(User);
-            var isUserAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-            if (!isUserAdmin)
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
+            var tripsQuery = _context.Trips
+                .Include(t => t.Driver)
+                .Include(t => t.Vehicle)
+                .OrderByDescending(t => t.StartDate)
+                .AsQueryable();
+            if (!isAdminOrManager)
             {
-                tripsQuery = tripsQuery.Where(t => t.Vehicle.UserId == user.Id);
+                tripsQuery = tripsQuery.Where(t =>
+                    (t.Driver != null && t.Driver.UserId == currentUser.Id) ||
+                    (t.Vehicle.Driver != null && t.Vehicle.Driver.UserId == currentUser.Id));
             }
-            return View(await tripsQuery.ToListAsync());
+
+            int pageSize = 8;
+            int pageNumber = page ?? 1;
+            var totalItems = await tripsQuery.CountAsync();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var tripsList = await tripsQuery.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            return View(tripsList);
         }
 
         // GET: Trips/Details/5
@@ -41,18 +58,24 @@ namespace Fleet_Managment_Production.Controllers
 
             var trip = await _context.Trips
                 .Include(t => t.Driver)
-                .Include(t => t.Vehicle)
+                .Include(t => t.Vehicle).ThenInclude(v => v.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (trip == null) return NotFound();
 
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+            {
+                if (trip.Driver?.UserId != currentUser.Id && trip.Vehicle?.Driver?.UserId != currentUser.Id)
+                    return Forbid();
+            }
             return View(trip);
         }
 
         // GET: Trips/Create
         public IActionResult Create()
         {
-            PrepareDropdowns();
+            PrepareDropdownsAsync();
             return View();
         }
 
@@ -96,7 +119,7 @@ namespace Fleet_Managment_Production.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            PrepareDropdowns(trip);
+            PrepareDropdownsAsync(trip);
             return View(trip);
         }
 
@@ -108,7 +131,7 @@ namespace Fleet_Managment_Production.Controllers
             var trip = await _context.Trips.FindAsync(id);
             if (trip == null) return NotFound();
 
-            PrepareDropdowns(trip);
+            PrepareDropdownsAsync(trip);
             return View(trip);
         }
 
@@ -161,7 +184,7 @@ namespace Fleet_Managment_Production.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            PrepareDropdowns(trip);
+            PrepareDropdownsAsync(trip);
             return View(trip);
         }
 
@@ -201,19 +224,31 @@ namespace Fleet_Managment_Production.Controllers
                 _context.Update(vehicle);
             }
         }
-
-        private void PrepareDropdowns(Trip? trip = null)
+        private async Task PrepareDropdownsAsync(Trip? trip = null)
         {
-            var driversList = _context.Drivers.Select(d => new
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
+            var driversQuery = _context.Drivers.AsQueryable();
+            var vehiclesQuery = _context.Vehicles.AsQueryable();
+
+            if (!isAdminOrManager)
             {
-                Id = d.Id,
+                // Zwykły kierowca widzi tylko siebie i swoje auto
+                driversQuery = driversQuery.Where(d => d.UserId == currentUser.Id);
+                vehiclesQuery = vehiclesQuery.Where(v => v.Driver.UserId == currentUser.Id);
+            }
+
+            ViewData["DriverId"] = new SelectList(await driversQuery.Select(d => new {
+                d.Id,
                 FullName = d.FirstName + " " + d.LastName
-            }).ToList();
-            ViewData["DriverId"] = new SelectList(driversList, "Id", "FullName", trip?.DriverId);
-            ViewData["VehicleId"] = new SelectList(_context.Vehicles.Select(v => new {
+            }).ToListAsync(), "Id", "FullName", trip?.DriverId);
+
+            ViewData["VehicleId"] = new SelectList(await vehiclesQuery.Select(v => new {
                 Id = v.VehicleId,
                 Description = $"{v.Make} {v.Model} ({v.LicensePlate})"
-            }), "Id", "Description", trip?.VehicleId);
+            }).ToListAsync(), "Id", "Description", trip?.VehicleId);
         }
+
     }
 }

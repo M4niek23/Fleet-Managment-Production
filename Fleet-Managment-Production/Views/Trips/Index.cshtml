@@ -1,7 +1,11 @@
 ﻿@model IEnumerable<Fleet_Managment_Production.Models.Trip>
+@using Microsoft.AspNetCore.Identity
+@using Fleet_Managment_Production.Models
+@inject UserManager<Users> UserManager
 
 @{
     ViewData["Title"] = "Rejestr Tras";
+    var currentUserId = UserManager.GetUserId(User);
 }
 
 <div class="container-fluid py-4">
@@ -31,75 +35,123 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @if (!Model.Any())
                         {
                             <tr>
-                                <td class="ps-4">
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-bold text-dark">@item.StartDate.ToShortDateString()</span>
-                                        <span class="small text-muted"><i class="bi bi-clock me-1"></i>@item.StartDate.ToShortTimeString()</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-light rounded p-1 border me-2">
-                                            <i class="bi bi-geo-alt text-primary"></i>
-                                        </div>
-                                        <div>
-                                            <span class="fw-bold text-dark">@item.StartLocation</span>
-                                            <i class="bi bi-arrow-right mx-2 text-muted small"></i>
-                                            <span class="fw-bold text-dark">@item.EndLocation</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    @if (item.Vehicle != null)
-                                    {
-                                        <div class="badge bg-white text-dark border mb-1">
-                                            <i class="bi bi-car-front-fill me-1 text-secondary"></i>@item.Vehicle.LicensePlate
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="badge bg-danger bg-opacity-10 text-danger border border-danger mb-1">Brak auta</div>
-                                    }
-
-                                    <div class="small text-muted">
-                                        <i class="bi bi-person me-1"></i>
-                                        @(item.Driver != null ? $"{item.Driver.FirstName} {item.Driver.LastName}" : "Brak kierowcy")
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold">@item.EstimatedDistanceKm</span> <span class="text-muted small">km</span>
-                                </td>
-                                <td>
-                                    @if (item.TripType == Fleet_Managment_Production.Models.TripType.Business)
-                                    {
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-3">Służbowa</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3">Prywatna</span>
-                                    }
-                                </td>
-                                <td class="text-end pe-4">
-                                    <div class="btn-group">
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Szczegóły">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Edytuj">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
+                                <td colspan="6" class="text-center py-4 text-muted">Brak zarejestrowanych tras.</td>
                             </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                var canEdit = User.IsInRole("Admin") || User.IsInRole("Manager") ||
+                                (item.Driver != null && item.Driver.UserId == currentUserId);
+
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold text-dark">@item.StartDate.ToShortDateString()</span>
+                                            <span class="small text-muted"><i class="bi bi-clock me-1"></i>@item.StartDate.ToShortTimeString()</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded p-1 border me-2">
+                                                <i class="bi bi-geo-alt text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <span class="fw-bold text-dark">@item.StartLocation</span>
+                                                <i class="bi bi-arrow-right mx-2 text-muted small"></i>
+                                                <span class="fw-bold text-dark">@item.EndLocation</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (item.Vehicle != null)
+                                        {
+                                            <div class="badge bg-white text-dark border mb-1">
+                                                <i class="bi bi-car-front-fill me-1 text-secondary"></i>@item.Vehicle.LicensePlate
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="badge bg-danger bg-opacity-10 text-danger border border-danger mb-1">Brak auta</div>
+                                        }
+
+                                        <div class="small text-muted">
+                                            <i class="bi bi-person me-1"></i>
+                                            @(item.Driver != null ? $"{item.Driver.FirstName} {item.Driver.LastName}" : "Brak kierowcy")
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">@item.EstimatedDistanceKm</span> <span class="text-muted small">km</span>
+                                    </td>
+                                    <td>
+                                        @if (item.TripType == Fleet_Managment_Production.Models.TripType.Business)
+                                        {
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-3">Służbowa</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3">Prywatna</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Szczegóły">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+
+                                            @if (canEdit)
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Edytuj">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            }
+
+                                            @if (User.IsInRole("Admin"))
+                                            {
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Nawigacja stronami" class="mt-4 pb-4">
+            <ul class="pagination justify-content-center flex-wrap shadow-sm mb-0">
+                <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)">
+                        <i class="bi bi-chevron-left"></i> <span class="d-none d-sm-inline">Poprzednia</span>
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)">
+                        <span class="d-none d-sm-inline">Następna</span> <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
 </div>
