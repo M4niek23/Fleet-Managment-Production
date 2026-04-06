@@ -18,6 +18,7 @@ namespace Fleet_Managment_Production.Models
         [Display(Name = "Opis usterki/serwisu"), Required(ErrorMessage = "Pole opisu usterki jest wymagane.")]
         public string Description { get; set; } = null!;
 
+        [Required(ErrorMessage ="Koszt jest wymagany.")]
         [Display(Name = "Koszt"), Range(0, double.MaxValue)]
         [Precision(18,2)]
         public decimal Cost { get; set; }
