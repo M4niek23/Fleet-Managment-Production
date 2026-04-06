@@ -21,7 +21,7 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Drivers
-        public async Task<IActionResult> Index(string searchString, string sortOrder,int? page)
+        public async Task<IActionResult> Index(string searchString, string sortOrder,int? page, DriverStatus? status)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
@@ -39,6 +39,11 @@ namespace Fleet_Managment_Production.Controllers
             {
                 driversQuery = driversQuery.Where(d => d.UserId == currentUser.Id);
             }
+            if (status.HasValue)
+            {
+                driversQuery = driversQuery.Where(d => d.Status == status.Value);
+            }
+
 
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -105,7 +110,7 @@ namespace Fleet_Managment_Production.Controllers
         // POST: Drivers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Pesel,SelectedCategories,LicenseCategories,PhoneNumber,UserId,Email")] Driver driver)
+        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Pesel,SelectedCategories,LicenseCategories,PhoneNumber,UserId,Email,Status")] Driver driver)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
@@ -177,7 +182,7 @@ namespace Fleet_Managment_Production.Controllers
         // POST: Drivers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Pesel,SelectedCategories,LicenseCategories,PhoneNumber,UserId,Email")] Driver driver)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Pesel,SelectedCategories,LicenseCategories,PhoneNumber,UserId,Email,Status")] Driver driver)
         {
             if (id != driver.Id) return NotFound();
 

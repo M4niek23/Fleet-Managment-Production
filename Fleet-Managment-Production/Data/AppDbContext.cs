@@ -8,8 +8,9 @@ namespace Fleet_Managment_Production.Data
     public class AppDbContext : IdentityDbContext<Users, IdentityRole, string>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
+        // Dodanie DbSet dla każdej z nowych tabel
         public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<Users> Users { get; set; }
         public DbSet<Insurance> Insurances { get; set; }
         public DbSet<Inspection> Inspections { get; set; }
         public DbSet<Cost> Costs { get; set; }
@@ -27,6 +28,7 @@ namespace Fleet_Managment_Production.Data
             .HasForeignKey(v => v.UserId)
             .OnDelete(DeleteBehavior.SetNull);
 
+            // Konfiguracja tabel
             modelBuilder.Entity<Vehicle>().ToTable("Vehicles");
             modelBuilder.Entity<Insurance>().ToTable("Insurances");
             modelBuilder.Entity<Vehicle>().HasKey(v => v.VehicleId);
@@ -60,7 +62,7 @@ namespace Fleet_Managment_Production.Data
             //Konfiguracja relacji Driver do Trip
             modelBuilder.Entity<Trip>()
                 .HasOne(t => t.Vehicle)
-                .WithMany(v => v.Trips) // <-- POPRAWKA: Wskazujemy listę Trips w pojeździe
+                .WithMany(v => v.Trips) 
                 .HasForeignKey(t => t.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
             //Konfiguracja relacji Vehicle do Service
@@ -69,20 +71,24 @@ namespace Fleet_Managment_Production.Data
                 .WithMany(v => v.Services)
                 .HasForeignKey(s => s.VehicleId)
                 .OnDelete(DeleteBehavior.Cascade);
+            // Konfiguracja precyzji dla pól kosztów
             modelBuilder.Entity<Service>()
                 .Property(s => s.Cost)
                 .HasPrecision(18, 2);
         }
+        // Nadpisanie SaveChanges i SaveChangesAsync, aby automatycznie tworzyć wpisy w tabeli Costs podczas dodawania nowych Inspections i Insurances
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             SynchronizationCosts();
             return await base.SaveChangesAsync(cancellationToken);
         }
+        // Nadpisanie SaveChanges, aby automatycznie tworzyć wpisy w tabeli Costs podczas dodawania nowych Inspections i Insurances
         public override int SaveChanges()
         {
             SynchronizationCosts();
             return base.SaveChanges();
         }
+        // Metoda do synchronizacji kosztów z Inspections i Insurances
         private void SynchronizationCosts()
         {
             var addedEntries = ChangeTracker.Entries()

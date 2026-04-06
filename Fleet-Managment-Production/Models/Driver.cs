@@ -23,6 +23,15 @@ namespace Fleet_Managment_Production.Models
         [Display(Name = "DE")] DE,
         [Display(Name = "T")] T
     }
+    public enum DriverStatus
+    {
+        [Display(Name = "Pracuje")]
+        Active,
+        [Display(Name = "Na urlopie")]
+        OnLeave,
+        [Display(Name = "Nie pracuje")]
+        Inactive,
+    }
 
     [Index(nameof(Pesel), IsUnique = true)]
     public class Driver
@@ -58,6 +67,10 @@ namespace Fleet_Managment_Production.Models
         [ForeignKey("UserId")]
         [Display(Name = "Użytkownik Systemowy")]
         public Users? User { get; set; }
+
+        [Required(ErrorMessage = "Status jest wymagany")]
+        [Display(Name = "Status")]
+        public DriverStatus Status { get; set; } = DriverStatus.Active;
 
         [Display(Name = "Email")]
         [EmailAddress]

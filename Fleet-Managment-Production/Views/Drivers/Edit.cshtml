@@ -91,7 +91,13 @@
                     <div class="col-12 text-muted text-uppercase small fw-bold mt-4 mb-2 border-bottom pb-1">
                         Dostęp do systemu
                     </div>
-
+                    <div class="form-group mb-3">
+                        <label asp-for="Status" class="control-label fw-bold"></label>
+                        <select asp-for="Status" class="form-select"
+                                asp-items="Html.GetEnumSelectList<DriverStatus>()">
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
                     <div class="col-md-12">
                         <div class="p-3 bg-light border rounded">
                             <label asp-for="UserId" class="form-label fw-bold mb-2">Powiąż z kontem użytkownika (Login)</label>
