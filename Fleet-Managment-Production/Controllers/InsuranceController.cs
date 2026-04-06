@@ -21,13 +21,12 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Insurance
-        public async Task<IActionResult> Index(int? id, string searchString)
+        public async Task<IActionResult> Index(int? id, string searchString, int? activePage, int? historyPage, string tab)
         {
             ViewData["CurrentFilter"] = searchString;
             var currentUser = await _userManager.GetUserAsync(User);
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
-            // 1. Filtrowanie pojazdów do listy rozwijanej
             var vehiclesQuery = _context.Vehicles.AsQueryable();
             if (!isAdminOrManager)
             {
@@ -40,7 +39,6 @@ namespace Fleet_Managment_Production.Controllers
                 DisplayText = v.LicensePlate ?? $"{v.Make} {v.Model}"
             }), "VehicleId", "DisplayText", id);
 
-            // 2. Bazowe zapytanie o ubezpieczenia
             IQueryable<Insurance> insurancesQuery = _context.Insurances.Include(i => i.Vehicle);
 
             if (!isAdminOrManager)
@@ -69,11 +67,27 @@ namespace Fleet_Managment_Production.Controllers
                 );
             }
 
-            var allInsurances = await insurancesQuery.ToListAsync();
+            int pageSize = 7;
+            int actPageNumber = activePage ?? 1;
+            int histPageNumber = historyPage ?? 1;
 
-            // 3. Podział na dwie listy do widoku
-            ViewBag.ActiveInsurances = allInsurances.Where(i => i.IsCurrent).OrderByDescending(i => i.ExpiryDate).ToList();
-            ViewBag.HistoryInsurances = allInsurances.Where(i => !i.IsCurrent).OrderByDescending(i => i.ExpiryDate).ToList();
+            var activeQuery = insurancesQuery.Where(i => i.IsCurrent).OrderByDescending(i => i.ExpiryDate);
+            var historyQuery = insurancesQuery.Where(i => !i.IsCurrent).OrderByDescending(i => i.ExpiryDate);
+
+            ViewBag.TotalSum = await activeQuery.SumAsync(i => (double?)i.Cost) ?? 0;
+
+            ViewBag.ActiveCurrentPage = actPageNumber;
+            ViewBag.ActiveTotalPages = (int)Math.Ceiling(await activeQuery.CountAsync() / (double)pageSize);
+            ViewBag.ActiveCount = await activeQuery.CountAsync();
+
+            ViewBag.HistoryCurrentPage = histPageNumber;
+            ViewBag.HistoryTotalPages = (int)Math.Ceiling(await historyQuery.CountAsync() / (double)pageSize);
+            ViewBag.HistoryCount = await historyQuery.CountAsync();
+
+            ViewBag.ActiveInsurances = await activeQuery.Skip((actPageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+            ViewBag.HistoryInsurances = await historyQuery.Skip((histPageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            ViewBag.ActiveTab = tab ?? "active";
 
             return View();
         }

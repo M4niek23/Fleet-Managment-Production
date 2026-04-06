@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = "Pulpit Nawigacyjny";
 
-    // Obliczamy liczniki do kafelków
     var expiringInsuranceCount = Model.ExpiringInsurances?.Count() ?? 0;
     var expiringInspectionCount = Model.ExpiringInspections?.Count() ?? 0;
     var totalAlerts = expiringInsuranceCount + expiringInspectionCount;

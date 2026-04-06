@@ -120,11 +120,14 @@
                                             <span class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-3">W trasie</span>
                                             break;
                                         case Fleet_Managment_Production.Models.VehicleStatus.InMaintenance:
-                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3">Serwis</span>
+                                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3">Serwis</span>
+                                            break;
+                                        case Fleet_Managment_Production.Models.VehicleStatus.Sold:
+                                                <span class="badge bg-gradient bg-opacity-10 text-black border border rounded-pill px-3">Sprzedany</span>
                                             break;
                                         default:
                                             <span class="badge bg-secondary rounded-pill">@item.Status</span>
-                                            break;
+                                        break;
                                     }
                                 </td>
 

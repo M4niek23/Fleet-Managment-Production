@@ -24,7 +24,7 @@ namespace Fleet_Managment_Production.Controllers
         // GET: Vehicles
         public async Task<IActionResult> Index(string searchString, int? vehicleId, int? page)
         {
-            int pageSize = 6;
+            int pageSize = 7;
             int pageNumber = page ?? 1;
             var currentUserId = _userManager.GetUserId(User);
             ViewData["CurrentFilter"] = searchString;
