@@ -1,13 +1,24 @@
 ﻿@model IEnumerable<Fleet_Managment_Production.Models.Cost>
 @using Fleet_Managment_Production.Models
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<Users> UserManager
 
 @{
     ViewData["Title"] = "Rejestr Kosztów";
-    // Zabezpieczenie przed błędem na pustej bazie
-    var totalSum = Model != null && Model.Any() ? Model.Sum(x => x.Amount) : 0;
+    var totalSum = ViewBag.TotalSum != null ? (decimal)ViewBag.TotalSum : 0m;
+    var currentUserId = UserManager.GetUserId(User);
 }
 
 <div class="container-fluid py-4">
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-1">Koszty</h2>
@@ -39,80 +50,130 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @if (!Model.Any())
                         {
                             <tr>
-                                <td class="ps-4">@item.Data.ToShortDateString()</td>
-                                <td>
-                                    @if (item.Vehicle != null)
-                                    {
-                                        <div class="fw-bold text-dark">@item.Vehicle.Make @item.Vehicle.Model</div>
-                                        <div class="small text-muted">@item.Vehicle.LicensePlate</div>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">-</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (item.Type == CostType.Paliwo)
-                                    {
-                                        <span class="badge bg-warning text-dark border border-warning">
-                                            <i class="bi bi-fuel-pump me-1"></i> Paliwo
-                                        </span>
-                                    }
-                                    else if (item.Type == CostType.Serwis || item.Type == CostType.Przegląd)
-                                    {
-                                        <span class="badge bg-info text-dark border border-info">
-                                            <i class="bi bi-tools me-1"></i> @item.Type
-                                        </span>
-                                    }
-                                    else if (item.Type == CostType.Ubezpieczenie)
-                                    {
-                                        <span class="badge bg-success border border-success">
-                                            <i class="bi bi-shield-check me-1"></i> @item.Type
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-light text-dark border">@item.Type</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (item.Type == CostType.Paliwo)
-                                    {
-                                        <div class="d-flex align-items-center gap-2">
-                                            @if (item.Liters != null)
-                                            {
-                                                <span class="fw-bold text-dark">@item.Liters L</span>
-                                                @if (item.IsFullTank)
+                                <td colspan="6" class="text-center py-4 text-muted">Brak zarejestrowanych kosztów.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                var canEdit = User.IsInRole("Admin") || User.IsInRole("Manager") ||
+                                (item.Vehicle?.Driver != null && item.Vehicle.Driver.UserId == currentUserId);
+
+                                <tr>
+                                    <td class="ps-4">@item.Data.ToShortDateString()</td>
+                                    <td>
+                                        @if (item.Vehicle != null)
+                                        {
+                                            <div class="fw-bold text-dark">@item.Vehicle.Make @item.Vehicle.Model</div>
+                                            <div class="small text-muted">@item.Vehicle.LicensePlate</div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Type == CostType.Paliwo)
+                                        {
+                                            <span class="badge bg-warning text-dark border border-warning">
+                                                <i class="bi bi-fuel-pump me-1"></i> Paliwo
+                                            </span>
+                                        }
+                                        else if (item.Type == CostType.Serwis || item.Type == CostType.Przegląd)
+                                        {
+                                            <span class="badge bg-info text-dark border border-info">
+                                                <i class="bi bi-tools me-1"></i> @item.Type
+                                            </span>
+                                        }
+                                        else if (item.Type == CostType.Ubezpieczenie)
+                                        {
+                                            <span class="badge bg-success border border-success">
+                                                <i class="bi bi-shield-check me-1"></i> @item.Type
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark border">@item.Type</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Type == CostType.Paliwo)
+                                        {
+                                            <div class="d-flex align-items-center gap-2">
+                                                @if (item.Liters != null)
                                                 {
-                                                    <span class="badge bg-success" style="font-size: 0.6rem;">PEŁNY</span>
+                                                    <span class="fw-bold text-dark">@item.Liters L</span>
+                                                    @if (item.IsFullTank)
+                                                    {
+                                                        <span class="badge bg-success" style="font-size: 0.6rem;">PEŁNY</span>
+                                                    }
                                                 }
+                                            </div>
+                                            @if (item.CurrentOdometer != null)
+                                            {
+                                                <div class="small text-muted"><i class="bi bi-speedometer2 me-1"></i> @item.CurrentOdometer km</div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">@item.Description</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4 fw-bold text-danger">@item.Amount.ToString("C")</td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            @if (canEdit && item.Type != CostType.Przegląd && item.Type != CostType.Ubezpieczenie)
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Edytuj"><i class="bi bi-pencil"></i></a>
+                                            }
+                                            @if (User.IsInRole("Admin") && item.Type != CostType.Przegląd && item.Type != CostType.Ubezpieczenie)
+                                            {
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń"><i class="bi bi-trash"></i></a>
+                                            }
+                                            else if (item.Type == CostType.Przegląd || item.Type == CostType.Ubezpieczenie)
+                                            {
+                                                <span class="badge bg-secondary p-2" title="Koszty wygenerowane z systemu, zablokowane"><i class="bi bi-lock"></i> System</span>
                                             }
                                         </div>
-                                        @if (item.CurrentOdometer != null)
-                                        {
-                                            <div class="small text-muted"><i class="bi bi-speedometer2 me-1"></i> @item.CurrentOdometer km</div>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">@item.Description</span>
-                                    }
-                                </td>
-                                <td class="text-end pe-4 fw-bold text-danger">@item.Amount.ToString("C")</td>
-                                <td class="text-end pe-4">
-                                    <div class="btn-group">
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Edytuj"><i class="bi bi-pencil"></i></a>
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń"><i class="bi bi-trash"></i></a>
-                                    </div>
-                                </td>
-                            </tr>
+                                    </td>
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Nawigacja stronami" class="mt-4 pb-4">
+            <ul class="pagination justify-content-center flex-wrap shadow-sm mb-0">
+                <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)">
+                        <i class="bi bi-chevron-left"></i> <span class="d-none d-sm-inline">Poprzednia</span>
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)">
+                        <span class="d-none d-sm-inline">Następna</span> <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
 </div>

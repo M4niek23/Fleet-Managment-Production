@@ -1,4 +1,7 @@
-﻿using Fleet_Managment_Production.Data;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +16,7 @@ namespace Fleet_Managment_Production.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<Users> _userManager;
+
         public CostsController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
@@ -20,46 +24,71 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Costs
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? page)
         {
-            var appDbContext = _context.Costs.Include(c => c.Vehicle);
-            return View(await appDbContext.ToListAsync());
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
+            var costsQuery = _context.Costs
+                .Include(c => c.Vehicle)
+                .ThenInclude(v => v.Driver)
+                .OrderByDescending(c => c.Data)
+                .AsQueryable();
+
+            if (!isAdminOrManager)
+            {
+                costsQuery = costsQuery.Where(c => c.Vehicle != null && c.Vehicle.Driver != null && c.Vehicle.Driver.UserId == currentUser.Id);
+            }
+
+            ViewBag.TotalSum = await costsQuery.SumAsync(c => c.Amount);
+
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+            var totalItems = await costsQuery.CountAsync();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var costsList = await costsQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return View(costsList);
         }
 
         // GET: Costs/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var cost = await _context.Costs
-                .Include(c => c.Vehicle)
+                .Include(c => c.Vehicle).ThenInclude(v => v.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (cost == null)
+            if (cost == null) return NotFound();
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
-                return NotFound();
+                if (cost.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
             }
 
             return View(cost);
         }
 
         // GET: Costs/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            PopulateVehiclesDropdown();
+            await PopulateVehiclesDropdownAsync();
             ViewData["CostType"] = new SelectList(Enum.GetValues(typeof(CostType)));
-
             return View();
         }
 
         // POST: Costs/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // Tu miałeś wszystko dobrze (Liters, CurrentOdometer są w Bind)
-        public async Task<IActionResult> Create([Bind("Id,VehicleId,Type,Opis,Kwota,Data,Liters,CurrentOdometer,IsFullTank")] Cost cost)
+        public async Task<IActionResult> Create([Bind("Id,VehicleId,Type,Description,Amount,Data,Liters,CurrentOdometer,IsFullTank")] Cost cost)
         {
             if (ModelState.IsValid)
             {
@@ -67,7 +96,7 @@ namespace Fleet_Managment_Production.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            PopulateVehiclesDropdown(cost.VehicleId);
+            await PopulateVehiclesDropdownAsync(cost.VehicleId);
             ViewData["CostType"] = new SelectList(Enum.GetValues(typeof(CostType)), cost.Type);
             return View(cost);
         }
@@ -75,41 +104,35 @@ namespace Fleet_Managment_Production.Controllers
         // GET: Costs/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
+            if (id == null) return NotFound();
+
+            var cost = await _context.Costs.Include(c => c.Vehicle).ThenInclude(v => v.Driver).FirstOrDefaultAsync(c => c.Id == id);
+            if (cost == null) return NotFound();
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
-                return NotFound();
+                if (cost.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
             }
 
-            var cost = await _context.Costs.FindAsync(id);
-            if (cost == null)
-            {
-                return NotFound();
-            }
-
-            // Blokada edycji kosztów systemowych
             if (cost.Type == CostType.Przegląd || cost.Type == CostType.Ubezpieczenie)
             {
                 TempData["ErrorMessage"] = "Nie można edytować kosztów wygenerowanych automatycznie.";
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateVehiclesDropdown(cost.VehicleId);
-            PopulateManualCostTypesDropdown(cost.Type); // Używamy helpera, żeby wykluczyć typy systemowe z listy
+            await PopulateVehiclesDropdownAsync(cost.VehicleId);
+            PopulateManualCostTypesDropdown(cost.Type);
             return View(cost);
         }
 
         // POST: Costs/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // UWAGA: Dodałem brakujące pola paliwowe do Bind! (Liters, CurrentOdometer, IsFullTank)
-        public async Task<IActionResult> Edit(int id, [Bind("Id,VehicleId,Type,Opis,Kwota,Data,Liters,CurrentOdometer,IsFullTank")] Cost cost)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,VehicleId,Type,Description,Amount,Data,Liters,CurrentOdometer,IsFullTank")] Cost cost)
         {
-            if (id != cost.Id)
-            {
-                return NotFound();
-            }
+            if (id != cost.Id) return NotFound();
 
-            // Sprawdzamy czy nie próbujemy edytować kosztu systemowego (security check)
             var originalCostType = await _context.Costs
                 .AsNoTracking()
                 .Where(c => c.Id == id)
@@ -131,19 +154,13 @@ namespace Fleet_Managment_Production.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CostExists(cost.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!CostExists(cost.Id)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateVehiclesDropdown(cost.VehicleId);
+            await PopulateVehiclesDropdownAsync(cost.VehicleId);
             PopulateManualCostTypesDropdown(cost.Type);
             return View(cost);
         }
@@ -151,18 +168,18 @@ namespace Fleet_Managment_Production.Controllers
         // GET: Costs/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var cost = await _context.Costs
-                .Include(c => c.Vehicle)
+                .Include(c => c.Vehicle).ThenInclude(v => v.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (cost == null)
+            if (cost == null) return NotFound();
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
-                return NotFound();
+                if (cost.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
             }
 
             if (cost.Type == CostType.Przegląd || cost.Type == CostType.Ubezpieczenie)
@@ -180,10 +197,7 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var cost = await _context.Costs.FindAsync(id);
-            if (cost == null)
-            {
-                return NotFound();
-            }
+            if (cost == null) return NotFound();
 
             if (cost.Type == CostType.Przegląd || cost.Type == CostType.Ubezpieczenie)
             {
@@ -201,28 +215,34 @@ namespace Fleet_Managment_Production.Controllers
             return _context.Costs.Any(e => e.Id == id);
         }
 
-        // Metoda pomocnicza do ładowania listy pojazdów
-        private void PopulateVehiclesDropdown(object selectedVehicle = null)
+        private async Task PopulateVehiclesDropdownAsync(object selectedVehicle = null)
         {
-            var vehiclesQuery = _context.Vehicles
-                .OrderBy(v => v.LicensePlate) // Sortowanie po tablicy
-                .Select(v => new {
-                    // TU BYŁ BŁĄD: Zmieniamy v.Id na v.VehicleId
-                    Id = v.VehicleId,
-                    // TU BYŁ BŁĄD: Zmieniamy v.Brand na v.Make i RegistrationNumber na LicensePlate
-                    DisplayText = v.LicensePlate ?? $"{v.Make} {v.Model} (Brak rej.)"
-                });
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
-            ViewData["VehicleId"] = new SelectList(vehiclesQuery, "Id", "DisplayText", selectedVehicle);
+            var vehiclesQuery = _context.Vehicles.AsQueryable();
+
+            if (!isAdminOrManager)
+            {
+                vehiclesQuery = vehiclesQuery.Where(v => v.Driver != null && v.Driver.UserId == currentUser.Id);
+            }
+
+            var vehicles = await vehiclesQuery
+                .OrderBy(v => v.LicensePlate)
+                .Select(v => new {
+                    Id = v.VehicleId,
+                    DisplayText = v.LicensePlate != null ? v.LicensePlate : $"{v.Make} {v.Model} (Brak rej.)"
+                }).ToListAsync();
+
+            ViewData["VehicleId"] = new SelectList(vehicles, "Id", "DisplayText", selectedVehicle);
         }
 
-        // Metoda pomocnicza do ładowania typów kosztów (bez systemowych)
         private void PopulateManualCostTypesDropdown(object selectedType = null)
         {
             var manualTypes = Enum.GetValues(typeof(CostType))
                 .Cast<CostType>()
-                .Where(t => t != CostType.Przegląd && t != CostType.Ubezpieczenie) // Wykluczamy automatyczne
-                .Select(t => new { Value = t, Text = t.ToString() });
+                .Where(t => t != CostType.Przegląd && t != CostType.Ubezpieczenie)
+                .Select(t => new { Value = (int)t, Text = t.ToString() });
 
             ViewData["CostType"] = new SelectList(manualTypes, "Value", "Text", selectedType);
         }

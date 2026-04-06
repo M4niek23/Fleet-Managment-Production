@@ -39,7 +39,7 @@ namespace Fleet_Managment_Production.Controllers
                     (t.Vehicle.Driver != null && t.Vehicle.Driver.UserId == currentUser.Id));
             }
 
-            int pageSize = 8;
+            int pageSize = 7;
             int pageNumber = page ?? 1;
             var totalItems = await tripsQuery.CountAsync();
 
@@ -84,7 +84,6 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,VehicleId,DriverId,StartDate,EndTime,StartLocation,EndLocation,StartLatitude,StartLongitude,EndLatitude,EndLongitude,EstimatedDistanceKm,StartOdometer,EndOdometer,Description,TripType")] Trip trip)
         {
-            // 1. Walidacja Ubezpieczenia
             bool hasValidInsurance = await _context.Insurances
                 .AnyAsync(i => i.VehicleId == trip.VehicleId &&
                                i.StartDate.Date <= trip.StartDate.Date &&
@@ -146,7 +145,6 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id != trip.Id) return NotFound();
 
-            // 1. Walidacja Ubezpieczenia
             bool hasValidInsurance = await _context.Insurances
                 .AnyAsync(i => i.VehicleId == trip.VehicleId &&
                                i.StartDate.Date <= trip.StartDate.Date &&
@@ -157,7 +155,6 @@ namespace Fleet_Managment_Production.Controllers
                 ModelState.AddModelError("VehicleId", "Pojazd nie posiada ważnego ubezpieczenia w wybranym terminie!");
             }
 
-            // 2. NOWA WALIDACJA: Sprawdzenie ważności przeglądu
             bool hasValidInspection = await _context.Inspections
                 .AnyAsync(i => i.VehicleId == trip.VehicleId &&
                                i.IsResultPositive == true &&
