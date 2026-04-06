@@ -1,7 +1,11 @@
 ﻿@model IEnumerable<Fleet_Managment_Production.Models.Service>
+@using Fleet_Managment_Production.Models
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<Users> UserManager
 
 @{
     ViewData["Title"] = "Serwis i Naprawy";
+    var currentUserId = UserManager.GetUserId(User);
 }
 
 <div class="container-fluid py-4">
@@ -11,52 +15,107 @@
             <h2 class="fw-bold mb-1">Serwis i Naprawy</h2>
             <p class="text-muted mb-0">Zarządzaj historią serwisową, naprawami i przeglądami floty.</p>
         </div>
-        <a asp-action="Create" class="btn btn-primary shadow-sm">
-            <i class="bi bi-plus-lg me-2"></i>Dodaj Serwis
-        </a>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+        {
+            <a asp-action="Create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>Dodaj Serwis
+            </a>
+        }
     </div>
 
-    <table class="table table-hover mt-3">
-        <thead class="table-light">
-            <tr>
-                <th>Pojazd</th>
-                <th>Opis</th>
-                <th>Data przyjęcia</th>
-                <th>Planowane zakończenie</th>
-                <th>Status</th>
-                <th>Akcje</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>
-                        <strong>@item.Vehicle?.Make @item.Vehicle?.Model</strong><br />
-                        <small class="text-muted">@item.Vehicle?.LicensePlate</small>
-                    </td>
-                    <td>@item.Description</td>
-                    <td>@item.EntryDate.ToShortDateString()</td>
-                    <td>@item.PlannedEndDate?.ToShortDateString()</td>
-                    <td>
-                        @if (item.ActualEndDate.HasValue)
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3">Pojazd</th>
+                            <th>Opis</th>
+                            <th>Data przyjęcia</th>
+                            <th>Planowane zakończenie</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
                         {
-                            <span class="badge bg-success">Zakończono</span>
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">Brak zarejestrowanych serwisów.</td>
+                            </tr>
                         }
                         else
                         {
-                            <span class="badge bg-warning text-dark">W serwisie</span>
+                            @foreach (var item in Model)
+                            {
+                                var canEdit = User.IsInRole("Admin") || User.IsInRole("Manager") ||
+                                (item.Vehicle?.Driver != null && item.Vehicle.Driver.UserId == currentUserId);
+
+                                <tr>
+                                    <td class="ps-4">
+                                        <strong>@item.Vehicle?.Make @item.Vehicle?.Model</strong><br />
+                                        <small class="text-muted">@item.Vehicle?.LicensePlate</small>
+                                    </td>
+                                    <td>@item.Description</td>
+                                    <td>@item.EntryDate.ToShortDateString()</td>
+                                    <td>@item.PlannedEndDate?.ToShortDateString()</td>
+                                    <td>
+                                        @if (item.ActualEndDate.HasValue)
+                                        {
+                                            <span class="badge bg-success">Zakończono</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">W serwisie</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Szczegóły"><i class="bi bi-eye"></i></a>
+                                            @if (canEdit)
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Edytuj"><i class="bi bi-pencil"></i></a>
+                                            }
+                                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                            {
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń"><i class="bi bi-trash"></i></a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
                         }
-                    </td>
-                    <td>
-                        <div class="btn-group">
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edytuj</a>
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Szczegóły</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Usuń</a>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Nawigacja stronami" class="mt-4 pb-4">
+            <ul class="pagination justify-content-center flex-wrap shadow-sm mb-0">
+                <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)">
+                        <i class="bi bi-chevron-left"></i> <span class="d-none d-sm-inline">Poprzednia</span>
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)">
+                        <span class="d-none d-sm-inline">Następna</span> <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
 </div>

@@ -99,7 +99,7 @@
                 </div>
                 <div class="card-body p-4">
                     <form asp-action="Create">
-                        <div asp-validation-summary="All" class="alert alert-danger"></div>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
                         <input type="hidden" asp-for="StartLatitude" id="startLat" />
                         <input type="hidden" asp-for="StartLongitude" id="startLng" />
@@ -150,6 +150,7 @@
                                         <span class="input-group-text bg-light"><i class="bi bi-car-front"></i></span>
                                         <select asp-for="VehicleId" class="form-select" asp-items="ViewBag.VehicleId"></select>
                                     </div>
+                                    <span asp-validation-for="VehicleId" class="text-danger small"></span>
                                 </div>
                                 <div class="col-md-12">
                                     <label asp-for="DriverId" class="form-label fw-bold">Kierowca</label>
@@ -157,6 +158,7 @@
                                         <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
                                         <select asp-for="DriverId" class="form-select" asp-items="ViewBag.DriverId"></select>
                                     </div>
+                                    <span asp-validation-for="DriverId" class="text-danger small"></span>
                                 </div>
                             </div>
                         </div>
@@ -167,10 +169,12 @@
                                 <div class="col-md-6">
                                     <label asp-for="StartDate" class="form-label fw-bold">Data rozpoczęcia</label>
                                     <input asp-for="StartDate" class="form-control" type="date" />
+                                    <span asp-validation-for="StartDate" class="text-danger small"></span>
                                 </div>
                                 <div class="col-md-6">
                                     <label asp-for="TripType" class="form-label fw-bold">Rodzaj trasy</label>
                                     <select asp-for="TripType" class="form-select" asp-items="Html.GetEnumSelectList<Fleet_Managment_Production.Models.TripType>()"></select>
+                                    <span asp-validation-for="TripType" class="text-danger small"></span>
                                 </div>
                                 <div class="col-md-6">
                                     <label asp-for="StartOdometer" class="form-label fw-bold">Licznik Start</label>
@@ -178,6 +182,7 @@
                                         <span class="input-group-text bg-light"><i class="bi bi-123"></i></span>
                                         <input asp-for="StartOdometer" class="form-control" placeholder="km" readonly />
                                     </div>
+                                    <span asp-validation-for="StartOdometer" class="text-danger small"></span>
                                 </div>
                                 <div class="col-md-6">
                                     <label asp-for="EndOdometer" class="form-label fw-bold">Licznik Stop</label>
@@ -185,10 +190,12 @@
                                         <span class="input-group-text bg-light"><i class="bi bi-123"></i></span>
                                         <input asp-for="EndOdometer" class="form-control" placeholder="km" />
                                     </div>
+                                    <span asp-validation-for="EndOdometer" class="text-danger fw-bold small"></span>
                                 </div>
                                 <div class="col-12">
                                     <label asp-for="Description" class="form-label fw-bold">Opis / Cel podróży</label>
                                     <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger small"></span>
                                 </div>
                             </div>
                         </div>

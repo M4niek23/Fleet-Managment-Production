@@ -6,21 +6,35 @@
     ViewData["Title"] = "Panel Administratora";
 }
 
-<div class="container mt-4">
-    
+<div class="container-fluid py-4">
 
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-            <form asp-action="Index" method="get" class="row g-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Panel Administratora</h2>
+            <p class="text-muted mb-0">Zarządzanie użytkownikami, rolami i uprawnieniami w systemie.</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body py-2">
+            <form asp-action="Index" method="get" class="row g-2 align-items-center">
                 <div class="col-md-10">
                     <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <span class="input-group-text bg-white border-end-0 border-0 shadow-sm"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
-                               class="form-control border-start-0" placeholder="Szukaj po nazwie, emailu lub nicku..." />
+                               class="form-control border-start-0 border-0 shadow-sm" placeholder="Szukaj po nazwie, emailu lub nicku..." />
                     </div>
                 </div>
                 <div class="col-md-2 d-grid">
-                    <button type="submit" class="btn btn-primary">Szukaj</button>
+                    <button type="submit" class="btn btn-primary shadow-sm">Szukaj</button>
                 </div>
             </form>
             @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
@@ -38,64 +52,108 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th>
-                            <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]" class="text-decoration-none text-dark">
+                        <th class="ps-4 py-3">
+                            <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]" class="text-decoration-none text-dark fw-bold">
                                 Nick / Imię i Nazwisko <i class="bi bi-arrow-down-up ms-1 small text-muted"></i>
                             </a>
                         </th>
                         <th>
-                            <a asp-action="Index" asp-route-sortOrder="@ViewData["EmailSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]" class="text-decoration-none text-dark">
+                            <a asp-action="Index" asp-route-sortOrder="@ViewData["EmailSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]" class="text-decoration-none text-dark fw-bold">
                                 Email <i class="bi bi-arrow-down-up ms-1 small text-muted"></i>
                             </a>
                         </th>
                         <th>Akcja</th>
-                        <th>Status konta</th>
+                        <th class="text-end pe-4">Status konta</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var user in Model)
+                    @if (!Model.Any())
                     {
-                        var roles = await UserManager.GetRolesAsync(user);
-                        var hasRoles = roles.Any();
-
                         <tr>
-                            <td class="fw-bold">@user.UserName <br /><small class="text-muted fw-normal">@user.FullName</small></td>
-                            <td>@user.Email</td>
-                            <td>
-                                <a class="btn btn-outline-primary btn-sm" asp-action="ManageRoles" asp-route-userId="@user.Id">
-                                    <i class="bi bi-gear-fill me-1"></i> Zarządzaj
-                                </a>
-                            </td>
-                            <td>
-                                @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
-                                {
-                                    <div class="d-flex align-items-center">
-                                        <span class="badge bg-danger me-2">Zablokowany</span>
-                                        <form asp-controller="Admin" asp-action="UnlockUser" method="post" class="d-inline">
-                                            <input type="hidden" name="id" value="@user.Id" />
-                                            <button type="submit" class="btn btn-link btn-sm p-0 text-danger" onclick="return confirm('Czy na pewno chcesz odblokować to konto?');">
-                                                Odblokuj
-                                            </button>
-                                        </form>
-                                    </div>
-                                }
-                                else if (hasRoles)
-                                {
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle me-1"></i> Aktywny
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="bi bi-clock-history me-1"></i> Oczekujący
-                                    </span>
-                                }
-                            </td>
+                            <td colspan="4" class="text-center py-4 text-muted">Brak użytkowników.</td>
                         </tr>
+                    }
+                    else
+                    {
+                        @foreach (var user in Model)
+                        {
+                            var roles = await UserManager.GetRolesAsync(user);
+                            var hasRoles = roles.Any();
+
+                            <tr>
+                                <td class="ps-4 fw-bold">@user.UserName <br /><small class="text-muted fw-normal">@user.FullName</small></td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <a class="btn btn-outline-primary btn-sm" asp-action="ManageRoles" asp-route-userId="@user.Id">
+                                        <i class="bi bi-gear-fill me-1"></i> Zarządzaj Rolami
+                                    </a>
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+                                    {
+                                        <div class="d-flex align-items-center justify-content-end">
+                                            <span class="badge bg-danger me-2">Zablokowany</span>
+                                            <form asp-controller="Admin" asp-action="UnlockUser" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@user.Id" />
+                                                <button type="submit" class="btn btn-link btn-sm p-0 text-danger text-decoration-none" onclick="return confirm('Czy na pewno chcesz odblokować to konto?');">
+                                                    <i class="bi bi-unlock-fill"></i> Odblokuj
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else if (hasRoles)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i> Aktywny
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-clock-history me-1"></i> Oczekujący
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>
         </div>
     </div>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Nawigacja stronami" class="mt-4 pb-4">
+            <ul class="pagination justify-content-center flex-wrap shadow-sm mb-0">
+                <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-searchString="@ViewData["CurrentFilter"]">
+                        <i class="bi bi-chevron-left"></i> <span class="d-none d-sm-inline">Poprzednia</span>
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-sortOrder="@ViewData["CurrentSort"]"
+                           asp-route-searchString="@ViewData["CurrentFilter"]">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-searchString="@ViewData["CurrentFilter"]">
+                        <span class="d-none d-sm-inline">Następna</span> <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
 </div>

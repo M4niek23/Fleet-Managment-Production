@@ -42,7 +42,7 @@ namespace Fleet_Managment_Production.Controllers
 
             ViewBag.TotalSum = await costsQuery.SumAsync(c => c.Amount);
 
-            int pageSize = 10;
+            int pageSize = 9;
             int pageNumber = page ?? 1;
             var totalItems = await costsQuery.CountAsync();
 

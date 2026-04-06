@@ -1,13 +1,18 @@
-﻿using Fleet_Managment_Production.Data;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Fleet_Managment_Production.Data;
 using Fleet_Managment_Production.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fleet_Managment_Production.Controllers
 {
+    [Authorize]
     public class ServicesController : Controller
     {
         private readonly AppDbContext _context;
@@ -20,13 +25,37 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Services
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? page)
         {
-            var services = await _context.Services
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
+            var servicesQuery = _context.Services
                 .Include(s => s.Vehicle)
+                .ThenInclude(v => v.Driver)
                 .OrderByDescending(s => s.EntryDate)
+                .AsQueryable();
+
+            // Zwykły kierowca widzi tylko serwisy swojego auta
+            if (!isAdminOrManager)
+            {
+                servicesQuery = servicesQuery.Where(s => s.Vehicle != null && s.Vehicle.Driver != null && s.Vehicle.Driver.UserId == currentUser.Id);
+            }
+
+            // Paginacja
+            int pageSize = 8;
+            int pageNumber = page ?? 1;
+            var totalItems = await servicesQuery.CountAsync();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var servicesList = await servicesQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
-            return View(services);
+
+            return View(servicesList);
         }
 
         // GET: Services/Details/5
@@ -36,34 +65,40 @@ namespace Fleet_Managment_Production.Controllers
 
             var service = await _context.Services
                 .Include(s => s.Vehicle)
+                .ThenInclude(v => v.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (service == null) return NotFound();
+
+            // Bezpieczeństwo
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+            {
+                if (service.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
+            }
 
             return View(service);
         }
 
         // GET: Services/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            PopulateVehiclesDropdown();
+            await PopulateVehiclesDropdownAsync();
             return View();
-
         }
 
         // POST: Services/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,VehicleId,Description,Cost,EntryDate,PlannedEndDate,ActualEndDate")] Service service)
         {
             var vehicle = await _context.Vehicles.FindAsync(service.VehicleId);
             if (vehicle == null) return NotFound();
-            if(vehicle.Status != VehicleStatus.InMaintenance)
+
+            if (vehicle.Status != VehicleStatus.InMaintenance)
             {
-                ModelState.AddModelError("", "Nie można oddać do samochodu do serwisu, ponieważ ma inny status niż 'W serwsie'. Zmień status i dodaj pojazd.");
-                PopulateVehiclesDropdown(service.VehicleId);
+                ModelState.AddModelError("", "Nie można oddać samochodu do serwisu, ponieważ ma inny status niż 'W serwisie'. Zmień status pojazdu przed dodaniem naprawy.");
+                await PopulateVehiclesDropdownAsync(service.VehicleId);
                 return View(service);
             }
 
@@ -73,40 +108,49 @@ namespace Fleet_Managment_Production.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            PopulateVehiclesDropdown(service.VehicleId);
+
+            await PopulateVehiclesDropdownAsync(service.VehicleId);
             return View(service);
         }
 
         // GET: Services/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var service = await _context.Services
                 .Include(s => s.Vehicle)
+                .ThenInclude(v => v.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (service == null)
+            if (service == null) return NotFound();
+
+            // Bezpieczeństwo
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
-                return NotFound();
+                if (service.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
             }
-            PopulateVehiclesDropdown(service.VehicleId);
+
+            await PopulateVehiclesDropdownAsync(service.VehicleId);
             return View(service);
         }
 
         // POST: Services/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,VehicleId,Description,Cost,EntryDate,PlannedEndDate,ActualEndDate")] Service service)
         {
-            if (id != service.Id)
+            if (id != service.Id) return NotFound();
+
+            var originalService = await _context.Services.AsNoTracking().Include(s => s.Vehicle).ThenInclude(v => v.Driver).FirstOrDefaultAsync(s => s.Id == id);
+            if (originalService == null) return NotFound();
+
+            // Bezpieczeństwo
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
-                return NotFound();
+                if (originalService.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
             }
 
             if (ModelState.IsValid)
@@ -130,35 +174,32 @@ namespace Fleet_Managment_Production.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ServiceExists(service.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!ServiceExists(service.Id)) return NotFound();
+                    else throw;
                 }
             }
 
-            ViewBag.VehicleId = new SelectList(_context.Vehicles, "VehicleId", "Make", service.VehicleId);
+            await PopulateVehiclesDropdownAsync(service.VehicleId);
             return View(service);
         }
 
         // GET: Services/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var service = await _context.Services
                 .Include(s => s.Vehicle)
+                .ThenInclude(v => v.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (service == null)
+
+            if (service == null) return NotFound();
+
+            // Bezpieczeństwo
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
-                return NotFound();
+                if (service.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
             }
 
             return View(service);
@@ -173,9 +214,8 @@ namespace Fleet_Managment_Production.Controllers
             if (service != null)
             {
                 _context.Services.Remove(service);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
@@ -183,30 +223,42 @@ namespace Fleet_Managment_Production.Controllers
         {
             return _context.Services.Any(e => e.Id == id);
         }
-        private void PopulateVehiclesDropdown(object selectedVehicle = null)
+
+        private async Task PopulateVehiclesDropdownAsync(object selectedVehicle = null)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
             var vehiclesQuery = _context.Vehicles
-                  .Where(v => v.Status == VehicleStatus.InMaintenance)
+                .Where(v => v.Status == VehicleStatus.InMaintenance)
+                .AsQueryable();
+
+            if (!isAdminOrManager)
+            {
+                vehiclesQuery = vehiclesQuery.Where(v => v.Driver != null && v.Driver.UserId == currentUser.Id);
+            }
+
+            var vehicles = await vehiclesQuery
                   .Select(v => new
                   {
                       v.VehicleId,
                       DisplayName = v.Make + " " + v.Model + " (" + v.LicensePlate + ")"
                   })
                   .OrderBy(v => v.DisplayName)
-                  .ToList();
-            if (!vehiclesQuery.Any())
+                  .ToListAsync();
+
+            if (!vehicles.Any())
             {
                 var emptyList = new List<object>
                 {
-                new { VehicleId = "", DisplayName = "Brak pojazdów o statusie 'W serwisie' - zmień status auta we flocie" }
+                    new { VehicleId = "", DisplayName = "Brak pojazdów o statusie 'W serwisie'" }
                 };
                 ViewBag.VehicleId = new SelectList(emptyList, "VehicleId", "DisplayName");
-
             }
             else
             {
-                ViewBag.VehicleId = new SelectList(vehiclesQuery, "VehicleId", "DisplayName", selectedVehicle);
-            }        
+                ViewBag.VehicleId = new SelectList(vehicles, "VehicleId", "DisplayName", selectedVehicle);
+            }
         }
     }
 }

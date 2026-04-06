@@ -4,33 +4,52 @@
     ViewData["Title"] = "Zarządzanie rolami";
 }
 
-<h3>Zarządzaj rolą<br /> @Model.UserName</h3>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Uprawnienia Użytkownika</h2>
+            <p class="text-muted mb-0">Zarządzaj rolami przypisanymi do wybranego profilu.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i>Powrót do listy
+        </a>
+    </div>
 
-<div class="row">
-    <div class="col-md-6">
-        <form method="post">
-            <input type="hidden" asp-for="UserId" />
-            <input type="hidden" asp-for="UserName" />
+    <div class="row">
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-person-fill-gear me-2"></i>Konto: @Model.UserName</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="UserName" />
 
-            <div asp-validation-summary="All" class="text-danger"></div>
+                        <div asp-validation-summary="All" class="text-danger"></div>
 
-            <div class="form-group">
-                @for (int i = 0; i < Model.Roles.Count; i++)
-                {
-                    <div class="form-check m-1">
-                        <input type="hidden" asp-for="Roles[i].RoleName" />
-                        <input type="checkbox" asp-for="Roles[i].IsSelected" class="form-check-input" />
-                        <label class="form-check-label" asp-for="Roles[i].IsSelected">
-                            @Model.Roles[i].RoleName
-                        </label>
-                    </div>
-                }
+                        <div class="form-group mb-4">
+                            <label class="text-muted text-uppercase small fw-bold mb-3 border-bottom pb-1 d-block">Dostępne Role</label>
+                            @for (int i = 0; i < Model.Roles.Count; i++)
+                            {
+                                <div class="form-check form-switch mb-2 fs-5">
+                                    <input type="hidden" asp-for="Roles[i].RoleName" />
+                                    <input type="checkbox" asp-for="Roles[i].IsSelected" class="form-check-input border-secondary shadow-sm" style="cursor: pointer;" />
+                                    <label class="form-check-label ms-2" asp-for="Roles[i].IsSelected" style="cursor: pointer;">
+                                        @Model.Roles[i].RoleName
+                                    </label>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary py-3 shadow-sm fw-bold text-uppercase">
+                                <i class="bi bi-save me-2"></i>Zapisz Role
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <div class="form-group mt-3">
-                <input type="submit" value="Zapisz" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>

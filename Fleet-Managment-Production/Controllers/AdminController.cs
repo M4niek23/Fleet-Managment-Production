@@ -21,13 +21,15 @@ namespace Fleet_Managment_Production.Controllers
         }
 
 
-        public async Task<IActionResult> Index(string searchString, string sortOrder)
+        public async Task<IActionResult> Index(string searchString, string sortOrder, int? page)
         {
+            ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["EmailSortParm"] = sortOrder == "Email" ? "email_desc" : "Email";
             ViewData["CurrentFilter"] = searchString;
 
             var usersQuery = _userManager.Users.AsQueryable();
+
             if (!string.IsNullOrEmpty(searchString))
             {
                 var lowerSearch = searchString.ToLower();
@@ -45,7 +47,20 @@ namespace Fleet_Managment_Production.Controllers
                 "email_desc" => usersQuery.OrderByDescending(u => u.Email),
                 _ => usersQuery.OrderBy(u => u.FullName),
             };
-            return View(await usersQuery.ToListAsync());
+
+            int pageSize = 7;
+            int pageNumber = page ?? 1;
+            var totalItems = await usersQuery.CountAsync();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var usersList = await usersQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return View(usersList);
         }
 
         [HttpPost]
