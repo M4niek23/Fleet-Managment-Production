@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
 <style>
-    /* Mapa "przyklejona" po prawej stronie */
     #map-container {
         position: sticky;
         top: 20px;
@@ -29,7 +28,6 @@
         display: none !important;
     }
 
-    /* Autocomplete Styles (te same co w Create) */
     .autocomplete-container {
         position: relative;
     }
@@ -175,7 +173,7 @@
                                     <label asp-for="StartOdometer" class="form-label fw-bold">Licznik Start</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light"><i class="bi bi-123"></i></span>
-                                        <input asp-for="StartOdometer" class="form-control" />
+                                        <input asp-for="StartOdometer" class="form-control" readonly />
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -224,7 +222,6 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
-            // 1. INICJALIZACJA MAPY
             var map = L.map('map').setView([52.0693, 19.4803], 6);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '' }).addTo(map);
 
@@ -245,36 +242,29 @@
                 }
             }).addTo(map);
 
-            // Aktualizacja dystansu po zmianie trasy
             routingControl.on('routesfound', function(e) {
                 var distanceKm = (e.routes[0].summary.totalDistance / 1000).toFixed(1);
                 document.getElementById('displayDistance').innerText = distanceKm + " km";
                 document.getElementById('estDistance').value = distanceKm.replace('.', ',');
             });
 
-            // 2. WCZYTANIE ISTNIEJĄCEJ TRASY Z MODELU
-            // Pobieramy wartości z ukrytych pól (Razor wpisał tam wartości)
-            // Replace zamienia polski przecinek na kropkę dla JS
             var initStartLat = document.getElementById('startLat').value.replace(',', '.');
             var initStartLng = document.getElementById('startLng').value.replace(',', '.');
             var initEndLat = document.getElementById('endLat').value.replace(',', '.');
             var initEndLng = document.getElementById('endLng').value.replace(',', '.');
 
-            // Jeśli mamy komplet współrzędnych, rysujemy trasę
             if (initStartLat && initStartLng && initEndLat && initEndLng) {
                 var startPoint = L.latLng(initStartLat, initStartLng);
                 var endPoint = L.latLng(initEndLat, initEndLng);
 
                 routingControl.setWaypoints([startPoint, endPoint]);
 
-                // Dopasuj zoom mapy
                 setTimeout(() => {
                      var bounds = L.latLngBounds(startPoint, endPoint);
                      map.fitBounds(bounds, { padding: [50, 50] });
                 }, 500);
             }
 
-            // 3. LOGIKA AUTOCOMPLETE (Funkcje pomocnicze)
             function setupAutocomplete(input, listContainer, loader, callbackSelect) {
                 let timeoutId;
                 input.addEventListener('input', function() {
@@ -308,7 +298,6 @@
                 document.addEventListener('click', e => { if (e.target !== input) listContainer.style.display = 'none'; });
             }
 
-            // Funkcja aktualizująca trasę
             function tryUpdateRoute() {
                 let sLat = document.getElementById('startLat').value.replace(',', '.');
                 let sLng = document.getElementById('startLng').value.replace(',', '.');
@@ -320,7 +309,6 @@
                 }
             }
 
-            // 4. PODPIĘCIE INPUTÓW
             setupAutocomplete(document.getElementById('startInput'), document.getElementById('startList'), document.getElementById('startLoader'), (lat, lng) => {
                 document.getElementById('startLat').value = lat.toString().replace('.', ',');
                 document.getElementById('startLng').value = lng.toString().replace('.', ',');
@@ -332,6 +320,37 @@
                 document.getElementById('endLng').value = lng.toString().replace('.', ',');
                 tryUpdateRoute();
             });
+
+            const vehicleSelect = document.getElementById('VehicleId');
+            const startOdometerInput = document.getElementById('StartOdometer');
+
+            function fetchVehicleOdometer() {
+                const vehicleId = vehicleSelect.value;
+                if (vehicleId) {
+                    startOdometerInput.value = 'Ładowanie...';
+
+                    const url = `@Url.Action("GetVehicleOdometer", "Trips")/${vehicleId}`;
+
+                    fetch(url)
+                        .then(response => {
+                            if(!response.ok) throw new Error("Błąd sieci");
+                            return response.json();
+                        })
+                        .then(data => {
+                            startOdometerInput.value = data.odometer;
+                        })
+                        .catch(error => {
+                            console.error('Błąd pobierania licznika:', error);
+                            startOdometerInput.value = 'Błąd';
+                        });
+                } else {
+                    startOdometerInput.value = '';
+                }
+            }
+
+            if (vehicleSelect && startOdometerInput) {
+                vehicleSelect.addEventListener('change', fetchVehicleOdometer);
+            }
 
         });
     </script>

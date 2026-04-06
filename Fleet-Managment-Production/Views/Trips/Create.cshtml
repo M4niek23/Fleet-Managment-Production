@@ -8,11 +8,10 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
 <style>
-    /* Mapa na pełną wysokość dostępnego obszaru */
     #map-container {
         position: sticky;
         top: 20px;
-        height: calc(100vh - 140px); /* Dopasowanie do okna */
+        height: calc(100vh - 140px); 
         min-height: 500px;
         border-radius: 12px;
         overflow: hidden;
@@ -25,12 +24,10 @@
         z-index: 1;
     }
 
-    /* Ukrywamy domyślny panel Routing Machine, bo mamy własne pola */
     .leaflet-routing-container {
         display: none !important;
     }
 
-    /* Stylizacja listy podpowiedzi (Autocomplete) */
     .autocomplete-container {
         position: relative;
     }
@@ -69,7 +66,6 @@
             display: block;
         }
 
-    /* Loader wewnątrz inputa */
     .input-loader {
         display: none;
         position: absolute;
@@ -103,7 +99,7 @@
                 </div>
                 <div class="card-body p-4">
                     <form asp-action="Create">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        <div asp-validation-summary="All" class="alert alert-danger"></div>
 
                         <input type="hidden" asp-for="StartLatitude" id="startLat" />
                         <input type="hidden" asp-for="StartLongitude" id="startLng" />
@@ -180,7 +176,7 @@
                                     <label asp-for="StartOdometer" class="form-label fw-bold">Licznik Start</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light"><i class="bi bi-123"></i></span>
-                                        <input asp-for="StartOdometer" class="form-control" placeholder="km" />
+                                        <input asp-for="StartOdometer" class="form-control" placeholder="km" readonly />
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -229,27 +225,22 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
-            // --- 1. INICJALIZACJA MAPY ---
-            // Środek Polski jako domyślny widok
             var map = L.map('map').setView([52.0693, 19.4803], 6);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: ''
             }).addTo(map);
 
-            // Konfiguracja routingu (trasy)
             var routingControl = L.Routing.control({
                 waypoints: [],
                 routeWhileDragging: false,
                 showAlternatives: false,
-                addWaypoints: false, // Blokujemy dodawanie punktów pośrednich myszką, żeby nie psuć formularza
+                addWaypoints: false, 
                 lineOptions: {
-                    styles: [{color: '#0d6efd', opacity: 0.7, weight: 5}] // Kolor trasy zgodny z motywem
+                    styles: [{color: '#0d6efd', opacity: 0.7, weight: 5}] 
                 },
                 createMarker: function(i, wp) {
-                    // Dedykowane markery dla Startu (Zielony) i Końca (Czerwony)
                     var color = (i === 0) ? 'green' : 'red';
-                    // Używamy prostych kółek Leafleta, ale można by tu dać customowe ikony
                     return L.marker(wp.latLng, {
                         icon: L.divIcon({
                             className: 'bg-transparent',
@@ -259,23 +250,18 @@
                 }
             }).addTo(map);
 
-            // Obsługa zdarzenia: Znaleziono trasę
             routingControl.on('routesfound', function(e) {
                 var routes = e.routes;
                 var summary = routes[0].summary;
 
-                // Konwersja metrów na km (1 miejsce po przecinku)
                 var distanceKm = (summary.totalDistance / 1000).toFixed(1);
 
-                // Wyświetlenie dla użytkownika
                 document.getElementById('displayDistance').innerText = distanceKm + " km";
 
-                // Zapisanie do ukrytego pola (zamiana kropki na przecinek dla C# decimal)
                 document.getElementById('estDistance').value = distanceKm.replace('.', ',');
             });
 
 
-            // --- 2. LOGIKA AUTOCOMPLETE (Nominatim) ---
 
             function setupAutocomplete(input, listContainer, loader, callbackSelect) {
                 let timeoutId;
@@ -283,18 +269,15 @@
                 input.addEventListener('input', function() {
                     const query = this.value;
 
-                    // Reset
                     listContainer.innerHTML = '';
                     listContainer.style.display = 'none';
                     clearTimeout(timeoutId);
 
                     if (!query || query.length < 3) return;
 
-                    // Debounce (czekamy 500ms po ostatnim naciśnięciu klawisza)
                     timeoutId = setTimeout(() => {
                         loader.style.display = 'block';
 
-                        // Zapytanie do OpenStreetMap Nominatim
                         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&countrycodes=pl`)
                             .then(response => response.json())
                             .then(data => {
@@ -304,7 +287,6 @@
                                 if (data.length > 0) {
                                     listContainer.style.display = 'block';
                                     data.forEach(item => {
-                                        // Skracanie zbyt długich nazw
                                         let displayName = item.display_name;
                                         if(displayName.length > 55) displayName = displayName.substring(0, 55) + "...";
 
@@ -313,10 +295,9 @@
                                         div.innerHTML = `<strong>${item.name || query}</strong><small class="text-muted">${displayName}</small>`;
 
                                         div.addEventListener('click', function() {
-                                            input.value = item.display_name; // Wstaw pełną nazwę do inputa
+                                            input.value = item.display_name; 
                                             listContainer.style.display = 'none';
 
-                                            // Wywołanie callbacka z koordynatami
                                             callbackSelect(item.lat, item.lon);
                                         });
 
@@ -331,7 +312,6 @@
                     }, 500);
                 });
 
-                // Ukryj listę po kliknięciu gdziekolwiek indziej
                 document.addEventListener('click', function(e) {
                     if (e.target !== input) {
                         listContainer.style.display = 'none';
@@ -339,23 +319,18 @@
                 });
             }
 
-            // --- 3. PODPIĘCIE PÓL ---
 
-            // Pole START
             setupAutocomplete(
                 document.getElementById('startInput'),
                 document.getElementById('startList'),
                 document.getElementById('startLoader'),
                 (lat, lng) => {
-                    // Zapisz do ukrytych pól (z przecinkiem dla C#)
                     document.getElementById('startLat').value = lat.toString().replace('.', ',');
                     document.getElementById('startLng').value = lng.toString().replace('.', ',');
 
                     tryUpdateRoute();
                 }
             );
-
-            // Pole KONIEC
             setupAutocomplete(
                 document.getElementById('endInput'),
                 document.getElementById('endList'),
@@ -368,7 +343,6 @@
                 }
             );
 
-            // Funkcja rysująca trasę na mapie
             function tryUpdateRoute() {
                 let sLat = document.getElementById('startLat').value.replace(',', '.');
                 let sLng = document.getElementById('startLng').value.replace(',', '.');
@@ -382,14 +356,53 @@
 
                         routingControl.setWaypoints([startPoint, endPoint]);
 
-                        // Dopasuj zoom mapy, żeby pokazać całą trasę
-                        // Dodajemy małe opóźnienie, żeby RoutingMachine zdążył przeliczyć
                         setTimeout(() => {
                              var bounds = L.latLngBounds(startPoint, endPoint);
                              map.fitBounds(bounds, { padding: [50, 50] });
                         }, 100);
                     }
                 }
+            }
+
+            const vehicleSelect = document.getElementById('VehicleId');
+            const startOdometerInput = document.getElementById('StartOdometer');
+
+            function fetchVehicleOdometer() {
+                const vehicleId = vehicleSelect.value;
+                console.log("Zmieniono pojazd na ID:", vehicleId);
+
+                if (vehicleId) {
+                    startOdometerInput.value = 'Ładowanie...';
+
+                    const url = `@Url.Action("GetVehicleOdometer", "Trips")/${vehicleId}`;
+                    console.log("Pobieram dane z adresu:", url);
+
+                    fetch(url)
+                        .then(response => {
+                            if(!response.ok) throw new Error("Błąd sieci - serwer zwrócił błąd " + response.status);
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log("Pobrano przebieg:", data.odometer);
+                            startOdometerInput.value = data.odometer;
+                        })
+                        .catch(error => {
+                            console.error('Wystąpił błąd pobierania licznika:', error);
+                            startOdometerInput.value = 'Błąd';
+                        });
+                } else {
+                    startOdometerInput.value = '';
+                }
+            }
+
+            if (vehicleSelect && startOdometerInput) {
+                vehicleSelect.addEventListener('change', fetchVehicleOdometer);
+
+                if (vehicleSelect.value) {
+                    fetchVehicleOdometer();
+                }
+            } else {
+                console.error("Błąd: Nie znaleziono pola VehicleId lub StartOdometer w HTML!");
             }
 
         });

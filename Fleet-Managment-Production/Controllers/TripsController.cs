@@ -73,9 +73,9 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Trips/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            PrepareDropdownsAsync();
+            await PrepareDropdownsAsync();
             return View();
         }
 
@@ -95,8 +95,6 @@ namespace Fleet_Managment_Production.Controllers
                 ModelState.AddModelError("VehicleId", "Wybrany pojazd nie posiada ważnego ubezpieczenia w dniu rozpoczęcia podróży!");
             }
 
-            // 2. NOWA WALIDACJA: Sprawdzenie ważności przeglądu
-            // Sprawdzamy czy jest przegląd pozytywny i czy jego data ważności (NextInspectionDate) jest >= dacie podróży
             bool hasValidInspection = await _context.Inspections
                 .AnyAsync(i => i.VehicleId == trip.VehicleId &&
                                i.IsResultPositive == true &&
@@ -106,7 +104,13 @@ namespace Fleet_Managment_Production.Controllers
             {
                 ModelState.AddModelError("VehicleId", "Wybrany pojazd nie posiada ważnego przeglądu technicznego!");
             }
-
+            if (trip.EndOdometer.HasValue)
+            {
+                if (trip.EndOdometer.Value < trip.StartOdometer)
+                {
+                    ModelState.AddModelError("EndOdometer", "Stan licznika końcowego nie może być mniejszy niż przebieg początkowy!");
+                }
+            }
             if (ModelState.IsValid)
             {
                 _context.Add(trip);
@@ -119,7 +123,7 @@ namespace Fleet_Managment_Production.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            PrepareDropdownsAsync(trip);
+            await PrepareDropdownsAsync(trip);
             return View(trip);
         }
 
@@ -131,7 +135,7 @@ namespace Fleet_Managment_Production.Controllers
             var trip = await _context.Trips.FindAsync(id);
             if (trip == null) return NotFound();
 
-            PrepareDropdownsAsync(trip);
+            await PrepareDropdownsAsync(trip);
             return View(trip);
         }
 
@@ -163,7 +167,13 @@ namespace Fleet_Managment_Production.Controllers
             {
                 ModelState.AddModelError("VehicleId", "Pojazd nie posiada ważnego przeglądu technicznego w wybranym terminie!");
             }
-
+            if (trip.EndOdometer.HasValue)
+            {
+                if (trip.EndOdometer.Value < trip.StartOdometer)
+                {
+                    ModelState.AddModelError("EndOdometer", "Stan licznika końcowego nie może być mniejszy niż przebieg początkowy!");
+                }
+            }
             if (ModelState.IsValid)
             {
                 try
@@ -184,7 +194,7 @@ namespace Fleet_Managment_Production.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            PrepareDropdownsAsync(trip);
+            await PrepareDropdownsAsync(trip);
             return View(trip);
         }
 
@@ -234,9 +244,8 @@ namespace Fleet_Managment_Production.Controllers
 
             if (!isAdminOrManager)
             {
-                // Zwykły kierowca widzi tylko siebie i swoje auto
                 driversQuery = driversQuery.Where(d => d.UserId == currentUser.Id);
-                vehiclesQuery = vehiclesQuery.Where(v => v.Driver.UserId == currentUser.Id);
+                vehiclesQuery = vehiclesQuery.Where(v => v.Driver != null && v.Driver.UserId == currentUser.Id);
             }
 
             ViewData["DriverId"] = new SelectList(await driversQuery.Select(d => new {
@@ -249,6 +258,18 @@ namespace Fleet_Managment_Production.Controllers
                 Description = $"{v.Make} {v.Model} ({v.LicensePlate})"
             }).ToListAsync(), "Id", "Description", trip?.VehicleId);
         }
+        // GET: Trips/GetVehicleOdometer/5
+        [HttpGet]
+        public async Task<IActionResult> GetVehicleOdometer(int? id)
+        {
+            if (id == null) return Json(new { odometer = 0 });
 
+            var vehicle = await _context.Vehicles.FindAsync(id);
+            if (vehicle != null)
+            {
+                return Json(new { odometer = vehicle.CurrentKm });
+            }
+            return Json(new { odometer = 0 });
+        }
     }
 }
