@@ -21,8 +21,9 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Drivers
-        public async Task<IActionResult> Index(string searchString, string sortOrder)
+        public async Task<IActionResult> Index(string searchString, string sortOrder,int? page)
         {
+            ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["CurrentFilter"] = searchString;
 
@@ -52,11 +53,21 @@ namespace Fleet_Managment_Production.Controllers
 
             driversQuery = sortOrder switch
             {
-                "name_desc" => driversQuery.OrderByDescending(d => d.LastName).ThenByDescending(d => d.FirstName),
-                _ => driversQuery.OrderBy(d => d.LastName).ThenBy(d => d.FirstName),
+                "name_desc" => driversQuery.OrderByDescending(d => d.FirstName).ThenByDescending(d => d.LastName),
+                _ => driversQuery.OrderBy(d => d.FirstName).ThenBy(d => d.LastName),
             };
+            int pageSize = 8;
+            int pageNumber = page ?? 1;
+            var totalItems = await driversQuery.CountAsync();
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-            return View(await driversQuery.ToListAsync());
+            var driversList = await driversQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return View(driversList);
         }
 
         // GET: Drivers/Details/5

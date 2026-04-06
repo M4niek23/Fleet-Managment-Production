@@ -16,6 +16,7 @@ namespace Fleet_Managment_Production.Models
         [Key]
         public int Id { get; set; }
 
+        [Required(ErrorMessage = "Pojazd jest wymagany.")]
         [Display(Name = "Pojazd")]
         public int VehicleId { get; set; }
         public virtual Vehicle? Vehicle { get; set; }
@@ -25,9 +26,9 @@ namespace Fleet_Managment_Production.Models
         public CostType Type { get; set; } 
 
         [Display(Name = "Opis")]
-        
         public string? Description { get; set; }
 
+        [Required(ErrorMessage = "Kwota jest wymagana.")]
         [Display(Name = "Kwota")]
         [Column(TypeName = "decimal(18,2)")]
         [Range(0.01, 1000000, ErrorMessage = "Kwota musi być większa od 0")]

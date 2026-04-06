@@ -115,3 +115,37 @@
         </tbody>
     </table>
 </div>
+@if (ViewBag.TotalPages > 1)
+{
+    <nav aria-label="Nawigacja stronami" class="mt-4 pb-4">
+        <ul class="pagination justify-content-center flex-wrap shadow-sm mb-0">
+            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@(ViewBag.CurrentPage - 1)"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-searchString="@ViewData["CurrentFilter"]">
+                    <i class="bi bi-chevron-left"></i> <span class="d-none d-sm-inline">Poprzednia</span>
+                </a>
+            </li>
+
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-searchString="@ViewData["CurrentFilter"]">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@(ViewBag.CurrentPage + 1)"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-searchString="@ViewData["CurrentFilter"]">
+                    <span class="d-none d-sm-inline">Następna</span> <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
