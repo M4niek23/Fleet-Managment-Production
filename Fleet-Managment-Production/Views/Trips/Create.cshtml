@@ -11,7 +11,7 @@
     #map-container {
         position: sticky;
         top: 20px;
-        height: calc(100vh - 140px); 
+        height: calc(100vh - 140px);
         min-height: 500px;
         border-radius: 12px;
         overflow: hidden;
@@ -242,9 +242,9 @@
                 waypoints: [],
                 routeWhileDragging: false,
                 showAlternatives: false,
-                addWaypoints: false, 
+                addWaypoints: false,
                 lineOptions: {
-                    styles: [{color: '#0d6efd', opacity: 0.7, weight: 5}] 
+                    styles: [{color: '#0d6efd', opacity: 0.7, weight: 5}]
                 },
                 createMarker: function(i, wp) {
                     var color = (i === 0) ? 'green' : 'red';
@@ -268,7 +268,34 @@
                 document.getElementById('estDistance').value = distanceKm.replace('.', ',');
             });
 
+            // --- NOWA FUNKCJA: Przywracanie trasy po odświeżeniu strony (błędzie walidacji) ---
+            function restoreRouteOnLoad() {
+                let sLat = document.getElementById('startLat').value.replace(',', '.');
+                let sLng = document.getElementById('startLng').value.replace(',', '.');
+                let eLat = document.getElementById('endLat').value.replace(',', '.');
+                let eLng = document.getElementById('endLng').value.replace(',', '.');
+                let estDist = document.getElementById('estDistance').value;
 
+                if (sLat && sLng && eLat && eLng && !isNaN(sLat)) {
+                    const startPoint = L.latLng(sLat, sLng);
+                    const endPoint = L.latLng(eLat, eLng);
+
+                    routingControl.setWaypoints([startPoint, endPoint]);
+
+                    // Przywróć tekstowy dystans
+                    if(estDist) {
+                        document.getElementById('displayDistance').innerText = estDist + " km";
+                    }
+
+                    setTimeout(() => {
+                         var bounds = L.latLngBounds(startPoint, endPoint);
+                         map.fitBounds(bounds, { padding: [50, 50] });
+                    }, 300);
+                }
+            }
+            // Wywołujemy przy starcie strony
+            restoreRouteOnLoad();
+            // ---------------------------------------------------------------------------------
 
             function setupAutocomplete(input, listContainer, loader, callbackSelect) {
                 let timeoutId;
@@ -302,7 +329,7 @@
                                         div.innerHTML = `<strong>${item.name || query}</strong><small class="text-muted">${displayName}</small>`;
 
                                         div.addEventListener('click', function() {
-                                            input.value = item.display_name; 
+                                            input.value = item.display_name;
                                             listContainer.style.display = 'none';
 
                                             callbackSelect(item.lat, item.lon);
@@ -376,25 +403,19 @@
 
             function fetchVehicleOdometer() {
                 const vehicleId = vehicleSelect.value;
-                console.log("Zmieniono pojazd na ID:", vehicleId);
-
                 if (vehicleId) {
                     startOdometerInput.value = 'Ładowanie...';
-
                     const url = `@Url.Action("GetVehicleOdometer", "Trips")/${vehicleId}`;
-                    console.log("Pobieram dane z adresu:", url);
-
                     fetch(url)
                         .then(response => {
-                            if(!response.ok) throw new Error("Błąd sieci - serwer zwrócił błąd " + response.status);
+                            if(!response.ok) throw new Error("Błąd sieci");
                             return response.json();
                         })
                         .then(data => {
-                            console.log("Pobrano przebieg:", data.odometer);
                             startOdometerInput.value = data.odometer;
                         })
                         .catch(error => {
-                            console.error('Wystąpił błąd pobierania licznika:', error);
+                            console.error(error);
                             startOdometerInput.value = 'Błąd';
                         });
                 } else {
@@ -404,12 +425,9 @@
 
             if (vehicleSelect && startOdometerInput) {
                 vehicleSelect.addEventListener('change', fetchVehicleOdometer);
-
                 if (vehicleSelect.value) {
                     fetchVehicleOdometer();
                 }
-            } else {
-                console.error("Błąd: Nie znaleziono pola VehicleId lub StartOdometer w HTML!");
             }
 
         });

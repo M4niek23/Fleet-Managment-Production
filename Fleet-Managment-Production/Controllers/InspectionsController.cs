@@ -115,16 +115,26 @@ namespace Fleet_Managment_Production.Controllers
                 inspection.NextInspectionDate = null;
             }
 
+            // --- NOWA LOGIKA: Pobranie pojazdu i weryfikacja przebiegu ---
+            var vehicleToUpdate = await _context.Vehicles.FindAsync(inspection.VehicleId);
+
+            if (vehicleToUpdate != null && inspection.Mileage.HasValue)
+            {
+                // Jeśli wpisany przebieg jest mniejszy niż aktualny w pojeździe, rzucamy błąd
+                if (inspection.Mileage.Value < vehicleToUpdate.CurrentKm)
+                {
+                    ModelState.AddModelError("Mileage", $"Przebieg nie może być mniejszy niż aktualny stan licznika pojazdu ({vehicleToUpdate.CurrentKm} km).");
+                }
+            }
+            // -------------------------------------------------------------
+
             if (ModelState.IsValid)
             {
-                if (inspection.Mileage.HasValue && inspection.Mileage > 0)
+                // Aktualizacja przebiegu pojazdu (wykona się tylko wtedy, gdy walidacja przejdzie pomyślnie)
+                if (vehicleToUpdate != null && inspection.Mileage.HasValue && inspection.Mileage.Value > vehicleToUpdate.CurrentKm)
                 {
-                    var vehicleToUpdate = await _context.Vehicles.FindAsync(inspection.VehicleId);
-                    if (vehicleToUpdate != null && inspection.Mileage.Value > vehicleToUpdate.CurrentKm)
-                    {
-                        vehicleToUpdate.CurrentKm = inspection.Mileage.Value;
-                        _context.Update(vehicleToUpdate);
-                    }
+                    vehicleToUpdate.CurrentKm = inspection.Mileage.Value;
+                    _context.Update(vehicleToUpdate);
                 }
 
                 _context.Add(inspection);

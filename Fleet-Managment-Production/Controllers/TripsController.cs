@@ -22,22 +22,59 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Trips
-        public async Task<IActionResult> Index(int? page)
+        // GET: Trips
+        public async Task<IActionResult> Index(int? filterDriverId, int? filterVehicleId, int? page)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
+            // Zapamiętujemy wybrane filtry dla widoku i paginacji
+            ViewData["CurrentDriverFilter"] = filterDriverId;
+            ViewData["CurrentVehicleFilter"] = filterVehicleId;
 
             var tripsQuery = _context.Trips
                 .Include(t => t.Driver)
                 .Include(t => t.Vehicle)
                 .OrderByDescending(t => t.StartDate)
                 .AsQueryable();
+
             if (!isAdminOrManager)
             {
                 tripsQuery = tripsQuery.Where(t =>
                     (t.Driver != null && t.Driver.UserId == currentUser.Id) ||
                     (t.Vehicle.Driver != null && t.Vehicle.Driver.UserId == currentUser.Id));
             }
+
+            // --- FILTROWANIE ---
+            if (filterDriverId.HasValue)
+            {
+                tripsQuery = tripsQuery.Where(t => t.DriverId == filterDriverId.Value);
+            }
+            if (filterVehicleId.HasValue)
+            {
+                tripsQuery = tripsQuery.Where(t => t.VehicleId == filterVehicleId.Value);
+            }
+
+            // --- PRZYGOTOWANIE LIST ROZWIJANYCH DO FILTROWANIA ---
+            var driversQuery = _context.Drivers.AsQueryable();
+            var vehiclesQuery = _context.Vehicles.AsQueryable();
+
+            if (!isAdminOrManager)
+            {
+                driversQuery = driversQuery.Where(d => d.UserId == currentUser.Id);
+                vehiclesQuery = vehiclesQuery.Where(v => v.Driver != null && v.Driver.UserId == currentUser.Id);
+            }
+
+            ViewData["DriversList"] = new SelectList(await driversQuery.Select(d => new {
+                d.Id,
+                FullName = d.FirstName + " " + d.LastName
+            }).ToListAsync(), "Id", "FullName", filterDriverId);
+
+            ViewData["VehiclesList"] = new SelectList(await vehiclesQuery.Select(v => new {
+                Id = v.VehicleId,
+                Description = $"{v.Make} {v.Model} ({v.LicensePlate})"
+            }).ToListAsync(), "Id", "Description", filterVehicleId);
+
 
             int pageSize = 7;
             int pageNumber = page ?? 1;

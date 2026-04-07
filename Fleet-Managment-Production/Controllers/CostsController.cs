@@ -24,15 +24,19 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Costs
-        public async Task<IActionResult> Index(int? page)
+        public async Task<IActionResult> Index(string sortOrder, CostType? filterCategory, int? page)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
+            // Zapamiętujemy stany dla paginacji i widoku
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["CategorySortParam"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
+            ViewData["CurrentFilter"] = filterCategory;
+
             var costsQuery = _context.Costs
                 .Include(c => c.Vehicle)
                 .ThenInclude(v => v.Driver)
-                .OrderByDescending(c => c.Data)
                 .AsQueryable();
 
             if (!isAdminOrManager)
@@ -40,7 +44,28 @@ namespace Fleet_Managment_Production.Controllers
                 costsQuery = costsQuery.Where(c => c.Vehicle != null && c.Vehicle.Driver != null && c.Vehicle.Driver.UserId == currentUser.Id);
             }
 
+            // --- FILTROWANIE PO KATEGORII ---
+            if (filterCategory.HasValue)
+            {
+                costsQuery = costsQuery.Where(c => c.Type == filterCategory.Value);
+            }
+
+            // Suma wydatków oblicza się teraz na podstawie tego, co odfiltrowaliśmy!
             ViewBag.TotalSum = await costsQuery.SumAsync(c => c.Amount);
+
+            // --- SORTOWANIE (z poprzedniego kroku) ---
+            switch (sortOrder)
+            {
+                case "category_asc":
+                    costsQuery = costsQuery.OrderBy(c => c.Type).ThenByDescending(c => c.Data);
+                    break;
+                case "category_desc":
+                    costsQuery = costsQuery.OrderByDescending(c => c.Type).ThenByDescending(c => c.Data);
+                    break;
+                default:
+                    costsQuery = costsQuery.OrderByDescending(c => c.Data);
+                    break;
+            }
 
             int pageSize = 9;
             int pageNumber = page ?? 1;
@@ -56,7 +81,6 @@ namespace Fleet_Managment_Production.Controllers
 
             return View(costsList);
         }
-
         // GET: Costs/Details/5
         public async Task<IActionResult> Details(int? id)
         {
