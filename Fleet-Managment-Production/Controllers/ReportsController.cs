@@ -87,33 +87,48 @@ namespace Fleet_Managment_Production.Controllers
         // --- 2. RAPORT SPALANIA ---
         private async Task GenerateFuelReport(ReportsViewModel model)
         {
-            var vehicles = await _context.Vehicles.Include(v => v.Costs).ToListAsync();
+            // 1. Zabezpieczenie zakresu dat (ustawiamy koniec na 23:59:59 danego dnia)
+            var start = model.StartDate?.Date ?? DateTime.MinValue;
+            var end = model.EndDate?.Date.AddDays(1).AddTicks(-1) ?? DateTime.MaxValue;
 
-            model.FuelData = vehicles.Select(v => {
+            var vehicles = await _context.Vehicles.Include(v => v.Costs).ToListAsync();
+            var fuelReportList = new List<FuelReportItem>();
+
+            foreach (var v in vehicles)
+            {
+                // 2. Pobieramy wszystkie koszty paliwa dla pojazdu w wybranym przedziale
                 var fuelCosts = v.Costs
-                    .Where(c => c.Type == CostType.Paliwo && c.Data >= model.StartDate && c.Data <= model.EndDate && c.Liters.HasValue && c.CurrentOdometer.HasValue)
-                    .OrderBy(c => c.CurrentOdometer).ToList();
+                    .Where(c => c.Type == CostType.Paliwo && c.Data >= start && c.Data <= end)
+                    .OrderBy(c => c.CurrentOdometer)
+                    .ToList();
+
+                // Jeśli pojazd nie ma ani jednego paragonu na paliwo -> pomijamy go w tabeli
+                if (!fuelCosts.Any()) continue;
 
                 int distance = 0;
-                double liters = 0;
 
-                if (fuelCosts.Count >= 2)
+                // 3. Sumujemy tylko te litry, które faktycznie zapisały się w bazie (nie są null)
+                double liters = fuelCosts.Where(c => c.Liters.HasValue).Sum(c => c.Liters.Value);
+
+                // 4. Obliczamy dystans (wymaga min. 2 wpisów z podanym przebiegiem)
+                var costsWithOdo = fuelCosts.Where(c => c.CurrentOdometer.HasValue).ToList();
+                if (costsWithOdo.Count >= 2)
                 {
-                    distance = fuelCosts.Last().CurrentOdometer.Value - fuelCosts.First().CurrentOdometer.Value;
-                    liters = fuelCosts.Skip(1).Sum(c => c.Liters.Value);
+                    distance = costsWithOdo.Last().CurrentOdometer.Value - costsWithOdo.First().CurrentOdometer.Value;
                 }
 
-                return new FuelReportItem
+                // Dodajemy auto do raportu NIEZALEŻNIE od tego, czy dało się policzyć dystans
+                fuelReportList.Add(new FuelReportItem
                 {
                     VehicleName = $"{v.Make} {v.Model}",
                     LicensePlate = v.LicensePlate,
                     DistanceTraveled = distance,
                     TotalLiters = liters
-                };
-            })
-            .Where(x => x.DistanceTraveled > 0)
-            .OrderByDescending(x => x.AverageConsumption)
-            .ToList();
+                });
+            }
+
+            // Sortujemy i przekazujemy do widoku
+            model.FuelData = fuelReportList.OrderByDescending(x => x.TotalLiters).ToList();
         }
 
         // --- 3. RAPORT SERWISÓW ---

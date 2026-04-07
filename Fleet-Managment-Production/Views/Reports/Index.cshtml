@@ -5,6 +5,14 @@
 }
 
 <style>
+    /* Domyślny rozmiar dla wykresu */
+    .chart-container {
+        position: relative;
+        height: 40vh;
+        width: 100%;
+    }
+
+    /* Karta w trybie fullscreen */
     .card-fullscreen {
         position: fixed !important;
         top: 0 !important;
@@ -14,16 +22,79 @@
         z-index: 9999 !important;
         margin: 0 !important;
         border-radius: 0 !important;
-        overflow-y: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        background-color: white !important;
     }
 
-        .card-fullscreen .card-body {
-            height: calc(100vh - 65px);
+    /* Reszta miejsca w karcie dla zawartości */
+    .card-fullscreen .card-body {
+        flex: 1 !important;
+        min-height: 0 !important; /* TO JEST KLUCZ DO NAPRAWY BŁĘDU */
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Kontener wykresu wypełnia całą dostępną przestrzeń */
+    .card-fullscreen .chart-container {
+        flex: 1 !important;
+        height: auto !important;
+    }
+
+    /* --- USTAWIENIA DLA DRUKARKI --- */
+
+    /* 1. Zmiana orientacji MUSI być poza blokiem media print! */
+    @@page {
+        size: A4 landscape;
+        margin: 1cm;
+    }
+
+    /* 2. Reszta stylów aktywująca się tylko przy druku */
+    @@media print {
+        body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        /* Ukrycie szukajki i paginacji DataTables na papierze */
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate,
+        .dataTables_wrapper .dataTables_length {
+            display: none !important;
         }
 
-        .card-fullscreen canvas {
-            max-height: 100% !important;
+        .card {
+            border: none !important;
+            box-shadow: none !important;
         }
+        /* Tabela i ucinanie */
+        .table-responsive {
+            overflow: visible !important;
+        }
+
+        table {
+            page-break-inside: auto;
+            width: 100% !important;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        .chart-container {
+            height: 300px !important;
+            width: 100% !important;
+            page-break-inside: avoid;
+            margin-bottom: 20px;
+        }
+    }
+
+
 </style>
 
 <div class="container-fluid py-4">
@@ -67,7 +138,7 @@
         <div class="row mb-4">
             @if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.TCO && Model.TcoData.Any())
             {
-                <div class="col-md-6 mb-3 mb-md-0">
+                <div class="col-6 col-md-6 mb-3 mb-md-0">
                     <div class="card bg-danger text-white shadow-sm border-0 h-100">
                         <div class="card-body p-4">
                             <h6 class="text-uppercase fw-bold mb-2 opacity-75"><i class="bi bi-wallet2 me-2"></i>Łączny Koszt Floty</h6>
@@ -75,7 +146,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-6 col-md-6">
                     <div class="card bg-dark text-white shadow-sm border-0 h-100">
                         <div class="card-body p-4">
                             <h6 class="text-uppercase fw-bold mb-2 opacity-75"><i class="bi bi-car-front me-2"></i>Średni Koszt na Auto</h6>
@@ -86,7 +157,7 @@
             }
             else if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.Fuel && Model.FuelData.Any())
             {
-                <div class="col-md-6 mb-3 mb-md-0">
+                <div class="col-6 col-md-6 mb-3 mb-md-0">
                     <div class="card bg-primary text-white shadow-sm border-0 h-100">
                         <div class="card-body p-4">
                             <h6 class="text-uppercase fw-bold mb-2 opacity-75"><i class="bi bi-fuel-pump me-2"></i>Łącznie Spalono (Litry)</h6>
@@ -94,11 +165,26 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-6 col-md-6">
                     <div class="card bg-dark text-white shadow-sm border-0 h-100">
                         <div class="card-body p-4">
                             <h6 class="text-uppercase fw-bold mb-2 opacity-75"><i class="bi bi-speedometer me-2"></i>Średnie Spalanie Floty</h6>
-                            <h2 class="mb-0 fw-bold">@Model.FuelData.Average(x => x.AverageConsumption).ToString("0.00") l/100km</h2>
+                            @{
+                                // 1. Filtrujemy - bierzemy pod uwagę tylko te auta, które mają obliczony dystans
+                                var autaZDystansem = Model.FuelData.Where(x => x.DistanceTraveled > 0).ToList();
+                                decimal srednieSpalanieFloty = 0;
+
+                                if (autaZDystansem.Any())
+                                {
+                                    // 2. Sumujemy ich dystans i spalone litry
+                                    var sumaDystansu = autaZDystansem.Sum(x => x.DistanceTraveled);
+                                    var sumaLitrow = autaZDystansem.Sum(x => x.TotalLiters);
+
+                                    // 3. Obliczamy prawdziwą, ważoną średnią dla floty
+                                    srednieSpalanieFloty = sumaDystansu > 0 ? (decimal)(sumaLitrow / sumaDystansu * 100) : 0;
+                                }
+                            }
+                            <h2 class="mb-0 fw-bold">@srednieSpalanieFloty.ToString("0.00") l/100km</h2>
                         </div>
                     </div>
                 </div>
@@ -118,7 +204,7 @@
                     </button>
                 </div>
                 <div class="card-body">
-                    <div style="position: relative; height:40vh; width:100%">
+                    <div class="chart-container">
                         <canvas id="reportChart"></canvas>
                     </div>
                 </div>
@@ -245,19 +331,31 @@
                 $('.btn-toggle-fullscreen').on('click', function() {
                     var $card = $(this).closest('.card');
                     var $icon = $(this).find('i');
+                    var $canvas = $('#reportChart');
 
+                    // 1. Ukrywamy wykres, aby nie stawiał oporu przy kurczeniu się karty
+                    $canvas.css('display', 'none');
+
+                    // 2. Przełączamy tryb pełnoekranowy
                     $card.toggleClass('card-fullscreen');
 
                     if ($card.hasClass('card-fullscreen')) {
                         $icon.removeClass('bi-arrows-fullscreen').addClass('bi-fullscreen-exit');
+                        // Blokujemy możliwość przewijania strony pod powiększoną kartą
+                        $('body').css('overflow', 'hidden');
                     } else {
                         $icon.removeClass('bi-fullscreen-exit').addClass('bi-arrows-fullscreen');
+                        // Przywracamy przewijanie po zamknięciu
+                        $('body').css('overflow', '');
                     }
 
-                    // Jeśli powiększony element to wykres, zmuś go do ponownego wyliczenia rozmiaru
-                    if (reportChartInstance != null) {
-                        setTimeout(function() { reportChartInstance.resize(); }, 50);
-                    }
+                    // 3. Po ustabilizowaniu układu (50ms) pokazujemy wykres i każemy mu się dopasować
+                    setTimeout(function() {
+                        $canvas.css('display', 'block');
+                        if (reportChartInstance != null) {
+                            reportChartInstance.resize();
+                        }
+                    }, 50);
                 });
 
                 // 3. GENEROWANIE WYKRESU
@@ -272,37 +370,37 @@
             @if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.TCO && Model.TcoData != null && Model.TcoData.Any())
             {
                 <text>
-                        chartLabels = @Html.Raw(Json.Serialize(Model.TcoData.Select(x => x.VehicleName)));
-                        chartData = @Html.Raw(Json.Serialize(Model.TcoData.Select(x => x.TotalCost)));
-                        chartLabelName = 'Całkowity Koszt (PLN)';
-                        chartColor = 'rgba(220, 53, 69, 0.7)';
+                            chartLabels = @Html.Raw(Json.Serialize(Model.TcoData.Select(x => x.VehicleName)));
+                            chartData = @Html.Raw(Json.Serialize(Model.TcoData.Select(x => x.TotalCost)));
+                            chartLabelName = 'Całkowity Koszt (PLN)';
+                            chartColor = 'rgba(220, 53, 69, 0.7)';
                 </text>
             }
             else if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.Fuel && Model.FuelData != null && Model.FuelData.Any())
             {
                 <text>
-                        chartLabels = @Html.Raw(Json.Serialize(Model.FuelData.Select(x => x.VehicleName)));
-                        chartData = @Html.Raw(Json.Serialize(Model.FuelData.Select(x => x.AverageConsumption)));
-                        chartLabelName = 'Średnie spalanie (l/100km)';
-                        chartColor = 'rgba(13, 110, 253, 0.7)';
+                            chartLabels = @Html.Raw(Json.Serialize(Model.FuelData.Select(x => x.VehicleName)));
+                            chartData = @Html.Raw(Json.Serialize(Model.FuelData.Select(x => x.AverageConsumption)));
+                            chartLabelName = 'Średnie spalanie (l/100km)';
+                            chartColor = 'rgba(13, 110, 253, 0.7)';
                 </text>
             }
             else if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.Service && Model.ServiceData != null && Model.ServiceData.Any())
             {
                 <text>
-                        chartLabels = @Html.Raw(Json.Serialize(Model.ServiceData.Select(x => x.VehicleName)));
-                        chartData = @Html.Raw(Json.Serialize(Model.ServiceData.Select(x => x.TotalServiceCost)));
-                        chartLabelName = 'Koszty napraw (PLN)';
-                        chartColor = 'rgba(255, 193, 7, 0.7)';
+                            chartLabels = @Html.Raw(Json.Serialize(Model.ServiceData.Select(x => x.VehicleName)));
+                            chartData = @Html.Raw(Json.Serialize(Model.ServiceData.Select(x => x.TotalServiceCost)));
+                            chartLabelName = 'Koszty napraw (PLN)';
+                            chartColor = 'rgba(255, 193, 7, 0.7)';
                 </text>
             }
             else if (Model.SelectedReport == Fleet_Managment_Production.ViewModels.ReportType.DriverActivity && Model.DriverActivityData != null && Model.DriverActivityData.Any())
             {
                 <text>
-                        chartLabels = @Html.Raw(Json.Serialize(Model.DriverActivityData.Select(x => x.DriverName)));
-                        chartData = @Html.Raw(Json.Serialize(Model.DriverActivityData.Select(x => x.TotalDistance)));
-                        chartLabelName = 'Przejechany dystans (km)';
-                        chartColor = 'rgba(25, 135, 84, 0.7)';
+                            chartLabels = @Html.Raw(Json.Serialize(Model.DriverActivityData.Select(x => x.DriverName)));
+                            chartData = @Html.Raw(Json.Serialize(Model.DriverActivityData.Select(x => x.TotalDistance)));
+                            chartLabelName = 'Przejechany dystans (km)';
+                            chartColor = 'rgba(25, 135, 84, 0.7)';
                 </text>
             }
 
