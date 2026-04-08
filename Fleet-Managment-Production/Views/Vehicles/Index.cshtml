@@ -139,17 +139,19 @@
                                             {                                            
                                                 <a asp-action="Details" asp-route-id="@item.VehicleId" class="btn btn-sm btn-outline-secondary" title="Szczegóły">
                                                 <i class="bi bi-eye"></i>
-                                            </a>
+                                                </a>
                                             
-                                            <a asp-action="Edit" asp-route-id="@item.VehicleId" class="btn btn-sm btn-outline-secondary" title="Edytuj">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
+                                                <a asp-action="Edit" asp-route-id="@item.VehicleId" class="btn btn-sm btn-outline-secondary" title="Edytuj">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
                                             }
                                             @if(User.IsInRole("Admin"))
                                             {
-                                            <a asp-action="Delete" asp-route-id="@item.VehicleId" class="btn btn-sm btn-outline-danger" title="Usuń">
-                                                <i class="bi bi-trash"></i>
-                                            </a>
+                                                <form asp-action="Delete" asp-route-id="@item.VehicleId" method="post" class="d-inline">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete-swal" title="Usuń">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
                                             }
                                     </div>
                                 </td>

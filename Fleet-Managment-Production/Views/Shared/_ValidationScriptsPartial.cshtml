@@ -9,4 +9,13 @@
         var globalizedValue = value.replace(",", ".");
         return this.optional(element) || (globalizedValue >= param[0] && globalizedValue <= param[1]);
     }
+
+    if ($.validator) {
+            $.extend($.validator.messages, {
+                min: $.validator.format("Proszę wpisać datę późniejszą lub równą {0}."),
+                // Możesz też dodać inne, np:
+                required: "To pole jest wymagane.",
+                number: "Proszę wpisać poprawną liczbę."
+            });
+        }
 </script>
