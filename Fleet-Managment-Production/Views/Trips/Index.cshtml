@@ -4,7 +4,6 @@
 @inject UserManager<Users> UserManager
 
 @{
-    ViewData["Title"] = "Rejestr Tras";
     var currentUserId = UserManager.GetUserId(User);
 }
 
@@ -160,7 +159,7 @@
                        asp-route-page="@(ViewBag.CurrentPage - 1)"
                        asp-route-filterDriverId="@ViewData["CurrentDriverFilter"]"
                        asp-route-filterVehicleId="@ViewData["CurrentVehicleFilter"]">
-                        <i class="bi bi-chevron-left"></i> <span class="d-none d-sm-inline">Poprzednia</span>
+                        <i class="bi bi-chevron-left"></i>
                     </a>
                 </li>
 
@@ -179,7 +178,7 @@
                        asp-route-page="@(ViewBag.CurrentPage + 1)"
                        asp-route-filterDriverId="@ViewData["CurrentDriverFilter"]"
                        asp-route-filterVehicleId="@ViewData["CurrentVehicleFilter"]">
-                        <span class="d-none d-sm-inline">Następna</span> <i class="bi bi-chevron-right"></i>
+                        <i class="bi bi-chevron-right"></i>
                     </a>
                 </li>
             </ul>

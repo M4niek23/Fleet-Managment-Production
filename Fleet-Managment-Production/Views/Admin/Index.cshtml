@@ -2,9 +2,7 @@
 @model IEnumerable<Users>
 @using Microsoft.AspNetCore.Identity;
 @inject UserManager<Users> UserManager
-@{
-    ViewData["Title"] = "Panel Administratora";
-}
+
 
 <div class="container-fluid py-4">
 
@@ -131,7 +129,7 @@
                        asp-route-page="@(ViewBag.CurrentPage - 1)"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
                        asp-route-searchString="@ViewData["CurrentFilter"]">
-                        <i class="bi bi-chevron-left"></i> <span class="d-none d-sm-inline">Poprzednia</span>
+                        <i class="bi bi-chevron-left"></i>
                     </a>
                 </li>
 
@@ -150,7 +148,7 @@
                        asp-route-page="@(ViewBag.CurrentPage + 1)"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
                        asp-route-searchString="@ViewData["CurrentFilter"]">
-                        <span class="d-none d-sm-inline">Następna</span> <i class="bi bi-chevron-right"></i>
+                       <i class="bi bi-chevron-right"></i>
                     </a>
                 </li>
             </ul>

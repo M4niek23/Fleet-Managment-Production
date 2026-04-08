@@ -106,7 +106,10 @@
                                                     @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                                                     {
                                                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light border" title="Edytuj"><i class="bi bi-pencil"></i></a>
-                                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-danger" title="Usuń"><i class="bi bi-trash"></i></a>
+                                                    }
+                                                    @if (User.IsInRole("Admin"))
+                                                    {
+                                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-light border text-danger" title="Usuń"><i class="bi bi-trash"></i></a>
                                                     }
                                                 </div>
                                             </td>
@@ -133,7 +136,7 @@
                                        asp-route-tab="active"
                                        asp-route-id="@ViewBag.VehicleId"
                                        asp-route-searchString="@ViewData["CurrentFilter"]">
-                                        <i class="bi bi-chevron-left"></i> <span class="d-none d-sm-inline">Poprzednia</span>
+                                        <i class="bi bi-chevron-left"></i>
                                     </a>
                                 </li>
 
@@ -156,7 +159,7 @@
                                        asp-route-tab="active"
                                        asp-route-id="@ViewBag.VehicleId"
                                        asp-route-searchString="@ViewData["CurrentFilter"]">
-                                        <span class="d-none d-sm-inline">Następna</span> <i class="bi bi-chevron-right"></i>
+                                       <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
                             </ul>
@@ -214,7 +217,7 @@
                                        asp-route-tab="history"
                                        asp-route-id="@ViewBag.VehicleId"
                                        asp-route-searchString="@ViewData["CurrentFilter"]">
-                                        <i class="bi bi-chevron-left"></i> <span class="d-none d-sm-inline">Poprzednia</span>
+                                        <i class="bi bi-chevron-left"></i>
                                     </a>
                                 </li>
 
@@ -237,7 +240,7 @@
                                        asp-route-tab="history"
                                        asp-route-id="@ViewBag.VehicleId"
                                        asp-route-searchString="@ViewData["CurrentFilter"]">
-                                        <span class="d-none d-sm-inline">Następna</span> <i class="bi bi-chevron-right"></i>
+                                        <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
                             </ul>

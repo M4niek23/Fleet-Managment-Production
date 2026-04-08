@@ -1,8 +1,6 @@
 ﻿@model IEnumerable<Fleet_Managment_Production.Models.Vehicle>
 
-@{
-    ViewData["Title"] = "Lista Pojazdów";
-}
+
 
 <div class="container-fluid py-4">
 
@@ -171,7 +169,7 @@
                     <a class="page-link" asp-action="Index"
                        asp-route-page="@(ViewBag.CurrentPage - 1)"
                        asp-route-searchString="@ViewData["CurrentFilter"]">
-                        <i class="bi bi-chevron-left"></i> <span class="d-none d-sm-inline">Poprzednia</span>
+                        <i class="bi bi-chevron-left"></i>
                     </a>
                 </li>
 
@@ -187,7 +185,7 @@
                     <a class="page-link" asp-action="Index"
                        asp-route-page="@(ViewBag.CurrentPage + 1)"
                        asp-route-searchString="@ViewData["CurrentFilter"]">
-                        <span class="d-none d-sm-inline">Następna</span> <i class="bi bi-chevron-right"></i>
+                        <i class="bi bi-chevron-right"></i>
                     </a>
                 </li>
             </ul>
