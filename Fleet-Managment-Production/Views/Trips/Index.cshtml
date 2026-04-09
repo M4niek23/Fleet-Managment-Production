@@ -135,9 +135,11 @@
 
                                             @if (User.IsInRole("Admin"))
                                             {
-                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń">
-                                                    <i class="bi bi-trash"></i>
-                                                </a>
+                                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete-swal" title="Usuń">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
                                             }
                                         </div>
                                     </td>

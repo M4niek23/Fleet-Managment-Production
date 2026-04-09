@@ -101,7 +101,14 @@ namespace Fleet_Managment_Production.Controllers
                 await PopulateVehiclesDropdownAsync(service.VehicleId);
                 return View(service);
             }
-
+            if (service.PlannedEndDate.HasValue && service.PlannedEndDate.Value < service.EntryDate)
+            {
+                ModelState.AddModelError("PlannedEndDate", "Planowana data zakończenia nie może być wcześniejsza niż data rozpoczęcia.");
+            }
+            if (service.ActualEndDate.HasValue && service.ActualEndDate.Value < service.EntryDate)
+            {
+                ModelState.AddModelError("ActualEndDate", "Rzeczywista data zakończenia nie może być wcześniejsza niż data rozpoczęcia.");
+            }
             if (ModelState.IsValid)
             {
                 _context.Add(service);
@@ -152,7 +159,14 @@ namespace Fleet_Managment_Production.Controllers
             {
                 if (originalService.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
             }
-
+            if (service.PlannedEndDate.HasValue && service.PlannedEndDate.Value < service.EntryDate)
+            {
+                ModelState.AddModelError("PlannedEndDate", "Planowana data zakończenia nie może być wcześniejsza niż data rozpoczęcia.");
+            }
+            if (service.ActualEndDate.HasValue && service.ActualEndDate.Value < service.EntryDate)
+            {
+                ModelState.AddModelError("ActualEndDate", "Rzeczywista data zakończenia nie może być wcześniejsza niż data rozpoczęcia.");
+            }
             if (ModelState.IsValid)
             {
                 try

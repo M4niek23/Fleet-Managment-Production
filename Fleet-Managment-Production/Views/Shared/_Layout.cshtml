@@ -268,7 +268,30 @@
             });
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            // Mechanim okienka odnośnie usuwania rekordów z systemu
+            $(document).on('click', '.btn-delete-swal', function (e) {
+                e.preventDefault(); // Zatrzymujemy domyślne kliknięcie
+                var form = $(this).closest('form');
 
+                Swal.fire({
+                    title: 'Czy na pewno chcesz usunąć?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',  
+                    confirmButtonText: '<i class="bi bi-trash me-1"></i> Tak, usuń',
+                    cancelButtonText: 'Anuluj'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
     @await RenderSectionAsync("Scripts", false)
 </body>
 </html>

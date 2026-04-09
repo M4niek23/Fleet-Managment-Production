@@ -98,4 +98,20 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(document).ready(function () {
+            // Po wybraniu daty rozpoczęcia blokujemy wcześniejsze dni w datach zakończenia
+            $('#EntryDate').on('change', function () {
+                var entryDate = $(this).val();
+                if (entryDate) {
+                    $('#PlannedEndDate').attr('min', entryDate);
+                    $('#ActualEndDate').attr('min', entryDate);
+                }
+            });
+
+            // Odpalenie w przypadku edycji (żeby przy załadowaniu strony zablokować daty)
+            $('#EntryDate').trigger('change');
+        });
+    </script>
 }
