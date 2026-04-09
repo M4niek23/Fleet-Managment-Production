@@ -25,24 +25,36 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Services
-        public async Task<IActionResult> Index(int? page)
+        public async Task<IActionResult> Index(string searchString,int? page)
         {
+            ViewData["CurrentFilter"] = searchString;
+
             var currentUser = await _userManager.GetUserAsync(User);
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
+
+          
             var servicesQuery = _context.Services
                 .Include(s => s.Vehicle)
                 .ThenInclude(v => v.Driver)
                 .OrderByDescending(s => s.EntryDate)
                 .AsQueryable();
 
-            // Zwykły kierowca widzi tylko serwisy swojego auta
             if (!isAdminOrManager)
             {
                 servicesQuery = servicesQuery.Where(s => s.Vehicle != null && s.Vehicle.Driver != null && s.Vehicle.Driver.UserId == currentUser.Id);
             }
 
-            // Paginacja
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var searchLower = searchString.ToLower();
+                servicesQuery = servicesQuery.Where(s =>
+                    (s.Description != null && s.Description.ToLower().Contains(searchLower)) ||
+                    (s.Vehicle != null && s.Vehicle.Make != null && s.Vehicle.Make.ToLower().Contains(searchLower)) ||
+                    (s.Vehicle != null && s.Vehicle.Model != null && s.Vehicle.Model.ToLower().Contains(searchLower)) ||
+                    (s.Vehicle != null && s.Vehicle.LicensePlate != null && s.Vehicle.LicensePlate.ToLower().Contains(searchLower))
+                );
+            }
             int pageSize = 8;
             int pageNumber = page ?? 1;
             var totalItems = await servicesQuery.CountAsync();

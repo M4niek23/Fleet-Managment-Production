@@ -20,6 +20,13 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <div class="card shadow-sm border-0 mb-4 bg-light">
         <div class="card-body py-2">
@@ -81,33 +88,48 @@
                             <tr>
                                 <td class="ps-4 fw-bold">@user.UserName <br /><small class="text-muted fw-normal">@user.FullName</small></td>
                                 <td>@user.Email</td>
+
                                 <td>
-                                    <a class="btn btn-outline-primary btn-sm" asp-action="ManageRoles" asp-route-userId="@user.Id">
-                                        <i class="bi bi-gear-fill me-1"></i> Zarządzaj Rolami
-                                    </a>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <a class="btn btn-outline-primary btn-sm" asp-action="ManageRoles" asp-route-userId="@user.Id">
+                                            <i class="bi bi-gear-fill me-1">Zarządzaj</i>
+                                        </a>
+
+                                        <form asp-controller="Admin" asp-action="ToggleBlock" method="post" class="m-0">
+                                            <input type="hidden" name="id" value="@user.Id" />
+
+                                            @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+                                            {
+                                                <button type="submit" class="btn btn-outline-success btn-sm" onclick="return confirm('Czy na pewno chcesz odblokować to konto?');">
+                                                    <i class="bi bi-unlock-fill me-1"></i> 
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Czy na pewno chcesz zablokować to konto? Użytkownik zostanie wylogowany i straci dostęp do systemu.');">
+                                                    <i class="bi bi-lock-fill me-1"></i> 
+                                                </button>
+                                            }
+                                        </form>
+                                    </div>
                                 </td>
+
                                 <td class="text-end pe-4">
                                     @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
                                     {
-                                        <div class="d-flex align-items-center justify-content-end">
-                                            <span class="badge bg-danger me-2">Zablokowany</span>
-                                            <form asp-controller="Admin" asp-action="UnlockUser" method="post" class="d-inline">
-                                                <input type="hidden" name="id" value="@user.Id" />
-                                                <button type="submit" class="btn btn-link btn-sm p-0 text-danger text-decoration-none" onclick="return confirm('Czy na pewno chcesz odblokować to konto?');">
-                                                    <i class="bi bi-unlock-fill"></i> Odblokuj
-                                                </button>
-                                            </form>
-                                        </div>
+                                        <span class="badge bg-danger shadow-sm">
+                                            <i class="bi bi-slash-circle me-1"></i> Zablokowany
+                                        </span>
                                     }
                                     else if (hasRoles)
                                     {
-                                        <span class="badge bg-success">
+                                        <span class="badge bg-success shadow-sm">
                                             <i class="bi bi-check-circle me-1"></i> Aktywny
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-warning text-dark">
+                                        <span class="badge bg-warning text-dark shadow-sm">
                                             <i class="bi bi-clock-history me-1"></i> Oczekujący
                                         </span>
                                     }

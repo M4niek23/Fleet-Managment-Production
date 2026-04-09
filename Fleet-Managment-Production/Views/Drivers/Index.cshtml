@@ -2,14 +2,12 @@
 @model IEnumerable<Fleet_Managment_Production.Models.Driver>
 
 @{
-    ViewData["Title"] = "Kierowcy";
-    // Pobieramy aktualny status z kontrolera, aby wiedzieć, która zakładka jest aktywna
     var currentStatus = ViewData["CurrentStatus"] as DriverStatus?;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <h2>Kierowcy</h2>
+        <h3 class="fw-bold mb-1">Baza kierowców</h3>
         <p class="text-muted">Baza pracowników i ich uprawnień.</p>
     </div>
     @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
@@ -18,8 +16,6 @@
     }
 </div>
 
-@* Sekcja Zakładek (Tabs) *@
-@* Sekcja Zakładek (Tabs) *@
 <div class="mb-4">
     <ul class="nav nav-tabs border-bottom-0">
         <li class="nav-item">
@@ -41,7 +37,6 @@
     </ul>
 </div>
 <form asp-action="Index" method="get" class="mb-4">
-    @* Ukryty status, aby szukanie tekstowe nie resetowało wybranej zakładki *@
     <input type="hidden" name="status" value="@currentStatus" />
     <div class="row g-2 align-items-center">
         <div class="col-md-5">
@@ -77,7 +72,7 @@
                         }
                     </a>
                 </th>
-                <th>Status</th> @* Nowa kolumna *@
+                <th>Status</th> 
                 <th>Kontakt</th>
                 <th>Prawo Jazdy</th>
                 <th>PESEL</th>
