@@ -5,14 +5,12 @@
 }
 
 <style>
-    /* Domyślny rozmiar dla wykresu */
     .chart-container {
         position: relative;
         height: 40vh;
         width: 100%;
     }
 
-    /* Karta w trybie fullscreen */
     .card-fullscreen {
         position: fixed !important;
         top: 0 !important;
@@ -27,35 +25,29 @@
         background-color: white !important;
     }
 
-    /* Reszta miejsca w karcie dla zawartości */
     .card-fullscreen .card-body {
         flex: 1 !important;
-        min-height: 0 !important; /* TO JEST KLUCZ DO NAPRAWY BŁĘDU */
+        min-height: 0 !important;
         display: flex !important;
         flex-direction: column !important;
     }
 
-    /* Kontener wykresu wypełnia całą dostępną przestrzeń */
     .card-fullscreen .chart-container {
         flex: 1 !important;
         height: auto !important;
     }
 
-    /* --- USTAWIENIA DLA DRUKARKI --- */
 
-    /* 1. Zmiana orientacji MUSI być poza blokiem media print! */
     @@page {
         size: A4 landscape;
         margin: 1cm;
     }
 
-    /* 2. Reszta stylów aktywująca się tylko przy druku */
     @@media print {
         body {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
-        /* Ukrycie szukajki i paginacji DataTables na papierze */
         .dataTables_wrapper .dataTables_filter,
         .dataTables_wrapper .dataTables_info,
         .dataTables_wrapper .dataTables_paginate,
@@ -67,7 +59,6 @@
             border: none !important;
             box-shadow: none !important;
         }
-        /* Tabela i ucinanie */
         .table-responsive {
             overflow: visible !important;
         }
@@ -170,17 +161,14 @@
                         <div class="card-body p-4">
                             <h6 class="text-uppercase fw-bold mb-2 opacity-75"><i class="bi bi-speedometer me-2"></i>Średnie Spalanie Floty</h6>
                             @{
-                                // 1. Filtrujemy - bierzemy pod uwagę tylko te auta, które mają obliczony dystans
                                 var autaZDystansem = Model.FuelData.Where(x => x.DistanceTraveled > 0).ToList();
                                 decimal srednieSpalanieFloty = 0;
 
                                 if (autaZDystansem.Any())
                                 {
-                                    // 2. Sumujemy ich dystans i spalone litry
                                     var sumaDystansu = autaZDystansem.Sum(x => x.DistanceTraveled);
                                     var sumaLitrow = autaZDystansem.Sum(x => x.TotalLiters);
 
-                                    // 3. Obliczamy prawdziwą, ważoną średnią dla floty
                                     srednieSpalanieFloty = sumaDystansu > 0 ? (decimal)(sumaLitrow / sumaDystansu * 100) : 0;
                                 }
                             }
@@ -345,7 +333,6 @@
                         $('body').css('overflow', 'hidden');
                     } else {
                         $icon.removeClass('bi-fullscreen-exit').addClass('bi-arrows-fullscreen');
-                        // Przywracamy przewijanie po zamknięciu
                         $('body').css('overflow', '');
                     }
 

@@ -57,6 +57,7 @@
                             <th>Opis</th>
                             <th>Data przyjęcia</th>
                             <th>Planowane zakończenie</th>
+                            <th>Zakończenie naprawy</th>
                             <th>Status</th>
                             <th class="text-end pe-4">Akcje</th>
                         </tr>
@@ -83,6 +84,7 @@
                                     <td>@item.Description</td>
                                     <td>@item.EntryDate.ToShortDateString()</td>
                                     <td>@item.PlannedEndDate?.ToShortDateString()</td>
+                                    <td>@item.ActualEndDate?.ToShortDateString()</td>
                                     <td>
                                         @if (item.ActualEndDate.HasValue)
                                         {

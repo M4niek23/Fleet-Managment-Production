@@ -86,7 +86,6 @@
 </div>
 
 <style>
-    /* Pionowa linia rozdzielająca kolumny na większych ekranach */
     @@media (min-width: 768px) {
         .border-end-md {
             border-right: 1px solid #dee2e6 !important;
@@ -101,7 +100,6 @@
 
     <script>
         $(document).ready(function () {
-            // Po wybraniu daty rozpoczęcia blokujemy wcześniejsze dni w datach zakończenia
             $('#EntryDate').on('change', function () {
                 var entryDate = $(this).val();
                 if (entryDate) {
@@ -110,7 +108,6 @@
                 }
             });
 
-            // Odpalenie w przypadku edycji (żeby przy załadowaniu strony zablokować daty)
             $('#EntryDate').trigger('change');
         });
     </script>

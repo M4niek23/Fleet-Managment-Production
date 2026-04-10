@@ -152,5 +152,45 @@ namespace Fleet_Managment_Production.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleBlock(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            var targetUser = await _userManager.FindByIdAsync(id);
+            if (targetUser == null) return NotFound();
+
+            var currentUserId = _userManager.GetUserId(User);
+            if (targetUser.Id == currentUserId)
+            {
+                TempData["ErrorMessage"] = "Nie możesz zablokować własnego konta.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (!targetUser.LockoutEnabled)
+            {
+                targetUser.LockoutEnabled = true;
+                await _userManager.UpdateAsync(targetUser);
+            }
+
+            var isLocked = await _userManager.IsLockedOutAsync(targetUser);
+
+            if (isLocked)
+            {
+                await _userManager.SetLockoutEndDateAsync(targetUser, null);
+                TempData["SuccessMessage"] = $"Konto {targetUser.Email} zostało pomyślnie odblokowane.";
+            }
+            else
+            {
+                await _userManager.SetLockoutEndDateAsync(targetUser, DateTimeOffset.MaxValue);
+
+                await _userManager.UpdateSecurityStampAsync(targetUser);
+
+                TempData["SuccessMessage"] = $"Konto {targetUser.Email} zostało zablokowane.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
