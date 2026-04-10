@@ -92,7 +92,7 @@
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <a class="btn btn-outline-primary btn-sm" asp-action="ManageRoles" asp-route-userId="@user.Id">
-                                            <i class="bi bi-gear-fill me-1">Zarządzaj</i>
+                                            <i class="bi bi-gear-fill me-1"></i>Zarządzaj
                                         </a>
 
                                         <form asp-controller="Admin" asp-action="ToggleBlock" method="post" class="m-0">
@@ -101,13 +101,13 @@
                                             @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
                                             {
                                                 <button type="submit" class="btn btn-outline-success btn-sm" onclick="return confirm('Czy na pewno chcesz odblokować to konto?');">
-                                                    <i class="bi bi-unlock-fill me-1"></i> 
+                                                    <i class="bi bi-unlock-fill me-1"></i>Odblokuj
                                                 </button>
                                             }
                                             else
                                             {
                                                 <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Czy na pewno chcesz zablokować to konto? Użytkownik zostanie wylogowany i straci dostęp do systemu.');">
-                                                    <i class="bi bi-lock-fill me-1"></i> 
+                                                    <i class="bi bi-lock-fill me-1"></i>Zablokuj
                                                 </button>
                                             }
                                         </form>
