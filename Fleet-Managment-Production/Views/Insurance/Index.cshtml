@@ -6,6 +6,39 @@
     var activeTab = ViewBag.ActiveTab as string ?? "active";
 }
 
+<style>
+    /* Efekt podświetlania ikonek w tabeli */
+    .table-action-btn i {
+        transition: color 0.2s ease-in-out;
+    }
+
+    .table-action-btn:hover i {
+        color: #0d6efd; /* Kolor niebieski z Bootstrapa po najechaniu */
+    }
+
+    .table-action-btn:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Dynamiczne kolory dla tekstu zakładek */
+    .custom-tabs .nav-link:not(.active) {
+        color: #6c757d !important; /* Szary dla nieaktywnych */
+    }
+
+    .custom-tabs .nav-link.active {
+        color: #212529 !important; /* Ciemny dla aktywnej */
+    }
+
+    /* Dynamiczne kolory dla odznak (liczników) wewnątrz zakładek */
+    .custom-tabs .nav-link:not(.active) .badge {
+        background-color: #6c757d !important; /* Szary (secondary) dla nieaktywnej */
+    }
+
+    .custom-tabs .nav-link.active .badge {
+        background-color: #0d6efd !important; /* Niebieski (primary) dla aktywnej */
+    }
+</style>
+
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -14,6 +47,7 @@
         </div>
         <div class="d-flex align-items-center gap-3">
             <div class="bg-white px-3 py-2 rounded shadow-sm border border-primary-subtle">
+
                 <small class="text-muted d-block text-uppercase" style="font-size:0.7rem;">Koszt aktywnych polis</small>
                 <span class="fw-bold text-primary fs-5">@totalSum.ToString("C")</span>
             </div>
@@ -29,6 +63,7 @@
     <div class="card shadow-sm border-0 mb-4 bg-light">
         <div class="card-body py-2">
             <form method="get" asp-action="Index" class="row g-2 align-items-center">
+
                 <div class="col-auto">
                     <label class="text-secondary small fw-bold">Pojazd:</label>
                 </div>
@@ -49,15 +84,15 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white p-0 border-bottom">
-            <ul class="nav nav-tabs border-0" id="insuranceTabs" role="tablist">
+            <ul class="nav nav-tabs border-0 custom-tabs" id="insuranceTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link @(ViewBag.ActiveTab == "active" ? "active" : "") fw-bold px-4 py-3" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab">
-                        Aktualne <span class="badge bg-primary ms-2">@ViewBag.ActiveCount</span>
+                    <button class="nav-link @(activeTab == "active" ? "active" : "") fw-bold px-4 py-3" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab">
+                        Aktualne <span class="badge ms-2">@ViewBag.ActiveCount</span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link @(ViewBag.ActiveTab == "history" ? "active" : "") fw-bold px-4 py-3 text-secondary" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
-                        Historia <span class="badge bg-secondary ms-2">@ViewBag.HistoryCount</span>
+                    <button class="nav-link @(activeTab == "history" ? "active" : "") fw-bold px-4 py-3" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                        Historia <span class="badge ms-2">@ViewBag.HistoryCount</span>
                     </button>
                 </li>
             </ul>
@@ -100,16 +135,20 @@
                                             </td>
                                             <td class="text-end fw-bold text-primary">@item.Cost.ToString("C")</td>
                                             <td class="text-end pe-4">
-                                                <div class="btn-group">
-                                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border" title="Szczegóły"><i class="bi bi-eye"></i></a>
+                                                <div class="btn-group shadow-sm">
+                                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border table-action-btn text-secondary" title="Szczegóły">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
                                                     @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                                                     {
-                                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light border" title="Edytuj"><i class="bi bi-pencil"></i></a>
+                                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light border table-action-btn text-secondary" title="Edytuj">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
                                                     }
                                                     @if (User.IsInRole("Admin"))
                                                     {
                                                         <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
-                                                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-swal" title="Usuń">
+                                                            <button type="button" class="btn btn-sm btn-light border table-action-btn text-secondary btn-delete-swal" title="Usuń">
                                                                 <i class="bi bi-trash"></i>
                                                             </button>
                                                         </form>
@@ -162,13 +201,13 @@
                                        asp-route-tab="active"
                                        asp-route-id="@ViewBag.VehicleId"
                                        asp-route-searchString="@ViewData["CurrentFilter"]">
-                                       <i class="bi bi-chevron-right"></i>
+                                        <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
                             </ul>
                         </nav>
                     }
-                  
+
                 </div>
 
                 <div class="tab-pane fade @(activeTab == "history" ? "show active" : "")" id="history" role="tabpanel">
@@ -194,7 +233,9 @@
                                             <td>@item.InsurareName</td>
                                             <td class="text-end">@item.Cost.ToString("C")</td>
                                             <td class="text-end pe-4">
-                                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Archiwum</a>
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border table-action-btn text-secondary">
+                                                    <i class="bi bi-archive"></i> Archiwum
+                                                </a>
                                             </td>
                                         </tr>
                                     }

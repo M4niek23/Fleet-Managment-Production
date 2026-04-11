@@ -1,26 +1,19 @@
 ﻿@using Fleet_Managment_Production.Models;
 @model Insurance
 
-@{
-    ViewData["Title"] = "Edycja Polisy";
-}
 
 <div class="container-fluid py-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Edycja Polisy</h2>
-            <p class="text-muted mb-0">Zaktualizuj dane ubezpieczenia lub zmień zakres ochrony.</p>
+            <h3 class="fw-bold mb-1">Edycja Polisy</h3>
         </div>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-action="Index" asp-route-vehicleId="@Model.VehicleId" class="btn btn-outline-secondary shadow-sm">
             <i class="bi bi-arrow-left me-2"></i>Powrót do listy
         </a>
     </div>
 
     <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold text-success"><i class="bi bi-pencil-square me-2"></i>Formularz edycji</h5>
-        </div>
         <div class="card-body p-4">
             <form asp-action="Edit">
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
@@ -28,16 +21,17 @@
                 <input type="hidden" asp-for="Id" />
 
                 <div class="row g-3">
-
-                    <div class="col-12 text-muted text-uppercase small fw-bold mt-2 mb-2 border-bottom pb-1">
-                        Informacje o polisie
+                    <div class="col-12">
+                        <p class="text-muted text-uppercase small fw-bold mb-0 border-bottom pb-2">
+                            <i class="bi bi-file-earmark-text me-1"></i>Informacje o polisie
+                        </p>
                     </div>
 
                     <div class="col-md-6">
                         <label asp-for="PolicyNumber" class="form-label fw-bold">Numer Polisy</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-file-earmark-text"></i></span>
-                            <input asp-for="PolicyNumber" class="form-control" />
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-file-earmark-text text-muted"></i></span>
+                            <input asp-for="PolicyNumber" class="form-control border-start-0" />
                         </div>
                         <span asp-validation-for="PolicyNumber" class="text-danger small"></span>
                     </div>
@@ -45,8 +39,8 @@
                     <div class="col-md-6">
                         <label asp-for="InsurareName" class="form-label fw-bold">Ubezpieczyciel</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-building"></i></span>
-                            <input asp-for="InsurareName" class="form-control" />
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-building text-muted"></i></span>
+                            <input asp-for="InsurareName" class="form-control border-start-0" />
                         </div>
                         <span asp-validation-for="InsurareName" class="text-danger small"></span>
                     </div>
@@ -54,8 +48,8 @@
                     <div class="col-md-6">
                         <label asp-for="VehicleId" class="form-label fw-bold">Pojazd</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-car-front"></i></span>
-                            <select asp-for="VehicleId" class="form-select" asp-items="ViewBag.VehicleList">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-car-front text-muted"></i></span>
+                            <select asp-for="VehicleId" class="form-select border-start-0" asp-items="ViewBag.VehicleList">
                                 <option value="">-- Wybierz pojazd --</option>
                             </select>
                         </div>
@@ -65,21 +59,23 @@
                     <div class="col-md-6">
                         <label asp-for="Cost" class="form-label fw-bold">Koszt (PLN)</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-currency-exchange"></i></span>
-                            <input asp-for="Cost" class="form-control" />
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-currency-exchange text-muted"></i></span>
+                            <input asp-for="Cost" class="form-control border-start-0" />
                         </div>
                         <span asp-validation-for="Cost" class="text-danger small"></span>
                     </div>
 
-                    <div class="col-12 text-muted text-uppercase small fw-bold mt-4 mb-2 border-bottom pb-1">
-                        Okres ważności
+                    <div class="col-12 mt-3">
+                        <p class="text-muted text-uppercase small fw-bold mb-0 border-bottom pb-2">
+                            <i class="bi bi-calendar-range me-1"></i>Okres ważności
+                        </p>
                     </div>
 
                     <div class="col-md-6">
                         <label asp-for="StartDate" class="form-label fw-bold">Ważna od</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-calendar-check"></i></span>
-                            <input asp-for="StartDate" class="form-control" type="date" />
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar-check text-muted"></i></span>
+                            <input asp-for="StartDate" class="form-control border-start-0" type="date" />
                         </div>
                         <span asp-validation-for="StartDate" class="text-danger small"></span>
                     </div>
@@ -87,55 +83,65 @@
                     <div class="col-md-6">
                         <label asp-for="ExpiryDate" class="form-label fw-bold">Ważna do</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-calendar-x"></i></span>
-                            <input asp-for="ExpiryDate" class="form-control" type="date" />
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar-x text-muted"></i></span>
+                            <input asp-for="ExpiryDate" class="form-control border-start-0" type="date" />
                         </div>
                         <span asp-validation-for="ExpiryDate" class="text-danger small"></span>
                     </div>
 
-                    <div class="col-12 text-muted text-uppercase small fw-bold mt-4 mb-2 border-bottom pb-1">
-                        Zakres ubezpieczenia
+                    <div class="col-12 mt-3">
+                        <p class="text-muted text-uppercase small fw-bold mb-0 border-bottom pb-2">
+                            <i class="bi bi-shield-check me-1"></i>Zakres ubezpieczenia
+                        </p>
                     </div>
 
                     <div class="col-md-6">
                         <label asp-for="AcScope" class="form-label fw-bold">Zakres AC</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-shield-shaded"></i></span>
-                            <select asp-for="AcScope" class="form-select" asp-items="Html.GetEnumSelectList<AcScope>()"></select>
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-shield-shaded text-muted"></i></span>
+                            <select asp-for="AcScope" class="form-select border-start-0" asp-items="Html.GetEnumSelectList<AcScope>()"></select>
                         </div>
                         <span asp-validation-for="AcScope" class="text-danger small"></span>
                     </div>
 
-                    <div class="col-md-6 d-flex align-items-center">
-                        <div class="form-check form-switch mt-4">
+                    <div class="col-md-6 d-flex align-items-end pb-1">
+                        <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" asp-for="HasOc" id="switchOc">
                             <label class="form-check-label fw-bold" for="switchOc">@Html.DisplayNameFor(model => model.HasOc)</label>
                         </div>
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-center mt-3">
+                    <div class="col-12 mt-3">
+                        <p class="text-muted text-uppercase small fw-bold mb-0 border-bottom pb-2">
+                            <i class="bi bi-toggles me-1"></i>Opcje dodatkowe
+                        </p>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-center">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" asp-for="HasAssistance" id="switchAssist">
                             <label class="form-check-label" for="switchAssist">@Html.DisplayNameFor(model => model.HasAssistance)</label>
                         </div>
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-center mt-3">
+                    <div class="col-md-3 d-flex align-items-center">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" asp-for="HasNNW" id="switchNNW">
                             <label class="form-check-label" for="switchNNW">@Html.DisplayNameFor(model => model.HasNNW)</label>
                         </div>
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-center mt-3">
+                    <div class="col-md-3 d-flex align-items-center">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" asp-for="IsCurrent" id="switchCurrent">
                             <label class="form-check-label" for="switchCurrent">Status Aktywny</label>
                         </div>
                     </div>
 
-                    <div class="col-12 mt-5 d-flex justify-content-end">
-                        <a asp-action="Index" class="btn btn-light border me-2">Anuluj</a>
+                    <div class="col-12 mt-4 d-flex justify-content-end gap-2">
+                        <a asp-action="Index" asp-route-vehicleId="@Model.VehicleId" class="btn btn-light border">
+                            <i class="bi bi-x-lg me-1"></i>Anuluj
+                        </a>
                         <button type="submit" class="btn btn-primary px-5 shadow-sm">
                             <i class="bi bi-save me-2"></i>Zapisz zmiany
                         </button>

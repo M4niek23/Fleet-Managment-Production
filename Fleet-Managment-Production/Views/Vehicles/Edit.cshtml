@@ -1,26 +1,19 @@
 ﻿@using Fleet_Managment_Production.Models;
 @model Vehicle
 
-@{
-    ViewData["Title"] = "Edycja pojazdu";
-}
-
 <div class="container-fluid py-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Edycja pojazdu</h2>
+            <h3 class="fw-bold mb-1">Edycja pojazdu</h3>
             <p class="text-muted mb-0">Zaktualizuj dane techniczne lub przypisania.</p>
         </div>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-action="Index" class="btn btn-outline-secondary shadow-sm">
             <i class="bi bi-arrow-left me-2"></i>Powrót do listy
         </a>
     </div>
 
     <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-pencil-square me-2"></i>Formularz edycji</h5>
-        </div>
         <div class="card-body p-4">
             <form asp-action="Edit">
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
@@ -29,15 +22,17 @@
 
                 <div class="row g-3">
 
-                    <div class="col-12 text-muted text-uppercase small fw-bold mt-2 mb-2 border-bottom pb-1">
-                        Informacje podstawowe
+                    <div class="col-12">
+                        <p class="text-muted text-uppercase small fw-bold mb-0 border-bottom pb-2">
+                            <i class="bi bi-car-front me-1"></i>Informacje podstawowe
+                        </p>
                     </div>
 
                     <div class="col-md-6">
                         <label asp-for="Make" class="form-label fw-bold">Marka</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-car-front"></i></span>
-                            <input asp-for="Make" class="form-control" />
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-car-front text-muted"></i></span>
+                            <input asp-for="Make" class="form-control border-start-0" />
                         </div>
                         <span asp-validation-for="Make" class="text-danger small"></span>
                     </div>
@@ -45,8 +40,8 @@
                     <div class="col-md-6">
                         <label asp-for="Model" class="form-label fw-bold">Model</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-gear"></i></span>
-                            <input asp-for="Model" class="form-control" />
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-gear text-muted"></i></span>
+                            <input asp-for="Model" class="form-control border-start-0" />
                         </div>
                         <span asp-validation-for="Model" class="text-danger small"></span>
                     </div>
@@ -54,8 +49,8 @@
                     <div class="col-md-6">
                         <label asp-for="ProductionYear" class="form-label fw-bold">Rok produkcji</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-calendar-event"></i></span>
-                            <select asp-for="ProductionYear" class="form-select">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar-event text-muted"></i></span>
+                            <select asp-for="ProductionYear" class="form-select border-start-0">
                                 <option value="">-- Wybierz rok --</option>
                                 @{
                                     int currentYear = DateTime.Now.Year;
@@ -72,23 +67,25 @@
                     <div class="col-md-6">
                         <label asp-for="FuelType" class="form-label fw-bold">Rodzaj paliwa</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-fuel-pump"></i></span>
-                            <select asp-for="FuelType" class="form-select" asp-items="Html.GetEnumSelectList<FuelType>()">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-fuel-pump text-muted"></i></span>
+                            <select asp-for="FuelType" class="form-select border-start-0" asp-items="Html.GetEnumSelectList<FuelType>()">
                                 <option value="">-- Wybierz paliwo --</option>
                             </select>
                         </div>
                         <span asp-validation-for="FuelType" class="text-danger small"></span>
                     </div>
 
-                    <div class="col-12 text-muted text-uppercase small fw-bold mt-5 mb-2 border-bottom pb-1">
-                        Identyfikacja i Stan
+                    <div class="col-12 mt-3">
+                        <p class="text-muted text-uppercase small fw-bold mb-0 border-bottom pb-2">
+                            <i class="bi bi-upc-scan me-1"></i>Identyfikacja i stan
+                        </p>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="LicensePlate" class="form-label fw-bold">Nr Rejestracyjny</label>
+                        <label asp-for="LicensePlate" class="form-label fw-bold">Nr rejestracyjny</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-card-text"></i></span>
-                            <input asp-for="LicensePlate" class="form-control" />
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-card-text text-muted"></i></span>
+                            <input asp-for="LicensePlate" class="form-control border-start-0" />
                         </div>
                         <span asp-validation-for="LicensePlate" class="text-danger small"></span>
                     </div>
@@ -96,8 +93,8 @@
                     <div class="col-md-6">
                         <label asp-for="VIN" class="form-label fw-bold">Numer VIN</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-upc-scan"></i></span>
-                            <input asp-for="VIN" class="form-control" />
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-upc-scan text-muted"></i></span>
+                            <input asp-for="VIN" class="form-control border-start-0" />
                         </div>
                         <span asp-validation-for="VIN" class="text-danger small"></span>
                     </div>
@@ -105,37 +102,35 @@
                     <div class="col-md-6">
                         <label asp-for="CurrentKm" class="form-label fw-bold">Aktualny przebieg (km)</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-speedometer2"></i></span>
-                            <input asp-for="CurrentKm" class="form-control" />
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-speedometer2 text-muted"></i></span>
+                            <input asp-for="CurrentKm" class="form-control border-start-0" />
                         </div>
                         <span asp-validation-for="CurrentKm" class="text-danger small"></span>
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6">
                         <label asp-for="Status" class="form-label fw-bold">Status pojazdu</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light">
+                            <span class="input-group-text bg-light border-end-0">
                                 @if (ViewBag.IsStatusLocked == true)
                                 {
                                     <i class="bi bi-lock-fill text-danger"></i>
                                 }
                                 else
                                 {
-                                    <i class="bi bi-info-circle"></i>
+                                    <i class="bi bi-info-circle text-muted"></i>
                                 }
                             </span>
-
                             @if (ViewBag.IsStatusLocked == true)
                             {
-                                <select asp-for="Status" class="form-select bg-light" asp-items="Html.GetEnumSelectList<VehicleStatus>()" disabled></select>
+                                <select asp-for="Status" class="form-select border-start-0 bg-light" asp-items="Html.GetEnumSelectList<VehicleStatus>()" disabled></select>
                                 <input type="hidden" asp-for="Status" />
                             }
                             else
                             {
-                                <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<VehicleStatus>()"></select>
+                                <select asp-for="Status" class="form-select border-start-0" asp-items="Html.GetEnumSelectList<VehicleStatus>()"></select>
                             }
                         </div>
-
                         @if (ViewBag.IsStatusLocked == true)
                         {
                             <small class="text-danger fw-bold">
@@ -145,15 +140,17 @@
                         <span asp-validation-for="Status" class="text-danger small"></span>
                     </div>
 
-                    <div class="col-12 text-muted text-uppercase small fw-bold mt-5 mb-2 border-bottom pb-1">
-                        Przypisania
+                    <div class="col-12 mt-3">
+                        <p class="text-muted text-uppercase small fw-bold mb-0 border-bottom pb-2">
+                            <i class="bi bi-person-badge me-1"></i>Przypisania
+                        </p>
                     </div>
 
                     <div class="col-md-6">
                         <label asp-for="DriverId" class="form-label fw-bold">Kierowca</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
-                            <select asp-for="DriverId" class="form-select" asp-items="ViewBag.DriverId">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-badge text-muted"></i></span>
+                            <select asp-for="DriverId" class="form-select border-start-0" asp-items="ViewBag.DriverId">
                                 <option value="">-- Brak przypisanego kierowcy --</option>
                             </select>
                         </div>
@@ -162,19 +159,22 @@
                     <div class="col-md-6">
                         <label asp-for="UserId" class="form-label fw-bold">Właściciel pojazdu</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-person-fill-lock"></i></span>
-                            <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-fill-lock text-muted"></i></span>
+                            <select asp-for="UserId" class="form-select border-start-0" asp-items="ViewBag.UserId">
                                 <option value="">-- Brak właściciela --</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="col-12 mt-5 d-flex justify-content-end">
-                        <a asp-action="Index" class="btn btn-light border me-2">Anuluj</a>
+                    <div class="col-12 mt-4 d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light border">
+                            <i class="bi bi-x-lg me-1"></i>Anuluj
+                        </a>
                         <button type="submit" class="btn btn-primary px-5 shadow-sm">
                             <i class="bi bi-save me-2"></i>Zapisz zmiany
                         </button>
                     </div>
+
                 </div>
             </form>
         </div>
