@@ -5,40 +5,6 @@
     var totalSum = ViewBag.TotalSum != null ? (decimal)ViewBag.TotalSum : 0m;
     var activeTab = ViewBag.ActiveTab as string ?? "active";
 }
-
-<style>
-    /* Efekt podświetlania ikonek w tabeli */
-    .table-action-btn i {
-        transition: color 0.2s ease-in-out;
-    }
-
-    .table-action-btn:hover i {
-        color: #0d6efd; /* Kolor niebieski z Bootstrapa po najechaniu */
-    }
-
-    .table-action-btn:hover {
-        background-color: #f8f9fa;
-    }
-
-    /* Dynamiczne kolory dla tekstu zakładek */
-    .custom-tabs .nav-link:not(.active) {
-        color: #6c757d !important; /* Szary dla nieaktywnych */
-    }
-
-    .custom-tabs .nav-link.active {
-        color: #212529 !important; /* Ciemny dla aktywnej */
-    }
-
-    /* Dynamiczne kolory dla odznak (liczników) wewnątrz zakładek */
-    .custom-tabs .nav-link:not(.active) .badge {
-        background-color: #6c757d !important; /* Szary (secondary) dla nieaktywnej */
-    }
-
-    .custom-tabs .nav-link.active .badge {
-        background-color: #0d6efd !important; /* Niebieski (primary) dla aktywnej */
-    }
-</style>
-
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -136,19 +102,19 @@
                                             <td class="text-end fw-bold text-primary">@item.Cost.ToString("C")</td>
                                             <td class="text-end pe-4">
                                                 <div class="btn-group shadow-sm">
-                                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border table-action-btn text-secondary" title="Szczegóły">
+                                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn-table-action" title="Szczegóły">
                                                         <i class="bi bi-eye"></i>
                                                     </a>
                                                     @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                                                     {
-                                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light border table-action-btn text-secondary" title="Edytuj">
+                                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn-table-action" title="Edytuj">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
                                                     }
                                                     @if (User.IsInRole("Admin"))
                                                     {
                                                         <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
-                                                            <button type="button" class="btn btn-sm btn-light border table-action-btn text-secondary btn-delete-swal" title="Usuń">
+                                                            <button type="button" class="btn-table-action btn-delete-swal" title="Usuń">
                                                                 <i class="bi bi-trash"></i>
                                                             </button>
                                                         </form>

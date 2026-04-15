@@ -121,14 +121,14 @@
                                         }
                                     </td>
                                     <td class="text-end pe-4">
-                                        <div class="btn-group">
-                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Szczegóły">
+                                        <div class="btn-group shadow-sm">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn-table-action" title="Szczegóły">
                                                 <i class="bi bi-eye"></i>
                                             </a>
 
                                             @if (canEdit)
                                             {
-                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Edytuj">
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-table-action" title="Edytuj">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
                                             }
@@ -136,7 +136,7 @@
                                             @if (User.IsInRole("Admin"))
                                             {
                                                 <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
-                                                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete-swal" title="Usuń">
+                                                    <button type="button" class="btn-table-action btn-delete-swal" title="Usuń">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </form>

@@ -20,39 +20,64 @@ namespace Fleet_Managment_Production.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index(int? id)
+        public async Task<IActionResult> Index(string searchString, int? vehicleId, int? page, string activeTab = "active")
         {
-            if (!_context.Vehicles.Any())
+            if (!_context.Vehicles.Any()) return View("NoVehicles");
+
+            ViewData["CurrentFilter"] = searchString;
+            ViewBag.CurrentVehicleId = vehicleId;
+            ViewBag.ActiveTab = activeTab;
+
+            int pageSize = 7;
+            int pageNumber = page ?? 1;
+
+            var query = _context.Inspections.Include(i => i.Vehicle).AsQueryable();
+
+            if (vehicleId.HasValue) query = query.Where(i => i.VehicleId == vehicleId.Value);
+            if (!string.IsNullOrEmpty(searchString))
             {
-                return View("NoVehicles");
+                var s = searchString.ToLower();
+                query = query.Where(i => i.Vehicle.LicensePlate.ToLower().Contains(s) || i.Vehicle.Make.ToLower().Contains(s));
             }
 
-            var allInspections = await _context.Inspections
-                                                .Include(i => i.Vehicle)
-                                                .OrderByDescending(i => i.InspectionDate)
-                                                .ToListAsync();
+            var activeQ = query.Where(i => i.IsResultPositive != false && (i.NextInspectionDate == null || i.NextInspectionDate >= DateTime.Today));
+            var negativeQ = query.Where(i => i.IsResultPositive == false);
+            var historyQ = query.Where(i => i.IsResultPositive != false && i.NextInspectionDate < DateTime.Today);
+
+            ViewBag.ActiveTotal = await activeQ.CountAsync();
+            ViewBag.NegativeTotal = await negativeQ.CountAsync();
+            ViewBag.HistoryTotal = await historyQ.CountAsync();
+
+            int currentCount = activeTab switch
+            {
+                "negative" => ViewBag.NegativeTotal,
+                "history" => ViewBag.HistoryTotal,
+                _ => ViewBag.ActiveTotal
+            };
+
+            ViewBag.TotalPages = (int)Math.Ceiling(currentCount / (double)pageSize);
+            ViewBag.CurrentPage = pageNumber;
 
             var viewModel = new InspectionsViewModel
             {
-                ActiveInspections = allInspections
-                                     .Where(i => i.IsResultPositive != false &&
-                                                (i.NextInspectionDate == null || i.NextInspectionDate >= DateTime.Today))
-                                     .OrderBy(i => i.InspectionDate) 
-                                     .ToList(),
-                HistoricalInspections = allInspections
-                                     .Where(i => i.IsResultPositive != false &&
-                                                 i.NextInspectionDate < DateTime.Today)
-                                     .OrderByDescending(i => i.InspectionDate)
-                                     .ToList(),
+                ActiveInspections = await (activeTab == "active"
+                    ? activeQ.OrderByDescending(i => i.InspectionDate).Skip((pageNumber - 1) * pageSize).Take(pageSize)
+                    : activeQ.OrderByDescending(i => i.InspectionDate).Take(pageSize)).ToListAsync(),
 
-                NegativeInspections = allInspections
-                                     .Where(i => i.IsResultPositive == false)
-                                     .OrderByDescending(i => i.InspectionDate)
-                                     .ToList()
+                NegativeInspections = await (activeTab == "negative"
+                    ? negativeQ.OrderByDescending(i => i.InspectionDate).Skip((pageNumber - 1) * pageSize).Take(pageSize)
+                    : negativeQ.OrderByDescending(i => i.InspectionDate).Take(pageSize)).ToListAsync(),
+
+                HistoricalInspections = await (activeTab == "history"
+                    ? historyQ.OrderByDescending(i => i.InspectionDate).Skip((pageNumber - 1) * pageSize).Take(pageSize)
+                    : historyQ.OrderByDescending(i => i.InspectionDate).Take(pageSize)).ToListAsync()
             };
+
+            var vehicleList = await _context.Vehicles.Select(v => new { v.VehicleId, Display = v.LicensePlate }).ToListAsync();
+            ViewBag.VehicleList = new SelectList(vehicleList, "VehicleId", "Display", vehicleId);
+
             return View(viewModel);
         }
-
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();

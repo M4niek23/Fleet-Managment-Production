@@ -1,6 +1,5 @@
 ﻿@using Fleet_Managment_Production.Models
 @model IEnumerable<Fleet_Managment_Production.Models.Driver>
-
 @{
     var currentStatus = ViewData["CurrentStatus"] as DriverStatus?;
 }
@@ -12,7 +11,9 @@
     </div>
     @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
     {
-        <a asp-action="Create" class="btn btn-dark"><i class="bi bi-person-plus"></i> Dodaj Kierowcę</a>
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i>Dodaj Kierowcę
+        </a>
     }
 </div>
 
@@ -134,17 +135,21 @@
                             }
                         </td>
                         <td class="font-monospace small">@item.Pesel</td>
-                        <td class="text-end">
-                            <div class="btn-group">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
+                        <td class="text-end pe-4">
+                            <div class="btn-group shadow-sm">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-table-action" title="Szczegóły">
+                                    <i class="bi bi-eye"></i>
+                                </a>
                                 @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                                 {
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn-table-action" title="Edytuj">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
                                 }
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-delete-swal" title="Usuń">
+                                        <button type="button" class="btn-table-action btn-delete-swal" title="Usuń">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>

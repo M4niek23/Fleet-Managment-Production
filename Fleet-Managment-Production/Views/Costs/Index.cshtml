@@ -158,22 +158,26 @@
                                     </td>
                                     <td class="text-end pe-4 fw-bold text-danger">@item.Amount.ToString("C")</td>
                                     <td class="text-end pe-4">
-                                        <div class="btn-group">
+                                        <div class="btn-group shadow-sm">
                                             @if (canEdit && item.Type != CostType.Przegląd && item.Type != CostType.Ubezpieczenie)
                                             {
-                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Edytuj"><i class="bi bi-pencil"></i></a>
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-table-action" title="Szczegóły"><i class="bi bi-eye"></i></a>
+                                            }
+                                            @if (canEdit && item.Type != CostType.Przegląd && item.Type != CostType.Ubezpieczenie)
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-table-action" title="Edytuj"><i class="bi bi-pencil"></i></a>
                                             }
                                             @if (User.IsInRole("Admin") && item.Type != CostType.Przegląd && item.Type != CostType.Ubezpieczenie)
                                             {
                                                 <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
-                                                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete-swal" title="Usuń">
+                                                    <button type="button" class="btn-table-action btn-delete-swal" title="Usuń">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </form>
                                             }
                                             else if (item.Type == CostType.Przegląd || item.Type == CostType.Ubezpieczenie)
                                             {
-                                                <span class="badge bg-secondary p-2" title="Koszty wygenerowane z systemu, zablokowane"><i class="bi bi-lock"></i> System</span>
+                                                <span class="badge bg-secondary p-2" title="Koszty wygenerowane z systemu, zablokowane"><i class="bi bi-lock"></i></span>
                                             }
                                         </div>
                                     </td>
