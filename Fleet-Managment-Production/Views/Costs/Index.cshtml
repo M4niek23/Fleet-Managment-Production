@@ -4,7 +4,6 @@
 @inject UserManager<Users> UserManager
 
 @{
-    ViewData["Title"] = "Rejestr Kosztów";
     var totalSum = ViewBag.TotalSum != null ? (decimal)ViewBag.TotalSum : 0m;
     var currentUserId = UserManager.GetUserId(User);
 }
