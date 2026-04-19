@@ -3,29 +3,31 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fleet_Managment_Production.Models
 {
-    public class Inspection
+    public class Inspection : IValidatableObject
     {
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage ="Data przeglądu jest wymagana.")]
-        [Display(Name="Data przeglądu")]
+        [Required(ErrorMessage = "Data przeglądu jest wymagana.")]
+        [Display(Name = "Data przeglądu")]
         [DataType(DataType.Date)]
         public DateTime InspectionDate { get; set; }
 
         [Display(Name = "Opis")]
+        [StringLength(500, ErrorMessage = "Opis nie może przekraczać 500 znaków.")]
         public string? Description { get; set; }
 
-        [Display(Name ="Przebieg (km)")]
-        [Range(0,int.MaxValue,ErrorMessage = "Przebieg musi być liczbą dokładną")]
-        public int? Mileage {  get; set; }
+        [Display(Name = "Przebieg (km)")]
+        [Range(0, int.MaxValue, ErrorMessage = "Przebieg musi być wartością dodatnią.")]
+        public int? Mileage { get; set; }
 
         [Display(Name = "Koszt")]
         [Column(TypeName = "decimal(18,2)")]
-        [Range(0, (double)decimal.MaxValue)]
+        [Range(0.0, 1000000.0, ErrorMessage = "Koszt musi być pomiędzy 0 a 1 000 000.")]
         public decimal Cost { get; set; }
 
         [Required(ErrorMessage = "Samochód jest wymagany.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Musisz wybrać przypisany pojazd z listy.")]
         [Display(Name = "Pojazd")]
         public int VehicleId { get; set; }
 
@@ -33,7 +35,7 @@ namespace Fleet_Managment_Production.Models
         public Vehicle? Vehicle { get; set; }
 
         [Display(Name = "Wynik przeglądu")]
-        public bool? IsResultPositive { get; set; } 
+        public bool? IsResultPositive { get; set; }
 
         [Display(Name = "Data ponownego przeglądu")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
@@ -41,5 +43,14 @@ namespace Fleet_Managment_Production.Models
 
         [Display(Name = "Przegląd aktywny")]
         public bool IsActive { get; set; }
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (NextInspectionDate.HasValue && NextInspectionDate <= InspectionDate)
+            {
+                yield return new ValidationResult(
+                    "Data ponownego przeglądu musi być późniejsza niż data aktualnego przeglądu.",
+                    new[] { nameof(NextInspectionDate) });
+            }
+        }
     }
 }
