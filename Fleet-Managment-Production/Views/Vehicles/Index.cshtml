@@ -8,7 +8,7 @@
         <div>
             <h3 class="fw-bold mb-1">Pojazdy</h3>
             <p class="text-muted mb-0">Zarządzaj flotą samochodową w Twojej firmie.</p>
-            <p class="text-muted mb-0">Kierowca: <strong>@ViewBag.driverId</strong></p>
+            <p class="text-muted mb-0">Kierowca: <strong>@ViewBag.SelectedDriverName</strong></p>
         </div>
         @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
         {

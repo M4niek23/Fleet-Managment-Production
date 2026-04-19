@@ -55,6 +55,13 @@ namespace Fleet_Managment_Production.Controllers
             if (driverId.HasValue)
             {
                 vehiclesQuery = vehiclesQuery.Where(v => v.DriverId == driverId.Value);
+                var selectedDriver = await _context.Drivers.FindAsync(driverId.Value);
+                ViewBag.SelectedDriverName = selectedDriver != null
+                    ? $"{selectedDriver.FirstName} {selectedDriver.LastName}"
+                    : "Wybranego kierowcy";
+            } else
+            {
+                ViewBag.SelectedDriverName = "Wyszyscy kierowcy";
             }
 
             if (!string.IsNullOrEmpty(searchString))
