@@ -153,6 +153,14 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId,DriverId")] Vehicle vehicle)
         {
+            if (_context.Vehicles.Any(v => v.VIN == vehicle.VIN))
+            {
+                ModelState.AddModelError("VIN", "Pojazd o podanym numerze VIN już istnieje w systemie.");
+            }
+            if (_context.Vehicles.Any(v => v.LicensePlate == vehicle.LicensePlate))
+            {
+                ModelState.AddModelError("LicensePlate", "Pojazd o tym numerze rejestracyjnym jest już zarejestrowany.");
+            }
             if (ModelState.IsValid)
             {
                 if (string.IsNullOrEmpty(vehicle.UserId))
@@ -193,6 +201,14 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId,DriverId")] Vehicle vehicle)
         {
+            if (_context.Vehicles.Any(v => v.LicensePlate == vehicle.LicensePlate))
+            {
+                ModelState.AddModelError("LicensePlate", "Pojazd o tym numerze rejestracyjnym jest już zarejestrowany.");
+            }
+            if (_context.Vehicles.Any(v => v.VIN == vehicle.VIN && v.VehicleId != vehicle.VehicleId))
+            {
+                ModelState.AddModelError("VIN", "Inny pojazd posiada już ten numer VIN.");
+            }
             if (id != vehicle.VehicleId) return NotFound();
 
             var currentVehicle = await _context.Vehicles
@@ -201,7 +217,6 @@ namespace Fleet_Managment_Production.Controllers
 
             if (currentVehicle == null) return NotFound();
 
-            // Blokada zmiany statusu przy aktywnym serwisie
             if (currentVehicle.Status != vehicle.Status)
             {
                 bool hasActiveService = await _context.Services

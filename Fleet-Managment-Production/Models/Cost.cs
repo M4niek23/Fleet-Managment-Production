@@ -28,10 +28,15 @@ namespace Fleet_Managment_Production.Models
         [StringLength(500, ErrorMessage = "Opis nie może przekraczać 500 znaków.")]
         public string? Description { get; set; }
 
+        private decimal _amount;
         [Required(ErrorMessage = "Kwota jest wymagana.")]
         [Column(TypeName = "decimal(18,2)")]
         [Range(0.01, 1000000, ErrorMessage = "Kwota musi być większa od 0 i mniejsza niż 1 000 000.")]
-        public decimal Amount { get; set; }
+        public decimal Amount
+        {
+            get => _amount;
+            set => _amount = Math.Round(value, 2, MidpointRounding.AwayFromZero);
+        }
 
         [Display(Name = "Data")]
         [DataType(DataType.Date)]

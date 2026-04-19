@@ -39,11 +39,17 @@ namespace Fleet_Managment_Production.Models
         [Display(Name = "Data wygaśnięcia")]
         public DateTime ExpiryDate { get; set; }
 
+        private decimal _cost;
+
         [Required(ErrorMessage = "Proszę podać koszt ubezpieczenia")]
         [Display(Name = "Koszt")]
         [Column(TypeName = "decimal(18,2)")]
         [Range(0.0, 1000000.0, ErrorMessage = "Koszt ubezpieczenia musi być wartością dodatnią.")] 
-        public decimal Cost { get; set; }
+        public decimal Cost
+        {
+             get => _cost;
+            set => _cost = Math.Round(value, 2, MidpointRounding.AwayFromZero);
+        }
 
         [Display(Name = "Zawiera OC")]
         public bool HasOc { get; set; } = true;

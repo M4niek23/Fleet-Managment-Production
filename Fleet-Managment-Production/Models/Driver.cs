@@ -35,7 +35,7 @@ namespace Fleet_Managment_Production.Models
     }
 
     [Index(nameof(Pesel), IsUnique = true)]
-    public class Driver : IValidatableObject 
+    public class Driver 
     {
         [Key]
         public int Id { get; set; }
@@ -85,49 +85,6 @@ namespace Fleet_Managment_Production.Models
         public string FullName => $"{FirstName} {LastName}";
         public ICollection<Trip> Trips { get; set; } = new List<Trip>();
 
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (!string.IsNullOrEmpty(Pesel) && Pesel.Length == 11 && Pesel.All(char.IsDigit))
-            {
-                int year = int.Parse(Pesel.Substring(0, 2));
-                int month = int.Parse(Pesel.Substring(2, 2));
-                int day = int.Parse(Pesel.Substring(4, 2));
 
-                // Dekodowanie stulecia (PESEL po 2000 roku ma dodane 20 do miesiąca)
-                if (month > 20 && month < 33)
-                {
-                    year += 2000;
-                    month -= 20;
-                }
-                else if (month > 0 && month < 13)
-                {
-                    year += 1900;
-                }
-
-                string? peselErrorMessage = null; // Zmienna pomocnicza na błąd
-
-                try
-                {
-                    DateTime birthDate = new DateTime(year, month, day);
-
-                    // Sprawdzenie wieku
-                    if (birthDate > DateTime.Today.AddYears(-18))
-                    {
-                        peselErrorMessage = "Kierowca musi mieć ukończone 18 lat.";
-                    }
-                }
-                catch
-                {
-                    // Wyrzuci błąd, jeśli PESEL zawiera np. 31 lutego
-                    peselErrorMessage = "Numer PESEL zawiera nieprawidłową datę urodzenia.";
-                }
-
-                // yield return WYKONUJEMY POZA BLOKIEM TRY-CATCH
-                if (peselErrorMessage != null)
-                {
-                    yield return new ValidationResult(peselErrorMessage, new[] { nameof(Pesel) });
-                }
-            }
         }
     }
-}

@@ -21,10 +21,16 @@ namespace Fleet_Managment_Production.Models
         [Range(0, int.MaxValue, ErrorMessage = "Przebieg musi być wartością dodatnią.")]
         public int? Mileage { get; set; }
 
+        private decimal _cost;
+
         [Display(Name = "Koszt")]
         [Column(TypeName = "decimal(18,2)")]
         [Range(0.0, 1000000.0, ErrorMessage = "Koszt musi być pomiędzy 0 a 1 000 000.")]
-        public decimal Cost { get; set; }
+        public decimal Cost
+        {
+           get => _cost;
+           set => _cost = Math.Round(value, 2, MidpointRounding.AwayFromZero);
+        }
 
         [Required(ErrorMessage = "Samochód jest wymagany.")]
         [Range(1, int.MaxValue, ErrorMessage = "Musisz wybrać przypisany pojazd z listy.")]

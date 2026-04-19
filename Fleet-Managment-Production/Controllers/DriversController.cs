@@ -134,7 +134,7 @@ namespace Fleet_Managment_Production.Controllers
 
             if (ModelState.IsValid)
             {
-                if (await _context.Drivers.AnyAsync(d => d.Pesel == driver.Pesel))
+                if (await _context.Drivers.AnyAsync(d => d.Pesel == driver.Pesel && d.Id != driver.Id))
                 {
                     ModelState.AddModelError("Pesel", "Ten PESEL już istnieje w bazie.");
                     ViewData["UserId"] = new SelectList(_context.Users, "Id", "Email", driver.UserId);
@@ -221,24 +221,32 @@ namespace Fleet_Managment_Production.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                var peselExists = await _context.Drivers
+                    .AnyAsync(d => d.Pesel == driver.Pesel && d.Id != driver.Id);
+                if (peselExists)
+                {
+                    ModelState.AddModelError("Pesel", "Inny kierowca w systemie posiada już ten numer PESEL.");
+                    ViewData["UserId"] = new SelectList(_context.Users, "Id", "Email", driver.UserId);
+                    return View(driver);
+                }
+                    try
                 {
                     _context.Update(driver);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!_context.Drivers.Any(e => e.Id == driver.Id)) return NotFound();
                     else throw;
                 }
-                return RedirectToAction(nameof(Index));
             }
             ViewData["UserId"] = new SelectList(_context.Users, "Id", "Email", driver.UserId);
             return View(driver);
         }
 
         // GET: Drivers/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)    
         {
             if (id == null) return NotFound();
 

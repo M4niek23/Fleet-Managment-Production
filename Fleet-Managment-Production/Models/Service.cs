@@ -21,12 +21,17 @@ namespace Fleet_Managment_Production.Models
         [StringLength(1000, ErrorMessage = "Opis nie może przekraczać 1000 znaków.")]
         public string Description { get; set; } = null!;
 
+        private decimal _cost;
+
         [Required(ErrorMessage = "Koszt jest wymagany.")]
         [Display(Name = "Koszt")]
         [Range(0.0, 1000000.0, ErrorMessage = "Koszt musi być wartością pomiędzy 0 a 1 000 000.")]
         [Precision(18, 2)]
-        public decimal Cost { get; set; }
-
+        public decimal Cost
+        {
+            get => _cost;
+            set => _cost = Math.Round(value, 2, MidpointRounding.AwayFromZero);
+        }
         [Display(Name = "Data przyjęcia"), DataType(DataType.Date)]
         [Required(ErrorMessage = "Data przyjęcia jest wymagana.")]
         public DateTime EntryDate { get; set; } = DateTime.Now;
