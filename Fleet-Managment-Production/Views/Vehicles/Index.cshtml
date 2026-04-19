@@ -1,6 +1,5 @@
-﻿@model IEnumerable<Fleet_Managment_Production.Models.Vehicle>
-
-
+﻿@using Fleet_Managment_Production.Models
+@model IEnumerable<Vehicle>
 
 <div class="container-fluid py-4">
 
@@ -21,6 +20,9 @@
     <div class="card shadow-sm border-0 mb-4 bg-light">
         <div class="card-body py-2">
             <form asp-action="Index" method="get" class="row g-2 align-items-center">
+                <input type="hidden" name="status" value="@ViewBag.CurrentStatus" />
+                <input type="hidden" name="sortOrder" value="@Context.Request.Query["sortOrder"]" />
+
                 <div class="col-auto">
                     <label class="text-secondary small fw-bold">Kierowca:</label>
                 </div>
@@ -44,6 +46,41 @@
     </div>
 
     <div class="card shadow-sm border-0">
+        <div class="card-header bg-light border-bottom-0 p-0">
+            <ul class="nav nav-tabs nav-fill card-header-tabs m-0" id="vehicleTabs">
+                <li class="nav-item">
+                    <a class="nav-link py-3 fw-bold @(ViewBag.CurrentStatus == null ? "active" : "")"
+                       asp-action="Index" asp-route-status="" asp-route-driverId="@ViewBag.CurrentDriverId" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@Context.Request.Query["sortOrder"]">
+                        Wszystkie <span class="badge bg-secondary rounded-pill ms-2">@ViewBag.CountAll</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link py-3 fw-bold text-success @(ViewBag.CurrentStatus == VehicleStatus.Available ? "active" : "")"
+                       asp-action="Index" asp-route-status="Available" asp-route-driverId="@ViewBag.CurrentDriverId" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@Context.Request.Query["sortOrder"]">
+                        Dostępne <span class="badge bg-success rounded-pill ms-2">@ViewBag.CountAvailable</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link py-3 fw-bold text-primary @(ViewBag.CurrentStatus == VehicleStatus.InUse ? "active" : "")"
+                       asp-action="Index" asp-route-status="InUse" asp-route-driverId="@ViewBag.CurrentDriverId" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@Context.Request.Query["sortOrder"]">
+                        W trasie <span class="badge bg-primary rounded-pill ms-2">@ViewBag.CountInUse</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link py-3 fw-bold text-warning @(ViewBag.CurrentStatus == VehicleStatus.InMaintenance ? "active" : "")"
+                       asp-action="Index" asp-route-status="InMaintenance" asp-route-driverId="@ViewBag.CurrentDriverId" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@Context.Request.Query["sortOrder"]">
+                        Serwis <span class="badge bg-warning rounded-pill ms-2">@ViewBag.CountMaintenance</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link py-3 fw-bold text-muted @(ViewBag.CurrentStatus == VehicleStatus.Sold ? "active" : "")"
+                       asp-action="Index" asp-route-status="Sold" asp-route-driverId="@ViewBag.CurrentDriverId" asp-route-searchString="@ViewData["CurrentFilter"]" asp-route-sortOrder="@Context.Request.Query["sortOrder"]">
+                        Sprzedane <span class="badge bg-secondary rounded-pill ms-2">@ViewBag.CountSold</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -56,6 +93,7 @@
                                    asp-route-sortOrder="@ViewBag.DriverSortParam"
                                    asp-route-searchString="@ViewData["CurrentFilter"]"
                                    asp-route-driverId="@ViewBag.CurrentDriverId"
+                                   asp-route-status="@ViewBag.CurrentStatus"
                                    class="text-dark text-decoration-none">
                                     Kierowca <i class="bi bi-arrow-down-up small"></i>
                                 </a>
@@ -132,7 +170,7 @@
 
                                     <td class="text-end pe-4">
                                         <div class="btn-group shadow-sm">
-                                            <a asp-action="Details" asp-route-id="@item.VehicleId" class="btn-table-action title="Szczegóły">
+                                            <a asp-action="Details" asp-route-id="@item.VehicleId" class="btn-table-action" title="Szczegóły">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                             @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
@@ -169,6 +207,7 @@
                        asp-route-page="@(ViewBag.CurrentPage - 1)"
                        asp-route-searchString="@ViewData["CurrentFilter"]"
                        asp-route-driverId="@ViewBag.CurrentDriverId"
+                       asp-route-status="@ViewBag.CurrentStatus"
                        asp-route-sortOrder="@Context.Request.Query["sortOrder"]">
                         <i class="bi bi-chevron-left"></i>
                     </a>
@@ -178,7 +217,10 @@
                 {
                     <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
                         <a class="page-link" asp-action="Index" asp-route-page="@i"
-                           asp-route-searchString="@ViewData["CurrentFilter"]">@i</a>
+                           asp-route-searchString="@ViewData["CurrentFilter"]"
+                           asp-route-driverId="@ViewBag.CurrentDriverId"
+                           asp-route-status="@ViewBag.CurrentStatus"
+                           asp-route-sortOrder="@Context.Request.Query["sortOrder"]">@i</a>
                     </li>
                 }
 
@@ -187,6 +229,7 @@
                        asp-route-page="@(ViewBag.CurrentPage + 1)"
                        asp-route-searchString="@ViewData["CurrentFilter"]"
                        asp-route-driverId="@ViewBag.CurrentDriverId"
+                       asp-route-status="@ViewBag.CurrentStatus"
                        asp-route-sortOrder="@Context.Request.Query["sortOrder"]">
                         <i class="bi bi-chevron-right"></i>
                     </a>

@@ -121,6 +121,11 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,VehicleId,DriverId,StartDate,EndTime,StartLocation,EndLocation,StartLatitude,StartLongitude,EndLatitude,EndLongitude,EstimatedDistanceKm,StartOdometer,EndOdometer,Description,TripType")] Trip trip)
         {
+            var vehicle = await _context.Vehicles.FindAsync(trip.VehicleId);
+            if (vehicle != null && vehicle.Status == VehicleStatus.Sold)
+            {
+                ModelState.AddModelError("VehicleId", "Ten pojazd został sprzedany, nie można przypisać mu nowej trasy.");
+            }
             bool hasValidInsurance = await _context.Insurances
                 .AnyAsync(i => i.VehicleId == trip.VehicleId &&
                                i.StartDate.Date <= trip.StartDate.Date &&
@@ -181,7 +186,11 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,VehicleId,DriverId,StartDate,EndTime,StartLocation,EndLocation,StartLatitude,StartLongitude,EndLatitude,EndLongitude,EstimatedDistanceKm,StartOdometer,EndOdometer,Description,TripType")] Trip trip)
         {
             if (id != trip.Id) return NotFound();
-
+            var vehicleCheck = await _context.Vehicles.AsNoTracking().FirstOrDefaultAsync(v => v.VehicleId == trip.VehicleId);
+            if (vehicleCheck != null && vehicleCheck.Status == VehicleStatus.Sold)
+            {
+                ModelState.AddModelError("VehicleId", "Ten pojazd został sprzedany, nie można przypisać mu trasy.");
+            }
             bool hasValidInsurance = await _context.Insurances
                 .AnyAsync(i => i.VehicleId == trip.VehicleId &&
                                i.StartDate.Date <= trip.StartDate.Date &&
@@ -274,7 +283,9 @@ namespace Fleet_Managment_Production.Controllers
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var driversQuery = _context.Drivers.AsQueryable();
-            var vehiclesQuery = _context.Vehicles.AsQueryable();
+            var vehiclesQuery = _context.Vehicles
+                    .Where(v => v.Status != VehicleStatus.Sold || (trip != null && v.VehicleId == trip.VehicleId))
+                    .AsQueryable();
 
             if (!isAdminOrManager)
             {

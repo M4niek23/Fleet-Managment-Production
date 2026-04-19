@@ -22,16 +22,12 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Vehicles
-        public async Task<IActionResult> Index(string searchString, int? driverId, string sortOrder, int? page)
+        public async Task<IActionResult> Index(string searchString, int? driverId, int? page, VehicleStatus? status)
         {
             int pageSize = 7;
             int pageNumber = page ?? 1;
             var currentUserId = _userManager.GetUserId(User);
-
             ViewData["CurrentFilter"] = searchString;
-            ViewBag.CurrentDriverId = driverId;
-            ViewBag.DriverSortParam = sortOrder == "driver_asc" ? "driver_desc" : "driver_asc";
-
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var vehiclesQuery = _context.Vehicles
@@ -42,54 +38,45 @@ namespace Fleet_Managment_Production.Controllers
             if (!isAdminOrManager)
             {
                 var driver = await _context.Drivers.FirstOrDefaultAsync(d => d.UserId == currentUserId);
-                if (driver != null)
-                {
-                    vehiclesQuery = vehiclesQuery.Where(v => v.DriverId == driver.Id);
-                }
-                else
-                {
-                    vehiclesQuery = vehiclesQuery.Where(v => false);
-                }
+                if (driver != null) vehiclesQuery = vehiclesQuery.Where(v => v.DriverId == driver.Id);
+                else vehiclesQuery = vehiclesQuery.Where(v => false);
             }
 
             if (driverId.HasValue)
             {
                 vehiclesQuery = vehiclesQuery.Where(v => v.DriverId == driverId.Value);
                 var selectedDriver = await _context.Drivers.FindAsync(driverId.Value);
-                ViewBag.SelectedDriverName = selectedDriver != null
-                    ? $"{selectedDriver.FirstName} {selectedDriver.LastName}"
-                    : "Wybranego kierowcy";
-            } else
+                ViewBag.SelectedDriverName = selectedDriver != null ? $"{selectedDriver.FirstName} {selectedDriver.LastName}" : "Wybranego kierowcy";
+            }
+            else
             {
-                ViewBag.SelectedDriverName = "Wyszyscy kierowcy";
+                ViewBag.SelectedDriverName = "Wszyscy kierowcy";
             }
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                var searchLower = searchString.ToLower();
+                var s = searchString.ToLower();
                 vehiclesQuery = vehiclesQuery.Where(v =>
-                    (v.Make != null && v.Make.ToLower().Contains(searchLower)) ||
-                    (v.Model != null && v.Model.ToLower().Contains(searchLower)) ||
-                    (v.LicensePlate != null && v.LicensePlate.ToLower().Contains(searchLower)) ||
-                    (v.VIN != null && v.VIN.ToLower().Contains(searchLower)) ||
-                    (v.Driver != null && v.Driver.FirstName.ToLower().Contains(searchLower)) ||
-                    (v.Driver != null && v.Driver.LastName.ToLower().Contains(searchLower)) ||
-                    (v.Driver != null && (v.Driver.FirstName + " " + v.Driver.LastName).ToLower().Contains(searchLower)) ||
-                    (v.Driver != null && (v.Driver.LastName + " " + v.Driver.FirstName).ToLower().Contains(searchLower))
-                );
+                    v.Make.ToLower().Contains(s) || v.LicensePlate.ToLower().Contains(s) || v.Model.ToLower().Contains(s));
             }
 
-            vehiclesQuery = sortOrder switch
+            ViewBag.CountAll = await vehiclesQuery.CountAsync();
+            ViewBag.CountAvailable = await vehiclesQuery.CountAsync(v => v.Status == VehicleStatus.Available);
+            ViewBag.CountInUse = await vehiclesQuery.CountAsync(v => v.Status == VehicleStatus.InUse);
+            ViewBag.CountMaintenance = await vehiclesQuery.CountAsync(v => v.Status == VehicleStatus.InMaintenance);
+            ViewBag.CountSold = await vehiclesQuery.CountAsync(v => v.Status == VehicleStatus.Sold);
+
+            if (status.HasValue)
             {
-                "driver_asc" => vehiclesQuery.OrderBy(v => v.Driver.LastName).ThenBy(v => v.Driver.FirstName),
-                "driver_desc" => vehiclesQuery.OrderByDescending(v => v.Driver.LastName).ThenByDescending(v => v.Driver.FirstName),
-                _ => vehiclesQuery.OrderBy(v => v.Make)
-            };
+                vehiclesQuery = vehiclesQuery.Where(v => v.Status == status.Value);
+            }
+
+            ViewBag.CurrentStatus = status;
+            ViewBag.CurrentDriverId = driverId;
 
             var totalItems = await vehiclesQuery.CountAsync();
-
             var vehiclesList = await vehiclesQuery
-                .OrderBy(v => v.Driver.LastName)
+                .OrderBy(v => v.Driver.LastName) 
                 .ThenBy(v => v.Driver.FirstName)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -97,27 +84,11 @@ namespace Fleet_Managment_Production.Controllers
 
             ViewBag.CurrentPage = pageNumber;
             ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-            ViewBag.CurrentDriverId = driverId;
 
-            var driversQuery = _context.Drivers.AsQueryable();
-            if (!isAdminOrManager)
-            {
-                var driver = await _context.Drivers.FirstOrDefaultAsync(d => d.UserId == currentUserId);
-                if (driver != null) driversQuery = driversQuery.Where(d => d.Id == driver.Id);
-                else driversQuery = driversQuery.Where(d => false);
-            }
-
-            var driversSelectList = await driversQuery.Select(d => new
-            {
-                DriverId = d.Id,
-                DisplayText = $"{d.FirstName} {d.LastName}"
-            }).ToListAsync();
-
-            ViewBag.DriverList = new SelectList(driversSelectList, "DriverId", "DisplayText", driverId);
+            var allDrivers = await _context.Drivers.Select(d => new { d.Id, Name = d.FirstName + " " + d.LastName }).ToListAsync();
+            ViewBag.DriverList = new SelectList(allDrivers, "Id", "Name", driverId);
 
             return View(vehiclesList);
-
-
         }
 
         // GET: Vehicles/Details/5

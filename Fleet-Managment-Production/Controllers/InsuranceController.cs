@@ -143,7 +143,7 @@ namespace Fleet_Managment_Production.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
-            var vehiclesQuery = _context.Vehicles.AsQueryable();
+            var vehiclesQuery = _context.Vehicles.Where(v => v.Status != VehicleStatus.Sold).AsQueryable();
             if (!isAdminOrManager)
                 vehiclesQuery = vehiclesQuery.Where(v => v.Driver != null && v.Driver.UserId == currentUser.Id);
 
@@ -162,6 +162,11 @@ namespace Fleet_Managment_Production.Controllers
             var vehicle = await _context.Vehicles.Include(v => v.Driver).FirstOrDefaultAsync(v => v.VehicleId == insurance.VehicleId);
             if (vehicle == null || (!isAdminOrManager && vehicle.Driver?.UserId != currentUser.Id))
                 return Forbid();
+
+            if(vehicle.Status == VehicleStatus.Sold)
+            {
+                ModelState.AddModelError("VehicleId", "Nie można dodać polisy ubezpieczeniowej dla sprzedanego pojazdu.");
+            }
 
             ModelState.Remove("Vehicle");
             if (ModelState.IsValid)

@@ -104,6 +104,7 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> Create(int? vehicleId)
         {
             var vehicleList = await _context.Vehicles
+                .Where(v => v.Status != VehicleStatus.Sold)
                 .Select(v => new
                 {
                     v.VehicleId,
@@ -150,22 +151,18 @@ namespace Fleet_Managment_Production.Controllers
                 inspection.NextInspectionDate = null;
             }
 
-            // --- NOWA LOGIKA: Pobranie pojazdu i weryfikacja przebiegu ---
             var vehicleToUpdate = await _context.Vehicles.FindAsync(inspection.VehicleId);
 
             if (vehicleToUpdate != null && inspection.Mileage.HasValue)
             {
-                // Jeśli wpisany przebieg jest mniejszy niż aktualny w pojeździe, rzucamy błąd
                 if (inspection.Mileage.Value < vehicleToUpdate.CurrentKm)
                 {
                     ModelState.AddModelError("Mileage", $"Przebieg nie może być mniejszy niż aktualny stan licznika pojazdu ({vehicleToUpdate.CurrentKm} km).");
                 }
             }
-            // -------------------------------------------------------------
 
             if (ModelState.IsValid)
             {
-                // Aktualizacja przebiegu pojazdu (wykona się tylko wtedy, gdy walidacja przejdzie pomyślnie)
                 if (vehicleToUpdate != null && inspection.Mileage.HasValue && inspection.Mileage.Value > vehicleToUpdate.CurrentKm)
                 {
                     vehicleToUpdate.CurrentKm = inspection.Mileage.Value;
@@ -248,6 +245,10 @@ namespace Fleet_Managment_Production.Controllers
                     if (inspection.Mileage.HasValue && inspection.Mileage > 0)
                     {
                         var vehicleToUpdate = await _context.Vehicles.FindAsync(inspection.VehicleId);
+                        if (vehicleToUpdate != null && vehicleToUpdate.Status == VehicleStatus.Sold)
+                        {
+                            ModelState.AddModelError("VehicleId", "Nie można dodać przeglądu dla tego pojazdu, ponieważ został sprzedany");
+                        }
                         if (vehicleToUpdate != null && inspection.Mileage.Value > vehicleToUpdate.CurrentKm)
                         {
                             vehicleToUpdate.CurrentKm = inspection.Mileage.Value;
