@@ -62,7 +62,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void Amount_AtMinimumValue_PassesValidation()
         {
             var cost = CreateValidCost();
-            cost.Amount = 0.01m; // Minimalna dopuszczalna kwota
+            cost.Amount = 0.01m;
 
             var errors = ValidationHelper.ValidateModel(cost);
 
@@ -89,7 +89,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void Type_WithInvalidEnumValue_FailsValidation()
         {
             var cost = CreateValidCost();
-            cost.Type = (CostType)99; // Wartość poza enumem
+            cost.Type = (CostType)99;
 
             var errors = ValidationHelper.ValidateModel(cost);
 
@@ -154,7 +154,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
             // Arrange
             var cost = CreateValidCost();
             cost.Type = CostType.Paliwo;
-            cost.Liters = null; // BŁĄD: Paliwo musi mieć litry
+            cost.Liters = null;
 
             // Act
             var errors = ValidationHelper.ValidateModel(cost);
@@ -168,8 +168,8 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         {
             // Arrange
             var cost = CreateValidCost();
-            cost.Type = CostType.Ubezpieczenie; // Nie paliwo
-            cost.Liters = 50.5; // BŁĄD: Ubezpieczenie nie ma litrów
+            cost.Type = CostType.Ubezpieczenie;
+            cost.Liters = 50.5; 
 
             // Act
             var errors = ValidationHelper.ValidateModel(cost);

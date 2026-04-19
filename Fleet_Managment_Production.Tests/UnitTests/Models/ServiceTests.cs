@@ -18,7 +18,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
                 VehicleId = 1,
                 EntryDate = DateTime.Today,
                 PlannedEndDate = DateTime.Today.AddDays(3),
-                ActualEndDate = null, // Serwis trwa
+                ActualEndDate = null,
                 Description = "Wymiana rozrządu",
                 Cost = 1500.00m
             };
@@ -55,7 +55,6 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         {
             var service = CreateValidService();
             service.EntryDate = DateTime.Today;
-            // BŁĄD: Planujemy skończyć przed przyjęciem auta
             service.PlannedEndDate = DateTime.Today.AddDays(-1);
 
             var errors = ValidationHelper.ValidateModel(service);
@@ -68,7 +67,6 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         {
             var service = CreateValidService();
             service.EntryDate = DateTime.Today;
-            // BŁĄD: Skończono naprawę przed przyjęciem auta
             service.ActualEndDate = DateTime.Today.AddDays(-5);
 
             var errors = ValidationHelper.ValidateModel(service);
@@ -84,7 +82,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void Description_ExceedingMaxLength_FailsValidation()
         {
             var service = CreateValidService();
-            service.Description = new string('A', 1001); // 1001 znaków (limit to 1000)
+            service.Description = new string('A', 1001);
 
             var errors = ValidationHelper.ValidateModel(service);
 
@@ -95,7 +93,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void Description_WhenNullOrEmpty_FailsValidation()
         {
             var service = CreateValidService();
-            service.Description = ""; // Opis jest u Ciebie [Required]
+            service.Description = "";
 
             var errors = ValidationHelper.ValidateModel(service);
 
@@ -120,7 +118,6 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void VehicleId_NotAssigned_FailsValidation()
         {
             var service = CreateValidService();
-            // Testujemy sytuację, gdy nikt nie wybrał z listy (domyślny int to 0)
             service.VehicleId = 0;
 
             var errors = ValidationHelper.ValidateModel(service);
@@ -139,7 +136,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
 
             var errors = ValidationHelper.ValidateModel(service);
 
-            Assert.Empty(errors); // Idealny model, brak błędów
+            Assert.Empty(errors);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
                 StartLocation = "Warszawa",
                 EndLocation = "Poznań",
                 StartOdometer = 120000,
-                EndOdometer = 120320, // 320 km przejechane
+                EndOdometer = 120320,
                 TripType = TripType.Business
             };
         }
@@ -42,7 +42,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void RealDistance_ReturnsZero_WhenTripIsOngoing()
         {
             var trip = CreateValidTrip();
-            trip.EndOdometer = null; // Trasa jeszcze trwa
+            trip.EndOdometer = null;
 
             Assert.Equal(0, trip.RealDistance);
         }
@@ -56,7 +56,6 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         {
             var trip = CreateValidTrip();
             trip.StartDate = DateTime.Now;
-            // BŁĄD: Zakończono przed startem
             trip.EndTime = DateTime.Now.AddHours(-1);
 
             var errors = ValidationHelper.ValidateModel(trip);
@@ -69,7 +68,6 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         {
             var trip = CreateValidTrip();
             trip.StartOdometer = 50000;
-            // BŁĄD: Cofanie licznika
             trip.EndOdometer = 49500;
 
             var errors = ValidationHelper.ValidateModel(trip);
@@ -85,8 +83,8 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void ForeignKeys_NotAssigned_FailsValidation()
         {
             var trip = CreateValidTrip();
-            trip.VehicleId = 0; // Brak przypisanego auta
-            trip.DriverId = 0;  // Brak przypisanego kierowcy
+            trip.VehicleId = 0; 
+            trip.DriverId = 0;  
 
             var errors = ValidationHelper.ValidateModel(trip);
 
@@ -98,7 +96,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void Enum_WithInvalidValue_FailsValidation()
         {
             var trip = CreateValidTrip();
-            trip.TripType = (TripType)99; // Zła wartość
+            trip.TripType = (TripType)99;
 
             var errors = ValidationHelper.ValidateModel(trip);
 
@@ -109,8 +107,8 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void GPSCoordinates_OutofBounds_FailsValidation()
         {
             var trip = CreateValidTrip();
-            trip.StartLatitude = 95.0;  // Limit to 90
-            trip.StartLongitude = 185.0; // Limit to 180
+            trip.StartLatitude = 95.0; 
+            trip.StartLongitude = 185.0;
 
             var errors = ValidationHelper.ValidateModel(trip);
 

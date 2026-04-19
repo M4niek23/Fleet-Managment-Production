@@ -20,7 +20,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
                 FuelType = FuelType.Hybryda,
                 ProductionYear = DateTime.Now.Year,
                 LicensePlate = "WAW12345",
-                VIN = "1T1ABCD1234567890", // 17 poprawnych znaków (bez I, O, Q)
+                VIN = "1T1ABCD1234567890",
                 CurrentKm = 15000,
                 Status = VehicleStatus.Available
             };
@@ -50,8 +50,8 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         // ==========================================
 
         [Theory]
-        [InlineData("1234567890123456")]   // 16 znaków (za krótki)
-        [InlineData("123456789012345678")] // 18 znaków (za długi)
+        [InlineData("1234567890123456")]  
+        [InlineData("123456789012345678")]
         public void VIN_IncorrectLength_FailsValidation(string invalidVin)
         {
             var vehicle = CreateValidVehicle();
@@ -63,11 +63,11 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         }
 
         [Theory]
-        [InlineData("1T1ABCD123456789I")] // Zawiera niedozwoloną literę 'I'
-        [InlineData("1T1ABCD123456789O")] // Zawiera niedozwoloną literę 'O'
-        [InlineData("1T1ABCD123456789Q")] // Zawiera niedozwoloną literę 'Q'
-        [InlineData("1T1abcd1234567890")] // Zawiera małe litery (Regex wymaga wielkich)
-        [InlineData("1T1ABCD12345678!@")] // Znaki specjalne
+        [InlineData("1T1ABCD123456789I")]
+        [InlineData("1T1ABCD123456789O")]
+        [InlineData("1T1ABCD123456789Q")]
+        [InlineData("1T1abcd1234567890")]
+        [InlineData("1T1ABCD12345678!@")]
         public void VIN_WithInvalidCharacters_FailsValidation(string invalidVin)
         {
             var vehicle = CreateValidVehicle();
@@ -82,7 +82,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void VIN_CorrectFormat_PassesValidation()
         {
             var vehicle = CreateValidVehicle();
-            vehicle.VIN = "WBA00000000000000"; // Przykładowy poprawny VIN BMW
+            vehicle.VIN = "WBA00000000000000";
 
             var errors = ValidationHelper.ValidateModel(vehicle);
 
@@ -97,7 +97,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void ProductionYear_Before1886_FailsValidation()
         {
             var vehicle = CreateValidVehicle();
-            vehicle.ProductionYear = 1885; // Przed wynalezieniem samochodu wg atrybutu Range
+            vehicle.ProductionYear = 1885;
 
             var errors = ValidationHelper.ValidateModel(vehicle);
 
@@ -108,7 +108,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void Validate_ProductionYearInFarFuture_ReturnsValidationError()
         {
             var vehicle = CreateValidVehicle();
-            vehicle.ProductionYear = DateTime.Now.Year + 2; // Auto z dalekiej przyszłości
+            vehicle.ProductionYear = DateTime.Now.Year + 2; 
 
             var errors = ValidationHelper.ValidateModel(vehicle);
 
@@ -119,7 +119,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void Validate_ProductionYearNextYear_PassesValidation()
         {
             var vehicle = CreateValidVehicle();
-            vehicle.ProductionYear = DateTime.Now.Year + 1; // Modele na kolejny rok są dozwolone
+            vehicle.ProductionYear = DateTime.Now.Year + 1; 
 
             var errors = ValidationHelper.ValidateModel(vehicle);
 

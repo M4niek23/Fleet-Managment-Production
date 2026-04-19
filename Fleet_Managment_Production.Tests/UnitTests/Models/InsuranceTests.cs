@@ -50,7 +50,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void InsurareName_ExceedingMaxLength_FailsValidation()
         {
             var insurance = CreateValidInsurance();
-            insurance.InsurareName = new string('X', 101); // Limit to 100
+            insurance.InsurareName = new string('X', 101);
 
             var errors = ValidationHelper.ValidateModel(insurance);
 
@@ -66,7 +66,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         {
             var insurance = CreateValidInsurance();
             insurance.StartDate = DateTime.Today;
-            // BŁĄD: Wygaśnięcie przed rozpoczęciem!
+           
             insurance.ExpiryDate = DateTime.Today.AddDays(-1);
 
             var errors = ValidationHelper.ValidateModel(insurance);
@@ -79,7 +79,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         {
             var insurance = CreateValidInsurance();
             insurance.StartDate = DateTime.Today;
-            insurance.ExpiryDate = DateTime.Today; // BŁĄD: Polisa 0-dniowa
+            insurance.ExpiryDate = DateTime.Today;
 
             var errors = ValidationHelper.ValidateModel(insurance);
 
@@ -107,7 +107,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void AcScope_WithInvalidEnumValue_FailsValidation()
         {
             var insurance = CreateValidInsurance();
-            insurance.AcScope = (AcScope)99; // Hakujemy Enuma
+            insurance.AcScope = (AcScope)99;
 
             var errors = ValidationHelper.ValidateModel(insurance);
 
@@ -118,7 +118,6 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
         public void VehicleId_WhenNull_FailsValidation()
         {
             var insurance = CreateValidInsurance();
-            // Polisa musi być przypisana do jakiegoś samochodu (wymóg [Required] na typie nullable int?)
             insurance.VehicleId = null;
 
             var errors = ValidationHelper.ValidateModel(insurance);
@@ -137,7 +136,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
 
             var errors = ValidationHelper.ValidateModel(insurance);
 
-            Assert.Empty(errors); // Model idealny, 0 błędów
+            Assert.Empty(errors);
         }
       
         [Fact]
@@ -146,14 +145,13 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
             // Arrange
             var insurance = CreateValidInsurance();
             insurance.StartDate = DateTime.Today.AddYears(-2);
-            insurance.ExpiryDate = DateTime.Today.AddDays(-1); // Polisa wygasła wczoraj!
-            insurance.IsCurrent = true; // BŁĄD: Użytkownik zaznaczył, że jest nadal aktywna
+            insurance.ExpiryDate = DateTime.Today.AddDays(-1);
+            insurance.IsCurrent = true;
 
             // Act
             var errors = ValidationHelper.ValidateModel(insurance);
 
             // Assert
-            // Test oczekuje, że model rzuci błąd dla pola IsCurrent
             Assert.Contains(errors, e => e.MemberNames.Contains(nameof(Insurance.IsCurrent)));
         }
     }
