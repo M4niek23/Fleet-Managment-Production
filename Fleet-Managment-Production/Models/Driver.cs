@@ -27,7 +27,7 @@ namespace Fleet_Managment_Production.Models
     {
         [Display(Name = "Pracuje")]
         Active,
-        [Display(Name = "Na urlopie")]
+        [Display(Name = "Urlop")]
         OnLeave,
         [Display(Name = "Nie pracuje")]
         Inactive,

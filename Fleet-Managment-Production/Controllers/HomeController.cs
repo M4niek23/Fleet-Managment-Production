@@ -23,14 +23,12 @@ namespace Fleet_Managment_Production.Controllers
             var today = DateTime.Today;
             var alertLimitDate = today.AddDays(30);
 
-            // Istniej¹ca logika dla ubezpieczeñ
             var expiringInsurances = await _context.Insurances
                 .Include(i => i.Vehicle)
                 .Where(i => i.ExpiryDate >= today && i.ExpiryDate <= alertLimitDate)
                 .OrderBy(i => i.ExpiryDate)
                 .ToListAsync();
 
-            // NOWA LOGIKA: Pobieranie koñcz¹cych siê przegl¹dów
             var expiringInspections = await _context.Inspections
                 .Include(i => i.Vehicle)
                 .Where(i => i.NextInspectionDate >= today && i.NextInspectionDate <= alertLimitDate)
@@ -40,7 +38,7 @@ namespace Fleet_Managment_Production.Controllers
             var viewModel = new DashboardViewModel
             {
                 ExpiringInsurances = expiringInsurances,
-                ExpiringInspections = expiringInspections // Przekazujemy do widoku
+                ExpiringInspections = expiringInspections
             };
 
             return View(viewModel);

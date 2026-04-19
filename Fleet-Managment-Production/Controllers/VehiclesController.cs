@@ -22,12 +22,16 @@ namespace Fleet_Managment_Production.Controllers
         }
 
         // GET: Vehicles
-        public async Task<IActionResult> Index(string searchString, int? vehicleId, int? page)
+        public async Task<IActionResult> Index(string searchString, int? driverId, string sortOrder, int? page)
         {
             int pageSize = 7;
             int pageNumber = page ?? 1;
             var currentUserId = _userManager.GetUserId(User);
+
             ViewData["CurrentFilter"] = searchString;
+            ViewBag.CurrentDriverId = driverId;
+            ViewBag.DriverSortParam = sortOrder == "driver_asc" ? "driver_desc" : "driver_asc";
+
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var vehiclesQuery = _context.Vehicles
@@ -48,10 +52,11 @@ namespace Fleet_Managment_Production.Controllers
                 }
             }
 
-            if (vehicleId.HasValue)
+            if (driverId.HasValue)
             {
-                vehiclesQuery = vehiclesQuery.Where(v => v.VehicleId == vehicleId.Value);
+                vehiclesQuery = vehiclesQuery.Where(v => v.DriverId == driverId.Value);
             }
+
             if (!string.IsNullOrEmpty(searchString))
             {
                 var searchLower = searchString.ToLower();
@@ -67,37 +72,45 @@ namespace Fleet_Managment_Production.Controllers
                 );
             }
 
+            vehiclesQuery = sortOrder switch
+            {
+                "driver_asc" => vehiclesQuery.OrderBy(v => v.Driver.LastName).ThenBy(v => v.Driver.FirstName),
+                "driver_desc" => vehiclesQuery.OrderByDescending(v => v.Driver.LastName).ThenByDescending(v => v.Driver.FirstName),
+                _ => vehiclesQuery.OrderBy(v => v.Make)
+            };
+
             var totalItems = await vehiclesQuery.CountAsync();
 
             var vehiclesList = await vehiclesQuery
-                .OrderBy(v => v.Make) 
+                .OrderBy(v => v.Driver.LastName)
+                .ThenBy(v => v.Driver.FirstName)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
             ViewBag.CurrentPage = pageNumber;
             ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            ViewBag.CurrentDriverId = driverId;
 
-            var dropdownQuery = _context.Vehicles.AsQueryable();
+            var driversQuery = _context.Drivers.AsQueryable();
             if (!isAdminOrManager)
             {
                 var driver = await _context.Drivers.FirstOrDefaultAsync(d => d.UserId == currentUserId);
-                if (driver != null) dropdownQuery = dropdownQuery.Where(v => v.DriverId == driver.Id);
-                else dropdownQuery = dropdownQuery.Where(v => false);
+                if (driver != null) driversQuery = driversQuery.Where(d => d.Id == driver.Id);
+                else driversQuery = driversQuery.Where(d => false);
             }
 
-            var allVehiclesForDropdown = await dropdownQuery.Include(v => v.Driver).ToListAsync();
-            var vehiclesSelectList = allVehiclesForDropdown.Select(v => new
+            var driversSelectList = await driversQuery.Select(d => new
             {
-                VehicleId = v.VehicleId,
-                DisplayText = v.Driver != null
-                    ? $"{v.Driver.FirstName} {v.Driver.LastName}"
-                    : $"[Brak kierowcy] {v.Make} {v.Model} ({v.LicensePlate})"
-            }).ToList();
+                DriverId = d.Id,
+                DisplayText = $"{d.FirstName} {d.LastName}"
+            }).ToListAsync();
 
-            ViewBag.VehicleList = new SelectList(vehiclesSelectList, "VehicleId", "DisplayText");
+            ViewBag.DriverList = new SelectList(driversSelectList, "DriverId", "DisplayText", driverId);
 
             return View(vehiclesList);
+
+
         }
 
         // GET: Vehicles/Details/5
