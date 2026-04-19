@@ -48,7 +48,8 @@ namespace Fleet_Managment_Production.Models
         public string LastName { get; set; } = null!;
 
         [Display(Name = "PESEL")]
-        [Required, StringLength(11)]
+        [Required(ErrorMessage = "PESEL jest wymagany.")]
+        [RegularExpression(@"^\d{11}$", ErrorMessage = "PESEL musi składać się z dokładnie 11 cyfr.")]
         public string Pesel { get; set; } = null!;
 
         [Display(Name = "Kategorie Prawa Jazdy")]
@@ -59,6 +60,7 @@ namespace Fleet_Managment_Production.Models
         public List<LicenseCategory> SelectedCategories { get; set; } = new List<LicenseCategory>();
 
         [Display(Name = "Telefon")]
+        [RegularExpression(@"^\+?[0-9\s\-]{9,15}$", ErrorMessage = "Niepoprawny format numeru telefonu. Wymagane od 9 do 15 znaków.")]
         public string? PhoneNumber { get; set; }
 
         [Display(Name = "Powiązane Konto Użytkownika")]
@@ -70,10 +72,11 @@ namespace Fleet_Managment_Production.Models
 
         [Required(ErrorMessage = "Status jest wymagany")]
         [Display(Name = "Status")]
+        [EnumDataType(typeof(DriverStatus), ErrorMessage = "Nieprawidłowy status kierowcy.")]
         public DriverStatus Status { get; set; } = DriverStatus.Active;
 
         [Display(Name = "Email")]
-        [EmailAddress]
+        [RegularExpression(@"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", ErrorMessage = "Niepoprawny format adresu e-mail.")]
         public string? Email { get; set; }
 
         public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
