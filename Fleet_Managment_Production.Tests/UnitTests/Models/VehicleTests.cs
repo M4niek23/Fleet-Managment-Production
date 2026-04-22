@@ -43,6 +43,9 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
 
             Assert.Empty(vehicle.Inspections);
             Assert.Empty(vehicle.Insurances);
+            Assert.Empty(vehicle.Costs);
+            Assert.Empty(vehicle.Trips);
+            Assert.Empty(vehicle.Services);
         }
 
         // ==========================================

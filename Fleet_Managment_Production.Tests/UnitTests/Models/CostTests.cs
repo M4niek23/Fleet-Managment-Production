@@ -79,6 +79,8 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
             var cost = new Cost { Amount = 100m, Type = CostType.Inne };
 
             var errors = ValidationHelper.ValidateModel(cost);
+
+            Assert.Contains(errors, e => e.MemberNames.Contains(nameof(Cost.VehicleId)));
         }
 
         // ==========================================
@@ -133,6 +135,7 @@ namespace Fleet_Managment_Production.Tests.UnitTests.Models
 
             var errors = ValidationHelper.ValidateModel(cost);
 
+            Assert.Contains(errors, e => e.MemberNames.Contains(nameof(Cost.CurrentOdometer)));
         }
 
         // ==========================================

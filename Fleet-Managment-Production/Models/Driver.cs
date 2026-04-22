@@ -35,7 +35,7 @@ namespace Fleet_Managment_Production.Models
     }
 
     [Index(nameof(Pesel), IsUnique = true)]
-    public class Driver 
+    public class Driver : IValidatableObject
     {
         [Key]
         public int Id { get; set; }
@@ -85,6 +85,44 @@ namespace Fleet_Managment_Production.Models
         public string FullName => $"{FirstName} {LastName}";
         public ICollection<Trip> Trips { get; set; } = new List<Trip>();
 
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (string.IsNullOrEmpty(Pesel) || Pesel.Length != 11 || !Pesel.All(char.IsDigit))
+                yield break;
 
+            int yy = int.Parse(Pesel.Substring(0, 2));
+            int mm = int.Parse(Pesel.Substring(2, 2));
+            int dd = int.Parse(Pesel.Substring(4, 2));
+
+            int year, month;
+            if (mm >= 81 && mm <= 92)      { year = 1800 + yy; month = mm - 80; }
+            else if (mm >= 21 && mm <= 32) { year = 2000 + yy; month = mm - 20; }
+            else if (mm >= 41 && mm <= 52) { year = 2100 + yy; month = mm - 40; }
+            else                           { year = 1900 + yy; month = mm; }
+
+            DateOnly birthDate;
+            try
+            {
+                birthDate = new DateOnly(year, month, dd);
+            }
+            catch
+            {
+                yield return new ValidationResult(
+                    "PESEL zawiera nieprawidłową datę urodzenia.",
+                    new[] { nameof(Pesel) });
+                yield break;
+            }
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var age = today.Year - birthDate.Year;
+            if (today < birthDate.AddYears(age)) age--;
+
+            if (age < 18)
+            {
+                yield return new ValidationResult(
+                    "Kierowca musi mieć ukończone 18 lat.",
+                    new[] { nameof(Pesel) });
+            }
         }
     }
+}

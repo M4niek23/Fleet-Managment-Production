@@ -17,6 +17,7 @@ namespace Fleet_Managment_Production.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Pojazd jest wymagany.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Musisz przypisać pojazd z listy.")]
         public int VehicleId { get; set; }
         public virtual Vehicle? Vehicle { get; set; }
 
