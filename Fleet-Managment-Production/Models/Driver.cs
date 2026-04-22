@@ -100,12 +100,11 @@ namespace Fleet_Managment_Production.Models
             else if (mm >= 41 && mm <= 52) { year = 2100 + yy; month = mm - 40; }
             else                           { year = 1900 + yy; month = mm; }
 
-            DateOnly birthDate;
-            try
-            {
-                birthDate = new DateOnly(year, month, dd);
-            }
-            catch
+            DateOnly? birthDate = null;
+            try { birthDate = new DateOnly(year, month, dd); }
+            catch { }
+
+            if (birthDate == null)
             {
                 yield return new ValidationResult(
                     "PESEL zawiera nieprawidłową datę urodzenia.",
@@ -114,8 +113,8 @@ namespace Fleet_Managment_Production.Models
             }
 
             var today = DateOnly.FromDateTime(DateTime.Today);
-            var age = today.Year - birthDate.Year;
-            if (today < birthDate.AddYears(age)) age--;
+            var age = today.Year - birthDate.Value.Year;
+            if (today < birthDate.Value.AddYears(age)) age--;
 
             if (age < 18)
             {
