@@ -9,18 +9,8 @@ namespace Fleet_Managment_Production.Controllers
 {
 
     [Authorize(Roles = "Admin")]
-    public class AdminController : Controller
+    public class AdminController(UserManager<Users> userManager, RoleManager<IdentityRole> roleManager) : Controller
     {
-        private readonly UserManager<Users> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-
-        public AdminController(UserManager<Users> userManager, RoleManager<IdentityRole> roleManager)
-        {
-            _userManager = userManager;
-            _roleManager = roleManager;
-        }
-
-
         public async Task<IActionResult> Index(string searchString, string sortOrder, int? page)
         {
             ViewData["CurrentSort"] = sortOrder;
@@ -28,7 +18,7 @@ namespace Fleet_Managment_Production.Controllers
             ViewData["EmailSortParm"] = sortOrder == "Email" ? "email_desc" : "Email";
             ViewData["CurrentFilter"] = searchString;
 
-            var usersQuery = _userManager.Users.AsQueryable();
+            var usersQuery = userManager.Users.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -70,13 +60,13 @@ namespace Fleet_Managment_Production.Controllers
             {
                 return NotFound("Nie podano ID użytkownika.");
             }
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await userManager.FindByIdAsync(id);
             if (user == null)
             {
                 return NotFound("Nie znaleziono użytkownika.");
             }
-            await _userManager.SetLockoutEndDateAsync(user, null);
-            await _userManager.ResetAccessFailedCountAsync(user);
+            await userManager.SetLockoutEndDateAsync(user, null);
+            await userManager.ResetAccessFailedCountAsync(user);
             TempData["SuccessMessage"] = $"Konto użytkownika {user.Email} zostało pomyślnie odblokowane.";
 
             return RedirectToAction(nameof(Index));
@@ -85,7 +75,7 @@ namespace Fleet_Managment_Production.Controllers
         [HttpGet]
         public async Task<IActionResult> ManageRoles(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return NotFound();
@@ -93,14 +83,14 @@ namespace Fleet_Managment_Production.Controllers
 
 
 
-            var allRoles = await _roleManager.Roles.ToListAsync();
+            var allRoles = await roleManager.Roles.ToListAsync();
 
 
             var model = new ManagerUserRolesViewModel
             {
                 UserId = user.Id,
                 UserName = user.UserName ?? "Brak nazwy",
-                Roles = new List<RoleSelectionViewModel>()
+                Roles = []
             };
 
 
@@ -111,7 +101,7 @@ namespace Fleet_Managment_Production.Controllers
                     model.Roles.Add(new RoleSelectionViewModel
                     {
                         RoleName = role.Name,
-                        IsSelected = await _userManager.IsInRoleAsync(user, role.Name)
+                        IsSelected = await userManager.IsInRoleAsync(user, role.Name)
                     });
                 }
             }
@@ -125,15 +115,15 @@ namespace Fleet_Managment_Production.Controllers
 
         public async Task<IActionResult> ManageRoles(ManagerUserRolesViewModel model)
         {
-            var user = await _userManager.FindByIdAsync(model.UserId);
+            var user = await userManager.FindByIdAsync(model.UserId);
             if (user == null)
             {
                 return NotFound();
             }
 
-            var userRoles = await _userManager.GetRolesAsync(user);
+            var userRoles = await userManager.GetRolesAsync(user);
 
-            var result = await _userManager.RemoveFromRolesAsync(user, userRoles);
+            var result = await userManager.RemoveFromRolesAsync(user, userRoles);
             if (!result.Succeeded)
             {
 
@@ -142,7 +132,7 @@ namespace Fleet_Managment_Production.Controllers
             }
 
 
-            result = await _userManager.AddToRolesAsync(user,
+            result = await userManager.AddToRolesAsync(user,
                 model.Roles.Where(r => r.IsSelected).Select(r => r.RoleName));
 
             if (!result.Succeeded)
@@ -160,10 +150,10 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
 
-            var targetUser = await _userManager.FindByIdAsync(id);
+            var targetUser = await userManager.FindByIdAsync(id);
             if (targetUser == null) return NotFound();
 
-            var currentUserId = _userManager.GetUserId(User);
+            var currentUserId = userManager.GetUserId(User);
             if (targetUser.Id == currentUserId)
             {
                 TempData["ErrorMessage"] = "Nie możesz zablokować własnego konta.";
@@ -173,21 +163,21 @@ namespace Fleet_Managment_Production.Controllers
             if (!targetUser.LockoutEnabled)
             {
                 targetUser.LockoutEnabled = true;
-                await _userManager.UpdateAsync(targetUser);
+                await userManager.UpdateAsync(targetUser);
             }
 
-            var isLocked = await _userManager.IsLockedOutAsync(targetUser);
+            var isLocked = await userManager.IsLockedOutAsync(targetUser);
 
             if (isLocked)
             {
-                await _userManager.SetLockoutEndDateAsync(targetUser, null);
+                await userManager.SetLockoutEndDateAsync(targetUser, null);
                 TempData["SuccessMessage"] = $"Konto {targetUser.Email} zostało pomyślnie odblokowane.";
             }
             else
             {
-                await _userManager.SetLockoutEndDateAsync(targetUser, DateTimeOffset.MaxValue);
+                await userManager.SetLockoutEndDateAsync(targetUser, DateTimeOffset.MaxValue);
 
-                await _userManager.UpdateSecurityStampAsync(targetUser);
+                await userManager.UpdateSecurityStampAsync(targetUser);
 
                 TempData["SuccessMessage"] = $"Konto {targetUser.Email} zostało zablokowane.";
             }

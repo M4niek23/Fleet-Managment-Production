@@ -87,7 +87,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if (Model.ExpiringInsurances.Any())
+                                @if (Model.ExpiringInsurances != null && Model.ExpiringInsurances.Any())
                                 {
                                     @foreach (var item in Model.ExpiringInsurances)
                                     {

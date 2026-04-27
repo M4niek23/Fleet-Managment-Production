@@ -5,9 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fleet_Managment_Production.Data
 {
-    public class AppDbContext : IdentityDbContext<Users, IdentityRole, string>
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<Users, IdentityRole, string>(options)
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<Insurance> Insurances { get; set; }
         public DbSet<Inspection> Inspections { get; set; }

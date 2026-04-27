@@ -10,17 +10,8 @@ using System.Security.Claims;
 namespace Fleet_Managment_Production.Controllers
 {
     [Authorize]
-    public class HomeController : Controller
+    public class HomeController(AppDbContext context) : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly AppDbContext _context;
-
-        public HomeController(ILogger<HomeController> logger, AppDbContext context)
-        {
-            _logger = logger;
-            _context = context; 
-        }
-
         public async Task<IActionResult> Index()
         {
             var today = DateTime.Today;
@@ -30,8 +21,8 @@ namespace Fleet_Managment_Production.Controllers
 
             bool isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
-            var insurancesQuery = _context.Insurances.Include(i => i.Vehicle).AsQueryable();
-            var inspectionsQuery = _context.Inspections.Include(i => i.Vehicle).AsQueryable();
+            var insurancesQuery = context.Insurances.Include(i => i.Vehicle).AsQueryable();
+            var inspectionsQuery = context.Inspections.Include(i => i.Vehicle).AsQueryable();
 
             if (!isAdminOrManager)
             {

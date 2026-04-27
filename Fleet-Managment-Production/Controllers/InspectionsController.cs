@@ -9,20 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fleet_Managment_Production.Controllers
 {
-    public class InspectionsController : Controller
+    public class InspectionsController(AppDbContext context) : Controller
     {
-        private readonly AppDbContext _context;
-        private readonly UserManager<Users> _userManager;
-
-        public InspectionsController(AppDbContext context, UserManager<Users> userManager)
-        {
-            _context = context;
-            _userManager = userManager;
-        }
-
         public async Task<IActionResult> Index(string searchString, int? vehicleId, int? page, string activeTab = "active")
         {
-            if (!_context.Vehicles.Any()) return View("NoVehicles");
+            if (!context.Vehicles.Any()) return View("NoVehicles");
 
             ViewData["CurrentFilter"] = searchString;
             ViewBag.CurrentVehicleId = vehicleId;
@@ -31,13 +22,13 @@ namespace Fleet_Managment_Production.Controllers
             int pageSize = 7;
             int pageNumber = page ?? 1;
 
-            var query = _context.Inspections.Include(i => i.Vehicle).AsQueryable();
+            var query = context.Inspections.Include(i => i.Vehicle).AsQueryable();
 
             if (vehicleId.HasValue)
             {
                 query = query.Where(i => i.VehicleId == vehicleId.Value);
 
-                var selectedVehicle = await _context.Vehicles.FindAsync(vehicleId.Value);
+                var selectedVehicle = await context.Vehicles.FindAsync(vehicleId.Value);
                 ViewBag.VehicleRegistration = selectedVehicle?.LicensePlate ?? "Wybranego pojazdu";
             } else
             {
@@ -87,7 +78,7 @@ namespace Fleet_Managment_Production.Controllers
                     : historyQ.OrderByDescending(i => i.InspectionDate).Take(pageSize)).ToListAsync()
             };
 
-            var vehicleList = await _context.Vehicles.Select(v => new { v.VehicleId, Display = v.LicensePlate }).ToListAsync();
+            var vehicleList = await context.Vehicles.Select(v => new { v.VehicleId, Display = v.LicensePlate }).ToListAsync();
             ViewBag.VehicleList = new SelectList(vehicleList, "VehicleId", "Display", vehicleId);
 
             return View(viewModel);
@@ -96,7 +87,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id == null) return NotFound();
 
-            var inspection = await _context.Inspections
+            var inspection = await context.Inspections
                 .Include(i => i.Vehicle)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -107,7 +98,7 @@ namespace Fleet_Managment_Production.Controllers
 
         public async Task<IActionResult> Create(int? vehicleId)
         {
-            var vehicleList = await _context.Vehicles
+            var vehicleList = await context.Vehicles
                 .Where(v => v.Status != VehicleStatus.Sold)
                 .Select(v => new
                 {
@@ -131,7 +122,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (inspection.IsActive == true && inspection.InspectionDate.Date >= DateTime.Today)
             {
-                var existingUpcoming = await _context.Inspections
+                var existingUpcoming = await context.Inspections
                     .FirstOrDefaultAsync(i => i.VehicleId == inspection.VehicleId &&
                                               i.InspectionDate.Date >= DateTime.Today &&
                                               i.IsActive == true);
@@ -155,7 +146,7 @@ namespace Fleet_Managment_Production.Controllers
                 inspection.NextInspectionDate = null;
             }
 
-            var vehicleToUpdate = await _context.Vehicles.FindAsync(inspection.VehicleId);
+            var vehicleToUpdate = await context.Vehicles.FindAsync(inspection.VehicleId);
 
             if (vehicleToUpdate != null && inspection.Mileage.HasValue)
             {
@@ -170,15 +161,15 @@ namespace Fleet_Managment_Production.Controllers
                 if (vehicleToUpdate != null && inspection.Mileage.HasValue && inspection.Mileage.Value > vehicleToUpdate.CurrentKm)
                 {
                     vehicleToUpdate.CurrentKm = inspection.Mileage.Value;
-                    _context.Update(vehicleToUpdate);
+                    context.Update(vehicleToUpdate);
                 }
 
-                _context.Add(inspection);
-                await _context.SaveChangesAsync();
+                context.Add(inspection);
+                await context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            var vehicleList = await _context.Vehicles
+            var vehicleList = await context.Vehicles
                 .Select(v => new
                 {
                     v.VehicleId,
@@ -194,10 +185,10 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
-            var inspection = await _context.Inspections.FindAsync(id);
+            var inspection = await context.Inspections.FindAsync(id);
             if (inspection == null) return NotFound();
 
-            var vehicleList = await _context.Vehicles
+            var vehicleList = await context.Vehicles
                 .Select(v => new
                 {
                     v.VehicleId,
@@ -217,7 +208,7 @@ namespace Fleet_Managment_Production.Controllers
 
             if (inspection.IsActive == true && inspection.InspectionDate.Date >= DateTime.Today)
             {
-                var existingUpcoming = await _context.Inspections
+                var existingUpcoming = await context.Inspections
                     .FirstOrDefaultAsync(i => i.VehicleId == inspection.VehicleId &&
                                               i.InspectionDate.Date >= DateTime.Today &&
                                               i.IsActive == true &&
@@ -248,7 +239,7 @@ namespace Fleet_Managment_Production.Controllers
                 {
                     if (inspection.Mileage.HasValue && inspection.Mileage > 0)
                     {
-                        var vehicleToUpdate = await _context.Vehicles.FindAsync(inspection.VehicleId);
+                        var vehicleToUpdate = await context.Vehicles.FindAsync(inspection.VehicleId);
                         if (vehicleToUpdate != null && vehicleToUpdate.Status == VehicleStatus.Sold)
                         {
                             ModelState.AddModelError("VehicleId", "Nie można dodać przeglądu dla tego pojazdu, ponieważ został sprzedany");
@@ -256,16 +247,16 @@ namespace Fleet_Managment_Production.Controllers
                         if (vehicleToUpdate != null && inspection.Mileage.Value > vehicleToUpdate.CurrentKm)
                         {
                             vehicleToUpdate.CurrentKm = inspection.Mileage.Value;
-                            _context.Update(vehicleToUpdate);
+                            context.Update(vehicleToUpdate);
                         }
                     }
 
-                    _context.Update(inspection);
-                    await _context.SaveChangesAsync();
+                    context.Update(inspection);
+                    await context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_context.Inspections.Any(e => e.Id == inspection.Id))
+                    if (!context.Inspections.Any(e => e.Id == inspection.Id))
                         return NotFound();
                     else
                         throw;
@@ -273,7 +264,7 @@ namespace Fleet_Managment_Production.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var vehicleList = await _context.Vehicles
+            var vehicleList = await context.Vehicles
                 .Select(v => new
                 {
                     v.VehicleId,
@@ -289,7 +280,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id == null) return NotFound();
 
-            var inspection = await _context.Inspections
+            var inspection = await context.Inspections
                 .Include(i => i.Vehicle)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -301,11 +292,11 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var inspection = await _context.Inspections.FindAsync(id);
+            var inspection = await context.Inspections.FindAsync(id);
             if (inspection != null)
             {
-                _context.Inspections.Remove(inspection);
-                await _context.SaveChangesAsync();
+                context.Inspections.Remove(inspection);
+                await context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
         }

@@ -13,29 +13,21 @@ using Microsoft.EntityFrameworkCore;
 namespace Fleet_Managment_Production.Controllers
 {
     [Authorize]
-    public class ServicesController : Controller
+    public class ServicesController(AppDbContext context, UserManager<Users> userManager) : Controller
     {
-        private readonly AppDbContext _context;
-        private readonly UserManager<Users> _userManager;
-
-        public ServicesController(AppDbContext context, UserManager<Users> userManager)
-        {
-            _context = context;
-            _userManager = userManager;
-        }
 
         // GET: Services
         public async Task<IActionResult> Index(string searchString,int? page)
         {
             ViewData["CurrentFilter"] = searchString;
 
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await userManager.GetUserAsync(User);
             if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
 
           
-            var servicesQuery = _context.Services
+            var servicesQuery = context.Services
                 .Include(s => s.Vehicle)
                 .ThenInclude(v => v!.Driver)
                 .OrderByDescending(s => s.EntryDate)
@@ -75,7 +67,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id == null) return NotFound();
 
-            var service = await _context.Services
+            var service = await context.Services
                 .Include(s => s.Vehicle)
                 .ThenInclude(v => v!.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -83,7 +75,7 @@ namespace Fleet_Managment_Production.Controllers
             if (service == null) return NotFound();
 
             // Bezpieczeństwo
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await userManager.GetUserAsync(User);
             if (currentUser == null) return Unauthorized();
             if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
@@ -105,7 +97,7 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,VehicleId,Description,Cost,EntryDate,PlannedEndDate,ActualEndDate")] Service service)
         {
-            var vehicle = await _context.Vehicles.FindAsync(service.VehicleId);
+            var vehicle = await context.Vehicles.FindAsync(service.VehicleId);
             if (vehicle == null) return NotFound();
 
             if (vehicle.Status != VehicleStatus.InMaintenance)
@@ -124,8 +116,8 @@ namespace Fleet_Managment_Production.Controllers
             }
             if (ModelState.IsValid)
             {
-                _context.Add(service);
-                await _context.SaveChangesAsync();
+                context.Add(service);
+                await context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
@@ -138,7 +130,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id == null) return NotFound();
 
-            var service = await _context.Services
+            var service = await context.Services
                 .Include(s => s.Vehicle)
                 .ThenInclude(v => v!.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -146,7 +138,7 @@ namespace Fleet_Managment_Production.Controllers
             if (service == null) return NotFound();
 
             // Bezpieczeństwo
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await userManager.GetUserAsync(User);
             if (currentUser == null) return Unauthorized();
             if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
@@ -164,11 +156,11 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id != service.Id) return NotFound();
 
-            var originalService = await _context.Services.AsNoTracking().Include(s => s.Vehicle).ThenInclude(v => v!.Driver).FirstOrDefaultAsync(s => s.Id == id);
+            var originalService = await context.Services.AsNoTracking().Include(s => s.Vehicle).ThenInclude(v => v!.Driver).FirstOrDefaultAsync(s => s.Id == id);
             if (originalService == null) return NotFound();
 
             // Bezpieczeństwo
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await userManager.GetUserAsync(User);
             if (currentUser == null) return Unauthorized();
             if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
@@ -188,16 +180,16 @@ namespace Fleet_Managment_Production.Controllers
                 {
                     if (service.ActualEndDate.HasValue)
                     {
-                        var vehicle = await _context.Vehicles.FindAsync(service.VehicleId);
+                        var vehicle = await context.Vehicles.FindAsync(service.VehicleId);
                         if (vehicle != null && vehicle.Status == VehicleStatus.InMaintenance)
                         {
                             vehicle.Status = VehicleStatus.Available;
-                            _context.Update(vehicle);
+                            context.Update(vehicle);
                         }
                     }
 
-                    _context.Update(service);
-                    await _context.SaveChangesAsync();
+                    context.Update(service);
+                    await context.SaveChangesAsync();
 
                     return RedirectToAction(nameof(Index));
                 }
@@ -217,7 +209,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id == null) return NotFound();
 
-            var service = await _context.Services
+            var service = await context.Services
                 .Include(s => s.Vehicle)
                 .ThenInclude(v => v!.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -225,7 +217,7 @@ namespace Fleet_Managment_Production.Controllers
             if (service == null) return NotFound();
 
             // Bezpieczeństwo
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await userManager.GetUserAsync(User);
             if (currentUser == null) return Unauthorized();
             if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
@@ -240,27 +232,27 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var service = await _context.Services.FindAsync(id);
+            var service = await context.Services.FindAsync(id);
             if (service != null)
             {
-                _context.Services.Remove(service);
-                await _context.SaveChangesAsync();
+                context.Services.Remove(service);
+                await context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
         }
 
         private bool ServiceExists(int id)
         {
-            return _context.Services.Any(e => e.Id == id);
+            return context.Services.Any(e => e.Id == id);
         }
 
         private async Task PopulateVehiclesDropdownAsync(object? selectedVehicle = null)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await userManager.GetUserAsync(User);
             if (currentUser == null) return;
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
-            var vehiclesQuery = _context.Vehicles
+            var vehiclesQuery = context.Vehicles
                 .Where(v => v.Status == VehicleStatus.InMaintenance)
                 .AsQueryable();
 
@@ -278,7 +270,7 @@ namespace Fleet_Managment_Production.Controllers
                   .OrderBy(v => v.DisplayName)
                   .ToListAsync();
 
-            if (!vehicles.Any())
+            if (vehicles.Count == 0)
             {
                 var emptyList = new List<object>
                 {

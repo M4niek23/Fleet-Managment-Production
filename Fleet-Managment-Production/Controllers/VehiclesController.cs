@@ -10,34 +10,26 @@ using Microsoft.Build.Framework;
 namespace Fleet_Managment_Production.Controllers
 {
     [Authorize]
-    public class VehiclesController : Controller
+    public class VehiclesController(AppDbContext context, UserManager<Users> userManager) : Controller
     {
-        private readonly AppDbContext _context;
-        private readonly UserManager<Users> _userManager;
-
-        public VehiclesController(AppDbContext context, UserManager<Users> userManager)
-        {
-            _context = context;
-            _userManager = userManager;
-        }
 
         // GET: Vehicles
         public async Task<IActionResult> Index(string searchString, int? driverId, int? page, VehicleStatus? status)
         {
             int pageSize = 7;
             int pageNumber = page ?? 1;
-            var currentUserId = _userManager.GetUserId(User);
+            var currentUserId = userManager.GetUserId(User);
             ViewData["CurrentFilter"] = searchString;
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
-            var vehiclesQuery = _context.Vehicles
+            var vehiclesQuery = context.Vehicles
                 .Include(v => v.User)
                 .Include(v => v.Driver)
                 .AsQueryable();
 
             if (!isAdminOrManager)
             {
-                var driver = await _context.Drivers.FirstOrDefaultAsync(d => d.UserId == currentUserId);
+                var driver = await context.Drivers.FirstOrDefaultAsync(d => d.UserId == currentUserId);
                 if (driver != null) vehiclesQuery = vehiclesQuery.Where(v => v.DriverId == driver.Id);
                 else vehiclesQuery = vehiclesQuery.Where(v => false);
             }
@@ -45,7 +37,7 @@ namespace Fleet_Managment_Production.Controllers
             if (driverId.HasValue)
             {
                 vehiclesQuery = vehiclesQuery.Where(v => v.DriverId == driverId.Value);
-                var selectedDriver = await _context.Drivers.FindAsync(driverId.Value);
+                var selectedDriver = await context.Drivers.FindAsync(driverId.Value);
                 ViewBag.SelectedDriverName = selectedDriver != null ? $"{selectedDriver.FirstName} {selectedDriver.LastName}" : "Wybranego kierowcy";
             }
             else
@@ -95,7 +87,7 @@ namespace Fleet_Managment_Production.Controllers
             ViewBag.CurrentPage = pageNumber;
             ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-            var allDrivers = await _context.Drivers.Select(d => new { d.Id, Name = d.FirstName + " " + d.LastName }).ToListAsync();
+            var allDrivers = await context.Drivers.Select(d => new { d.Id, Name = d.FirstName + " " + d.LastName }).ToListAsync();
             ViewBag.DriverList = new SelectList(allDrivers, "Id", "Name", driverId);
 
             return View(vehiclesList);
@@ -106,7 +98,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id == null) return NotFound();
 
-            var vehicle = await _context.Vehicles
+            var vehicle = await context.Vehicles
                 .Include(v => v.Trips).ThenInclude(t => t.Driver)
                 .Include(v => v.Inspections)
                 .Include(v => v.Insurances)
@@ -138,11 +130,11 @@ namespace Fleet_Managment_Production.Controllers
             }
             ViewBag.AvgConsumption = avgConsumption;
 
-            vehicle.Trips = vehicle.Trips.OrderByDescending(t => t.StartDate).ToList();
-            vehicle.Inspections = vehicle.Inspections.OrderByDescending(i => i.InspectionDate).ToList();
-            vehicle.Insurances = vehicle.Insurances.OrderByDescending(i => i.ExpiryDate).ToList();
-            vehicle.Costs = vehicle.Costs.OrderByDescending(c => c.Data).ToList();
-            vehicle.Services = vehicle.Services.OrderByDescending(s => s.ActualEndDate).ToList();
+            vehicle.Trips = [.. vehicle.Trips.OrderByDescending(t => t.StartDate)];
+            vehicle.Inspections = [.. vehicle.Inspections.OrderByDescending(i => i.InspectionDate)];
+            vehicle.Insurances = [.. vehicle.Insurances.OrderByDescending(i => i.ExpiryDate)];
+            vehicle.Costs = [.. vehicle.Costs.OrderByDescending(c => c.Data)];
+            vehicle.Services = [.. vehicle.Services.OrderByDescending(s => s.ActualEndDate)];
 
             return View(vehicle);
         }
@@ -162,11 +154,11 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId,DriverId")] Vehicle vehicle)
         {
-            if (_context.Vehicles.Any(v => v.VIN == vehicle.VIN))
+            if (context.Vehicles.Any(v => v.VIN == vehicle.VIN))
             {
                 ModelState.AddModelError("VIN", "Pojazd o podanym numerze VIN już istnieje w systemie.");
             }
-            if (_context.Vehicles.Any(v => v.LicensePlate == vehicle.LicensePlate))
+            if (context.Vehicles.Any(v => v.LicensePlate == vehicle.LicensePlate))
             {
                 ModelState.AddModelError("LicensePlate", "Pojazd o tym numerze rejestracyjnym jest już zarejestrowany.");
             }
@@ -174,13 +166,13 @@ namespace Fleet_Managment_Production.Controllers
             {
                 if (string.IsNullOrEmpty(vehicle.UserId))
                 {
-                    var user = await _userManager.GetUserAsync(User);
+                    var user = await userManager.GetUserAsync(User);
                     if (user != null)
                         vehicle.UserId = user.Id;
                 }
 
-                _context.Vehicles.Add(vehicle);
-                await _context.SaveChangesAsync();
+                context.Vehicles.Add(vehicle);
+                await context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
@@ -194,10 +186,10 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id == null) return NotFound();
 
-            var vehicle = await _context.Vehicles.FindAsync(id);
+            var vehicle = await context.Vehicles.FindAsync(id);
             if (vehicle == null) return NotFound();
 
-            var hasActiveService = await _context.Services.AnyAsync(s => s.VehicleId == id && s.ActualEndDate == null);
+            var hasActiveService = await context.Services.AnyAsync(s => s.VehicleId == id && s.ActualEndDate == null);
             ViewBag.IsStatusLocked = hasActiveService;
 
             PopulateUsersDropdown(vehicle.UserId);
@@ -210,17 +202,17 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId,DriverId")] Vehicle vehicle)
         {
-            if (_context.Vehicles.Any(v => v.LicensePlate == vehicle.LicensePlate))
+            if (context.Vehicles.Any(v => v.LicensePlate == vehicle.LicensePlate))
             {
                 ModelState.AddModelError("LicensePlate", "Pojazd o tym numerze rejestracyjnym jest już zarejestrowany.");
             }
-            if (_context.Vehicles.Any(v => v.VIN == vehicle.VIN && v.VehicleId != vehicle.VehicleId))
+            if (context.Vehicles.Any(v => v.VIN == vehicle.VIN && v.VehicleId != vehicle.VehicleId))
             {
                 ModelState.AddModelError("VIN", "Inny pojazd posiada już ten numer VIN.");
             }
             if (id != vehicle.VehicleId) return NotFound();
 
-            var currentVehicle = await _context.Vehicles
+            var currentVehicle = await context.Vehicles
                 .AsNoTracking()
                 .FirstOrDefaultAsync(v => v.VehicleId == id);
 
@@ -228,7 +220,7 @@ namespace Fleet_Managment_Production.Controllers
 
             if (currentVehicle.Status != vehicle.Status)
             {
-                bool hasActiveService = await _context.Services
+                bool hasActiveService = await context.Services
                     .AnyAsync(s => s.VehicleId == id && s.ActualEndDate == null);
 
                 if (hasActiveService)
@@ -244,8 +236,8 @@ namespace Fleet_Managment_Production.Controllers
             {
                 try
                 {
-                    _context.Update(vehicle);
-                    await _context.SaveChangesAsync();
+                    context.Update(vehicle);
+                    await context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -266,7 +258,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id == null) return NotFound();
 
-            var vehicle = await _context.Vehicles
+            var vehicle = await context.Vehicles
                 .Include(v => v.User)
                 .Include(v => v.Driver)
                 .FirstOrDefaultAsync(m => m.VehicleId == id);
@@ -282,11 +274,11 @@ namespace Fleet_Managment_Production.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var vehicle = await _context.Vehicles.FindAsync(id);
+            var vehicle = await context.Vehicles.FindAsync(id);
             if (vehicle != null)
             {
-                _context.Vehicles.Remove(vehicle);
-                await _context.SaveChangesAsync();
+                context.Vehicles.Remove(vehicle);
+                await context.SaveChangesAsync();
             }
 
             return RedirectToAction(nameof(Index));
@@ -294,12 +286,12 @@ namespace Fleet_Managment_Production.Controllers
 
         private bool VehicleExists(int id)
         {
-            return _context.Vehicles.Any(e => e.VehicleId == id);
+            return context.Vehicles.Any(e => e.VehicleId == id);
         }
 
         private void PopulateUsersDropdown(object? selectedUser = null)
         {
-            var usersQuery = _userManager.Users
+            var usersQuery = userManager.Users
                 .Select(u => new { u.Id, DisplayName = u.UserName })
                 .OrderBy(u => u.DisplayName)
                 .ToList();
@@ -309,7 +301,7 @@ namespace Fleet_Managment_Production.Controllers
 
         private void PopulateDriversDropdown(object? selectedDriver = null)
         {
-            var driversQuery = _context.Drivers
+            var driversQuery = context.Drivers
                 .Select(d => new
                 {
                     d.Id,
