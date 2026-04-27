@@ -202,7 +202,7 @@ namespace Fleet_Managment_Production.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("VehicleId,Status,Make,Model,FuelType,ProductionYear,LicensePlate,VIN,CurrentKm,UserId,DriverId")] Vehicle vehicle)
         {
-            if (context.Vehicles.Any(v => v.LicensePlate == vehicle.LicensePlate))
+            if (context.Vehicles.Any(v => v.LicensePlate == vehicle.LicensePlate && v.VehicleId != vehicle.VehicleId))
             {
                 ModelState.AddModelError("LicensePlate", "Pojazd o tym numerze rejestracyjnym jest już zarejestrowany.");
             }
