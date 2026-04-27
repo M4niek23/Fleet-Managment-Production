@@ -32,11 +32,10 @@ namespace Fleet_Managment_Production.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                var lowerSearch = searchString.ToLower();
                 usersQuery = usersQuery.Where(u =>
-                    (u.FullName != null && u.FullName.ToLower().Contains(lowerSearch)) ||
-                    (u.UserName != null && u.UserName.ToLower().Contains(lowerSearch)) ||
-                    (u.Email != null && u.Email.ToLower().Contains(lowerSearch))
+                    (u.FullName != null && u.FullName.Contains(searchString)) ||
+                    (u.UserName != null && u.UserName.Contains(searchString)) ||
+                    (u.Email != null && u.Email.Contains(searchString))
                 );
 
             }
@@ -100,18 +99,21 @@ namespace Fleet_Managment_Production.Controllers
             var model = new ManagerUserRolesViewModel
             {
                 UserId = user.Id,
-                UserName = user.UserName,
+                UserName = user.UserName ?? "Brak nazwy",
                 Roles = new List<RoleSelectionViewModel>()
             };
 
 
             foreach (var role in allRoles)
             {
-                model.Roles.Add(new RoleSelectionViewModel
+              if(role.Name != null)
                 {
-                    RoleName = role.Name,
-                    IsSelected = await _userManager.IsInRoleAsync(user, role.Name)
-                });
+                    model.Roles.Add(new RoleSelectionViewModel
+                    {
+                        RoleName = role.Name,
+                        IsSelected = await _userManager.IsInRoleAsync(user, role.Name)
+                    });
+                }
             }
 
             return View(model);

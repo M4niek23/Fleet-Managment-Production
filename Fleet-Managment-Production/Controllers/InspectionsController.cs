@@ -39,15 +39,16 @@ namespace Fleet_Managment_Production.Controllers
 
                 var selectedVehicle = await _context.Vehicles.FindAsync(vehicleId.Value);
                 ViewBag.VehicleRegistration = selectedVehicle?.LicensePlate ?? "Wybranego pojazdu";
-            }else
+            } else
             {
                 ViewBag.VehicleRegistration = "Wszystkie pojazdy";
             }
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                var s = searchString.ToLower();
-                query = query.Where(i => i.Vehicle.LicensePlate.ToLower().Contains(s) || i.Vehicle.Make.ToLower().Contains(s));
+                query = query.Where(i =>
+                     (i.Vehicle.LicensePlate != null && i.Vehicle.LicensePlate.Contains(searchString)) ||
+                     (i.Vehicle.Make != null && i.Vehicle.Make.Contains(searchString)));
             }
 
             var activeQ = query.Where(i => i.IsResultPositive != false && (i.NextInspectionDate == null || i.NextInspectionDate >= DateTime.Today));

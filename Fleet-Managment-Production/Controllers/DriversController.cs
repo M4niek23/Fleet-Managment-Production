@@ -47,12 +47,11 @@ namespace Fleet_Managment_Production.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                var lowerSearch = searchString.ToLower();
                 driversQuery = driversQuery.Where(d =>
-                       d.FirstName.ToLower().Contains(lowerSearch) ||
-                       d.LastName.ToLower().Contains(lowerSearch) ||
-                       (d.FirstName + " " + d.LastName).ToLower().Contains(lowerSearch) ||
-                       (d.LastName + " " + d.FirstName).ToLower().Contains(lowerSearch)
+                       d.FirstName.Contains(searchString) ||
+                       d.LastName.Contains(searchString) ||
+                       (d.FirstName + " " + d.LastName).Contains(searchString) ||
+                       (d.LastName + " " + d.FirstName).Contains(searchString)
                     );
             }
 

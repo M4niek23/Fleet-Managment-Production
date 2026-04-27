@@ -8,9 +8,7 @@ namespace Fleet_Managment_Production.Data
     public class AppDbContext : IdentityDbContext<Users, IdentityRole, string>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-        // Dodanie DbSet dla każdej z nowych tabel
         public DbSet<Vehicle> Vehicles { get; set; }
-        public DbSet<Users> Users { get; set; }
         public DbSet<Insurance> Insurances { get; set; }
         public DbSet<Inspection> Inspections { get; set; }
         public DbSet<Cost> Costs { get; set; }

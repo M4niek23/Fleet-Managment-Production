@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Fleet_Managment_Production.Data;       
 using Microsoft.EntityFrameworkCore;        
 using Fleet_Managment_Production.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Fleet_Managment_Production.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -23,14 +26,25 @@ namespace Fleet_Managment_Production.Controllers
             var today = DateTime.Today;
             var alertLimitDate = today.AddDays(30);
 
-            var expiringInsurances = await _context.Insurances
-                .Include(i => i.Vehicle)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            bool isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+
+            var insurancesQuery = _context.Insurances.Include(i => i.Vehicle).AsQueryable();
+            var inspectionsQuery = _context.Inspections.Include(i => i.Vehicle).AsQueryable();
+
+            if (!isAdminOrManager)
+            {
+                insurancesQuery = insurancesQuery.Where(i => i.Vehicle.Driver.UserId == userId);
+                inspectionsQuery = inspectionsQuery.Where(i => i.Vehicle.Driver.UserId == userId);
+            }
+
+            var expiringInsurances = await insurancesQuery
                 .Where(i => i.ExpiryDate >= today && i.ExpiryDate <= alertLimitDate)
                 .OrderBy(i => i.ExpiryDate)
                 .ToListAsync();
 
-            var expiringInspections = await _context.Inspections
-                .Include(i => i.Vehicle)
+            var expiringInspections = await inspectionsQuery
                 .Where(i => i.NextInspectionDate >= today && i.NextInspectionDate <= alertLimitDate)
                 .OrderBy(i => i.NextInspectionDate)
                 .ToListAsync();
@@ -43,7 +57,6 @@ namespace Fleet_Managment_Production.Controllers
 
             return View(viewModel);
         }
-
         public IActionResult Privacy()
         {
             return View();

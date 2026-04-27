@@ -60,10 +60,9 @@ namespace Fleet_Managment_Production.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                var lowerSearch = searchString.ToLower();
                 insurancesQuery = insurancesQuery.Where(i =>
-                    (i.PolicyNumber != null && i.PolicyNumber.ToLower().Contains(lowerSearch)) ||
-                    (i.Vehicle.LicensePlate != null && i.Vehicle.LicensePlate.ToLower().Contains(lowerSearch))
+                    (i.PolicyNumber != null && i.PolicyNumber.Contains(searchString)) ||
+                    (i.Vehicle.LicensePlate != null && i.Vehicle.LicensePlate.Contains(searchString))
                 );
             }
 

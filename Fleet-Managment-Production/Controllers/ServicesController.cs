@@ -47,12 +47,11 @@ namespace Fleet_Managment_Production.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                var searchLower = searchString.ToLower();
                 servicesQuery = servicesQuery.Where(s =>
-                    (s.Description != null && s.Description.ToLower().Contains(searchLower)) ||
-                    (s.Vehicle != null && s.Vehicle.Make != null && s.Vehicle.Make.ToLower().Contains(searchLower)) ||
-                    (s.Vehicle != null && s.Vehicle.Model != null && s.Vehicle.Model.ToLower().Contains(searchLower)) ||
-                    (s.Vehicle != null && s.Vehicle.LicensePlate != null && s.Vehicle.LicensePlate.ToLower().Contains(searchLower))
+                    (s.Description != null && s.Description.Contains(searchString)) ||
+                    (s.Vehicle != null && s.Vehicle.Make != null && s.Vehicle.Make.Contains(searchString)) ||
+                    (s.Vehicle != null && s.Vehicle.Model != null && s.Vehicle.Model.Contains(searchString)) ||
+                    (s.Vehicle != null && s.Vehicle.LicensePlate != null && s.Vehicle.LicensePlate.Contains(searchString))
                 );
             }
             int pageSize = 8;

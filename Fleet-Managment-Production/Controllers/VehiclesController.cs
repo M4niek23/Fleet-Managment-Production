@@ -55,9 +55,19 @@ namespace Fleet_Managment_Production.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                var s = searchString.ToLower();
                 vehiclesQuery = vehiclesQuery.Where(v =>
-                    v.Make.ToLower().Contains(s) || v.LicensePlate.ToLower().Contains(s) || v.Model.ToLower().Contains(s));
+                   v.Make.Contains(searchString) ||
+                   v.Model.Contains(searchString) ||
+                   (v.Make + " " + v.Model).Contains(searchString) ||
+                   (v.Model + " " + v.Make).Contains(searchString) ||
+                   (v.LicensePlate != null && v.LicensePlate.Contains(searchString)) ||
+                   (v.Driver != null && (
+                        v.Driver.FirstName.Contains(searchString) ||
+                        v.Driver.LastName.Contains(searchString) ||
+                        (v.Driver.FirstName + " " + v.Driver.LastName).Contains(searchString) ||
+                        (v.Driver.LastName + " " + v.Driver.FirstName).Contains(searchString)
+                   ))
+                );
             }
 
             ViewBag.CountAll = await vehiclesQuery.CountAsync();
