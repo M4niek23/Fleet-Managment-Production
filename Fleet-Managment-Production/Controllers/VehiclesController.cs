@@ -86,8 +86,8 @@ namespace Fleet_Managment_Production.Controllers
 
             var totalItems = await vehiclesQuery.CountAsync();
             var vehiclesList = await vehiclesQuery
-                .OrderBy(v => v.Driver.LastName) 
-                .ThenBy(v => v.Driver.FirstName)
+                .OrderBy(v => v.Driver != null ? v.Driver.LastName : "")
+                .ThenBy(v => v.Driver != null ? v.Driver.FirstName : "")
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -128,9 +128,8 @@ namespace Fleet_Managment_Production.Controllers
                 var firstEntry = fuelCosts.First();
                 var lastEntry = fuelCosts.Last();
 
-                int totalDistance = lastEntry.CurrentOdometer.Value - firstEntry.CurrentOdometer.Value;
-
-                double totalLiters = fuelCosts.Skip(1).Sum(c => c.Liters.Value);
+                int totalDistance = lastEntry.CurrentOdometer.GetValueOrDefault() - firstEntry.CurrentOdometer.GetValueOrDefault();
+                double totalLiters = fuelCosts.Skip(1).Sum(c => c.Liters.GetValueOrDefault());
 
                 if (totalDistance > 0)
                 {
@@ -298,7 +297,7 @@ namespace Fleet_Managment_Production.Controllers
             return _context.Vehicles.Any(e => e.VehicleId == id);
         }
 
-        private void PopulateUsersDropdown(object selectedUser = null)
+        private void PopulateUsersDropdown(object? selectedUser = null)
         {
             var usersQuery = _userManager.Users
                 .Select(u => new { u.Id, DisplayName = u.UserName })
@@ -308,7 +307,7 @@ namespace Fleet_Managment_Production.Controllers
             ViewBag.UserId = new SelectList(usersQuery, "Id", "DisplayName", selectedUser);
         }
 
-        private void PopulateDriversDropdown(object selectedDriver = null)
+        private void PopulateDriversDropdown(object? selectedDriver = null)
         {
             var driversQuery = _context.Drivers
                 .Select(d => new
