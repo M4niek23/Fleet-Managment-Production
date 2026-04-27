@@ -47,8 +47,11 @@ namespace Fleet_Managment_Production.Controllers
             if (!string.IsNullOrEmpty(searchString))
             {
                 query = query.Where(i =>
-                     (i.Vehicle.LicensePlate != null && i.Vehicle.LicensePlate.Contains(searchString)) ||
-                     (i.Vehicle.Make != null && i.Vehicle.Make.Contains(searchString)));
+                    i.Vehicle != null && (
+                        (i.Vehicle.LicensePlate != null && i.Vehicle.LicensePlate.Contains(searchString)) ||
+                        (i.Vehicle.Make != null && i.Vehicle.Make.Contains(searchString))
+                    )
+                );
             }
 
             var activeQ = query.Where(i => i.IsResultPositive != false && (i.NextInspectionDate == null || i.NextInspectionDate >= DateTime.Today));
