@@ -28,6 +28,7 @@ namespace Fleet_Managment_Production.Controllers
             ViewData["CurrentFilter"] = searchString;
 
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var driversQuery = _context.Drivers
@@ -80,6 +81,7 @@ namespace Fleet_Managment_Production.Controllers
             if (id == null) return NotFound();
 
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var driver = await _context.Drivers
@@ -112,6 +114,7 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Pesel,SelectedCategories,LicenseCategories,PhoneNumber,UserId,Email,Status")] Driver driver)
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             if (!isAdminOrManager)
@@ -154,6 +157,7 @@ namespace Fleet_Managment_Production.Controllers
             if (id == null) return NotFound();
 
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var driver = await _context.Drivers.FindAsync(id);
@@ -168,9 +172,8 @@ namespace Fleet_Managment_Production.Controllers
             {
                 driver.SelectedCategories = driver.LicenseCategories
                     .Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(c => Enum.TryParse<LicenseCategory>(c, out var parsedEnum) ? parsedEnum : (LicenseCategory?)null)
-                    .Where(c => c.HasValue)
-                    .Select(c => c.Value)
+                    .Where(c => Enum.TryParse<LicenseCategory>(c, out _))
+                    .Select(c => Enum.Parse<LicenseCategory>(c))
                     .ToList();
             }
 
@@ -186,6 +189,7 @@ namespace Fleet_Managment_Production.Controllers
             if (id != driver.Id) return NotFound();
 
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var existingDriver = await _context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
@@ -250,6 +254,7 @@ namespace Fleet_Managment_Production.Controllers
             if (id == null) return NotFound();
 
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var driver = await _context.Drivers
@@ -272,6 +277,7 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var driver = await _context.Drivers.FindAsync(id);
