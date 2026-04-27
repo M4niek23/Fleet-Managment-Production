@@ -35,8 +35,17 @@ namespace Fleet_Managment_Production.Controllers
 
             if (!isAdminOrManager)
             {
-                insurancesQuery = insurancesQuery.Where(i => i.Vehicle.Driver.UserId == userId);
-                inspectionsQuery = inspectionsQuery.Where(i => i.Vehicle.Driver.UserId == userId);
+                insurancesQuery = insurancesQuery.Where(i =>
+                    i.Vehicle != null && (
+                        i.Vehicle.UserId == userId ||
+                        (i.Vehicle.Driver != null && i.Vehicle.Driver.UserId == userId)
+                    ));
+
+                inspectionsQuery = inspectionsQuery.Where(i =>
+                    i.Vehicle != null && (
+                        i.Vehicle.UserId == userId ||
+                        (i.Vehicle.Driver != null && i.Vehicle.Driver.UserId == userId)
+                    ));
             }
 
             var expiringInsurances = await insurancesQuery
