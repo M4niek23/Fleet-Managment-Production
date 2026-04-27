@@ -25,6 +25,7 @@ namespace Fleet_Managment_Production.Controllers
         {
             ViewData["CurrentFilter"] = searchString;
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var vehiclesQuery = _context.Vehicles.AsQueryable();
@@ -43,7 +44,10 @@ namespace Fleet_Managment_Production.Controllers
 
             if (!isAdminOrManager)
             {
-                insurancesQuery = insurancesQuery.Where(i => i.Vehicle.Driver.UserId == currentUser.Id);
+                insurancesQuery = insurancesQuery.Where(i =>
+                    i.Vehicle != null &&
+                    i.Vehicle.Driver != null &&
+                    i.Vehicle.Driver.UserId == currentUser.Id);
             }
 
             if (id.HasValue)
@@ -62,7 +66,7 @@ namespace Fleet_Managment_Production.Controllers
             {
                 insurancesQuery = insurancesQuery.Where(i =>
                     (i.PolicyNumber != null && i.PolicyNumber.Contains(searchString)) ||
-                    (i.Vehicle.LicensePlate != null && i.Vehicle.LicensePlate.Contains(searchString))
+                    (i.Vehicle != null && i.Vehicle.LicensePlate != null && i.Vehicle.LicensePlate.Contains(searchString))
                 );
             }
 
@@ -95,15 +99,16 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> History(int? id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             IQueryable<Insurance> historyQuery = _context.Insurances
                 .Include(i => i.Vehicle)
-                .Where(i => !i.IsCurrent); // Tylko historyczne
+                .Where(i => !i.IsCurrent);
 
             if (!isAdminOrManager)
             {
-                historyQuery = historyQuery.Where(i => i.Vehicle.Driver.UserId == currentUser.Id);
+                historyQuery = historyQuery.Where(i => i.Vehicle != null && i.Vehicle.Driver != null && i.Vehicle.Driver.UserId == currentUser.Id);
             }
 
             if (id.HasValue)
@@ -122,10 +127,11 @@ namespace Fleet_Managment_Production.Controllers
             if (id == null) return NotFound();
 
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var insurance = await _context.Insurances
-                .Include(i => i.Vehicle).ThenInclude(v => v.Driver)
+                .Include(i => i.Vehicle).ThenInclude(v => v!.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (insurance == null) return NotFound();
@@ -140,6 +146,7 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> Create(int? vehicleId)
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var vehiclesQuery = _context.Vehicles.Where(v => v.Status != VehicleStatus.Sold).AsQueryable();
@@ -156,6 +163,7 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> Create([Bind("PolicyNumber,InsurareName,StartDate,ExpiryDate,Cost,VehicleId,IsCurrent,HasOc,HasAssistance,AcScope,HasNNW")] Insurance insurance)
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var vehicle = await _context.Vehicles.Include(v => v.Driver).FirstOrDefaultAsync(v => v.VehicleId == insurance.VehicleId);
@@ -192,10 +200,11 @@ namespace Fleet_Managment_Production.Controllers
             if (id == null) return NotFound();
 
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var insurance = await _context.Insurances
-                .Include(i => i.Vehicle).ThenInclude(v => v.Driver)
+                .Include(i => i.Vehicle).ThenInclude(v => v!.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (insurance == null) return NotFound();
@@ -219,6 +228,7 @@ namespace Fleet_Managment_Production.Controllers
             if (id != insurance.Id) return NotFound();
 
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var vehicle = await _context.Vehicles.Include(v => v.Driver).FirstOrDefaultAsync(v => v.VehicleId == insurance.VehicleId);
@@ -256,10 +266,11 @@ namespace Fleet_Managment_Production.Controllers
             if (id == null) return NotFound();
 
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var insurance = await _context.Insurances
-                .Include(i => i.Vehicle).ThenInclude(v => v.Driver)
+                .Include(i => i.Vehicle).ThenInclude(v => v!.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (insurance == null) return NotFound();
@@ -276,10 +287,12 @@ namespace Fleet_Managment_Production.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
+
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var insurance = await _context.Insurances
-                .Include(i => i.Vehicle).ThenInclude(v => v.Driver)
+                .Include(i => i.Vehicle).ThenInclude(v => v!.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (insurance != null)
