@@ -30,13 +30,14 @@ namespace Fleet_Managment_Production.Controllers
             ViewData["CurrentFilter"] = searchString;
 
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
 
           
             var servicesQuery = _context.Services
                 .Include(s => s.Vehicle)
-                .ThenInclude(v => v.Driver)
+                .ThenInclude(v => v!.Driver)
                 .OrderByDescending(s => s.EntryDate)
                 .AsQueryable();
 
@@ -76,13 +77,14 @@ namespace Fleet_Managment_Production.Controllers
 
             var service = await _context.Services
                 .Include(s => s.Vehicle)
-                .ThenInclude(v => v.Driver)
+                .ThenInclude(v => v!.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (service == null) return NotFound();
 
             // Bezpieczeństwo
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
                 if (service.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
@@ -138,13 +140,14 @@ namespace Fleet_Managment_Production.Controllers
 
             var service = await _context.Services
                 .Include(s => s.Vehicle)
-                .ThenInclude(v => v.Driver)
+                .ThenInclude(v => v!.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (service == null) return NotFound();
 
             // Bezpieczeństwo
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
                 if (service.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
@@ -161,11 +164,12 @@ namespace Fleet_Managment_Production.Controllers
         {
             if (id != service.Id) return NotFound();
 
-            var originalService = await _context.Services.AsNoTracking().Include(s => s.Vehicle).ThenInclude(v => v.Driver).FirstOrDefaultAsync(s => s.Id == id);
+            var originalService = await _context.Services.AsNoTracking().Include(s => s.Vehicle).ThenInclude(v => v!.Driver).FirstOrDefaultAsync(s => s.Id == id);
             if (originalService == null) return NotFound();
 
             // Bezpieczeństwo
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
                 if (originalService.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
@@ -215,13 +219,14 @@ namespace Fleet_Managment_Production.Controllers
 
             var service = await _context.Services
                 .Include(s => s.Vehicle)
-                .ThenInclude(v => v.Driver)
+                .ThenInclude(v => v!.Driver)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (service == null) return NotFound();
 
             // Bezpieczeństwo
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
             if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
                 if (service.Vehicle?.Driver?.UserId != currentUser.Id) return Forbid();
@@ -249,9 +254,10 @@ namespace Fleet_Managment_Production.Controllers
             return _context.Services.Any(e => e.Id == id);
         }
 
-        private async Task PopulateVehiclesDropdownAsync(object selectedVehicle = null)
+        private async Task PopulateVehiclesDropdownAsync(object? selectedVehicle = null)
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return;
             var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var vehiclesQuery = _context.Vehicles
